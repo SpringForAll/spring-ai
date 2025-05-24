@@ -1,28 +1,28 @@
-= MariaDB Vector Store
+= MariaDB 向量存储
 
-This section walks you through setting up `MariaDBVectorStore` to store document embeddings and perform similarity searches.
+本节将指导您如何设置 `MariaDBVectorStore` 来存储文档嵌入并执行相似性搜索。
 
-link:https://mariadb.org/projects/mariadb-vector/[MariaDB Vector] is part of MariaDB 11.7 and enables storing and searching over machine learning-generated embeddings.
-It provides efficient vector similarity search capabilities using vector indexes, supporting both cosine similarity and Euclidean distance metrics.
+link:https://mariadb.org/projects/mariadb-vector/[MariaDB Vector] 是 MariaDB 11.7 的一部分，支持存储和搜索机器学习生成的嵌入。
+它使用向量索引提供高效的向量相似性搜索功能，支持余弦相似度和欧几里得距离度量。
 
-== Prerequisites
+== 前提条件
 
-* A running MariaDB (11.7+) instance. The following options are available:
-** link:https://hub.docker.com/_/mariadb[Docker] image
+* 运行中的 MariaDB (11.7+) 实例。以下选项可用：
+** link:https://hub.docker.com/_/mariadb[Docker] 镜像
 ** link:https://mariadb.org/download/[MariaDB Server]
 ** link:https://mariadb.com/products/skysql/[MariaDB SkySQL]
-* If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `MariaDBVectorStore`.
+* 如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 配置 API 密钥，用于生成存储在 `MariaDBVectorStore` 中的嵌入。
 
-== Auto-Configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the MariaDB Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 MariaDB 向量存储提供了 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 文件中添加以下依赖：
 
 [source,xml]
 ----
@@ -32,7 +32,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -41,15 +41,15 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-The vector store implementation can initialize the required schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+向量存储实现可以为您初始化所需的模式，但您必须通过在适当的构造函数中指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
 
-NOTE: This is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+注意：这是一个破坏性更改！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
-For example, to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel], add the following dependency:
+例如，要使用 xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel]，请添加以下依赖：
 
 [source,xml]
 ----
@@ -59,9 +59,9 @@ For example, to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI Embedd
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-Now you can auto-wire the `MariaDBVectorStore` in your application:
+现在您可以在应用程序中自动装配 `MariaDBVectorStore`：
 
 [source,java]
 ----
@@ -74,18 +74,18 @@ List<Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to MariaDB
+// 将文档添加到 MariaDB
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
 [[mariadbvector-properties]]
-=== Configuration Properties
+=== 配置属性
 
-To connect to MariaDB and use the `MariaDBVectorStore`, you need to provide access details for your instance.
-A simple configuration can be provided via Spring Boot's `application.yml`:
+要连接到 MariaDB 并使用 `MariaDBVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [source,yaml]
 ----
@@ -102,31 +102,31 @@ spring:
         dimensions: 1536
 ----
 
-TIP: If you run MariaDB Vector as a Spring Boot dev service via link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.docker-compose[Docker Compose]
-or link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.testcontainers[Testcontainers],
-you don't need to configure URL, username and password since they are autoconfigured by Spring Boot.
+提示：如果您通过 link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.docker-compose[Docker Compose]
+或 link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.testcontainers[Testcontainers]
+将 MariaDB Vector 作为 Spring Boot 开发服务运行，则不需要配置 URL、用户名和密码，因为它们由 Spring Boot 自动配置。
 
-Properties starting with `spring.ai.vectorstore.mariadb.*` are used to configure the `MariaDBVectorStore`:
+以 `spring.ai.vectorstore.mariadb.*` 开头的属性用于配置 `MariaDBVectorStore`：
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
+|属性 | 描述 | 默认值
 
-|`spring.ai.vectorstore.mariadb.initialize-schema`| Whether to initialize the required schema | `false`
-|`spring.ai.vectorstore.mariadb.distance-type`| Search distance type. Use `COSINE` (default) or `EUCLIDEAN`. If vectors are normalized to length 1, you can use `EUCLIDEAN` for best performance.| `COSINE`
-|`spring.ai.vectorstore.mariadb.dimensions`| Embeddings dimension. If not specified explicitly, will retrieve dimensions from the provided `EmbeddingModel`. | `1536`
-|`spring.ai.vectorstore.mariadb.remove-existing-vector-store-table` | Deletes the existing vector store table on startup. | `false`
-|`spring.ai.vectorstore.mariadb.schema-name` | Vector store schema name | `null`
-|`spring.ai.vectorstore.mariadb.table-name` | Vector store table name | `vector_store`
-|`spring.ai.vectorstore.mariadb.schema-validation` | Enables schema and table name validation to ensure they are valid and existing objects. | `false`
+|`spring.ai.vectorstore.mariadb.initialize-schema`| 是否初始化所需的模式 | `false`
+|`spring.ai.vectorstore.mariadb.distance-type`| 搜索距离类型。使用 `COSINE`（默认）或 `EUCLIDEAN`。如果向量被归一化为长度 1，您可以使用 `EUCLIDEAN` 获得最佳性能。| `COSINE`
+|`spring.ai.vectorstore.mariadb.dimensions`| 嵌入维度。如果未明确指定，将从提供的 `EmbeddingModel` 中检索维度。 | `1536`
+|`spring.ai.vectorstore.mariadb.remove-existing-vector-store-table` | 在启动时删除现有的向量存储表。 | `false`
+|`spring.ai.vectorstore.mariadb.schema-name` | 向量存储模式名称 | `null`
+|`spring.ai.vectorstore.mariadb.table-name` | 向量存储表名称 | `vector_store`
+|`spring.ai.vectorstore.mariadb.schema-validation` | 启用模式和表名验证，以确保它们是有效的现有对象。 | `false`
 |===
 
-TIP: If you configure a custom schema and/or table name, consider enabling schema validation by setting `spring.ai.vectorstore.mariadb.schema-validation=true`.
-This ensures the correctness of the names and reduces the risk of SQL injection attacks.
+提示：如果您配置了自定义模式和/或表名，请考虑通过设置 `spring.ai.vectorstore.mariadb.schema-validation=true` 启用模式验证。
+这确保了名称的正确性并降低了 SQL 注入攻击的风险。
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the MariaDB vector store. For this you need to add the following dependencies to your project:
+除了使用 Spring Boot 自动配置外，您还可以手动配置 MariaDB 向量存储。为此，您需要在项目中添加以下依赖：
 
 [source,xml]
 ----
@@ -147,42 +147,42 @@ Instead of using the Spring Boot auto-configuration, you can manually configure 
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Then create the `MariaDBVectorStore` bean using the builder pattern:
+然后使用构建器模式创建 `MariaDBVectorStore` bean：
 
 [source,java]
 ----
 @Bean
 public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
     return MariaDBVectorStore.builder(jdbcTemplate, embeddingModel)
-        .dimensions(1536)                      // Optional: defaults to 1536
-        .distanceType(MariaDBDistanceType.COSINE) // Optional: defaults to COSINE
-        .schemaName("mydb")                    // Optional: defaults to null
-        .vectorTableName("custom_vectors")     // Optional: defaults to "vector_store"
-        .contentFieldName("text")             // Optional: defaults to "content"
-        .embeddingFieldName("embedding")      // Optional: defaults to "embedding"
-        .idFieldName("doc_id")                // Optional: defaults to "id"
-        .metadataFieldName("meta")           // Optional: defaults to "metadata"
-        .initializeSchema(true)               // Optional: defaults to false
-        .schemaValidation(true)              // Optional: defaults to false
-        .removeExistingVectorStoreTable(false) // Optional: defaults to false
-        .maxDocumentBatchSize(10000)         // Optional: defaults to 10000
+        .dimensions(1536)                      // 可选：默认为 1536
+        .distanceType(MariaDBDistanceType.COSINE) // 可选：默认为 COSINE
+        .schemaName("mydb")                    // 可选：默认为 null
+        .vectorTableName("custom_vectors")     // 可选：默认为 "vector_store"
+        .contentFieldName("text")             // 可选：默认为 "content"
+        .embeddingFieldName("embedding")      // 可选：默认为 "embedding"
+        .idFieldName("doc_id")                // 可选：默认为 "id"
+        .metadataFieldName("meta")           // 可选：默认为 "metadata"
+        .initializeSchema(true)               // 可选：默认为 false
+        .schemaValidation(true)              // 可选：默认为 false
+        .removeExistingVectorStoreTable(false) // 可选：默认为 false
+        .maxDocumentBatchSize(10000)         // 可选：默认为 10000
         .build();
 }
 
-// This can be any EmbeddingModel implementation
+// 这可以是任何 EmbeddingModel 实现
 @Bean
 public EmbeddingModel embeddingModel() {
     return new OpenAiEmbeddingModel(new OpenAiApi(System.getenv("OPENAI_API_KEY")));
 }
 ----
 
-== Metadata Filtering
+== 元数据过滤
 
-You can leverage the generic, portable xref:api/vectordbs.adoc#metadata-filters[metadata filters] with MariaDB Vector store.
+您可以利用通用的、可移植的 xref:api/vectordbs.adoc#metadata-filters[元数据过滤器] 与 MariaDB 向量存储。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -194,7 +194,7 @@ vectorStore.similaritySearch(
         .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -209,11 +209,11 @@ vectorStore.similaritySearch(SearchRequest.builder()
         b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: These filter expressions are automatically converted into the equivalent MariaDB JSON path expressions.
+注意：这些过滤器表达式会自动转换为等效的 MariaDB JSON 路径表达式。
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The MariaDB Vector Store implementation provides access to the underlying native JDBC client (`JdbcTemplate`) through the `getNativeClient()` method:
+MariaDB 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 JDBC 客户端（`JdbcTemplate`）的访问：
 
 [source,java]
 ----
@@ -222,8 +222,8 @@ Optional<JdbcTemplate> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     JdbcTemplate jdbc = nativeClient.get();
-    // Use the native client for MariaDB-specific operations
+    // 使用原生客户端进行 MariaDB 特定的操作
 }
 ----
 
-The native client gives you access to MariaDB-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端使您能够访问可能未通过 `VectorStore` 接口公开的 MariaDB 特定功能和操作。

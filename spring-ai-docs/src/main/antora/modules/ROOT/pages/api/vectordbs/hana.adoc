@@ -1,48 +1,47 @@
 = SAP HANA Cloud
 
-== Prerequisites
+== 前提条件
 
-* You need a SAP HANA Cloud vector engine account - Refer xref:api/vectordbs/hanadb-provision-a-trial-account.adoc[SAP HANA Cloud vector engine - provision a trial account] guide to create a trial account.
-* If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the vector store.
+* 您需要一个 SAP HANA Cloud 向量引擎账户 - 请参阅 xref:api/vectordbs/hanadb-provision-a-trial-account.adoc[SAP HANA Cloud 向量引擎 - 创建试用账户] 指南来创建试用账户。
+* 如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 提供一个 API 密钥，用于生成向量存储存储的嵌入。
 
-== Auto-configuration
+== 自动配置
 
-Spring AI does not provide a dedicated module for SAP Hana vector store.
-Users are expected to provide their own configuration in the applications using the standard vector store module for SAP Hana vector store in Spring AI - `spring-ai-hanadb-store`.
+Spring AI 没有为 SAP Hana 向量存储提供专用模块。
+用户需要在应用程序中使用 Spring AI 中的标准 SAP Hana 向量存储模块 `spring-ai-hanadb-store` 提供自己的配置。
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Please have a look at the list of xref:#hanacloudvectorstore-properties[HanaCloudVectorStore Properties] for the vector store to learn about the default values and configuration options.
+请查看向量存储的 xref:#hanacloudvectorstore-properties[HanaCloudVectorStore 属性] 列表，了解默认值和配置选项。
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
 [[hanacloudvectorstore-properties]]
-== HanaCloudVectorStore Properties
+== HanaCloudVectorStore 属性
 
-You can use the following properties in your Spring Boot configuration to customize the SAP Hana vector store.
-It uses `spring.datasource.*` properties to configure the Hana datasource and the `spring.ai.vectorstore.hanadb.*` properties to configure the Hana vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 SAP Hana 向量存储。
+它使用 `spring.datasource.*` 属性来配置 Hana 数据源，使用 `spring.ai.vectorstore.hanadb.*` 属性来配置 Hana 向量存储。
 
 |===
-|Property| Description | Default value
+|属性| 描述 | 默认值
 
-|`spring.datasource.driver-class-name` | Driver class name | com.sap.db.jdbc.Driver
-|`spring.datasource.url` | Hana Datasource URL | -
-|`spring.datasource.username` | Hana datasource username | -
-|`spring.datasource.password` | Hana datasource password | -
+|`spring.datasource.driver-class-name` | 驱动类名 | com.sap.db.jdbc.Driver
+|`spring.datasource.url` | Hana 数据源 URL | -
+|`spring.datasource.username` | Hana 数据源用户名 | -
+|`spring.datasource.password` | Hana 数据源密码 | -
 |`spring.ai.vectorstore.hanadb.top-k`| TODO | -
 |`spring.ai.vectorstore.hanadb.table-name`| TODO | -
-|`spring.ai.vectorstore.hanadb.initialize-schema`| whether to initialize the required schema  | `false`
+|`spring.ai.vectorstore.hanadb.initialize-schema`| 是否初始化所需的模式 | `false`
 
 |===
 
+== 构建示例 RAG 应用程序
 
-== Build a Sample RAG application
+展示如何设置一个使用 SAP Hana Cloud 作为向量数据库并利用 OpenAI 实现 RAG 模式的项目
 
-Shows how to setup a project that uses SAP Hana Cloud as the vector DB and leverage OpenAI to implement RAG pattern
-
-* Create a table `CRICKET_WORLD_CUP` in SAP Hana DB:
+* 在 SAP Hana DB 中创建表 `CRICKET_WORLD_CUP`：
 [sql]
 ----
 CREATE TABLE CRICKET_WORLD_CUP (
@@ -52,9 +51,9 @@ CREATE TABLE CRICKET_WORLD_CUP (
 )
 ----
 
-* Add the following dependencies in your `pom.xml`
+* 在您的 `pom.xml` 中添加以下依赖
 
-You may set the property `spring-ai-version` as `<spring-ai-version>1.0.0-SNAPSHOT</spring-ai-version>`:
+您可以将属性 `spring-ai-version` 设置为 `<spring-ai-version>1.0.0-SNAPSHOT</spring-ai-version>`：
 [source,xml]
 ----
 
@@ -98,7 +97,7 @@ You may set the property `spring-ai-version` as `<spring-ai-version>1.0.0-SNAPSH
 </dependency>
 ----
 
-* Add the following properties in `application.properties` file:
+* 在 `application.properties` 文件中添加以下属性：
 
 [yml]
 ----
@@ -114,7 +113,7 @@ spring.ai.vectorstore.hanadb.tableName=CRICKET_WORLD_CUP
 spring.ai.vectorstore.hanadb.topK=3
 ----
 
-=== Create an `Entity` class named `CricketWorldCup` that extends from `HanaVectorEntity`:
+=== 创建一个名为 `CricketWorldCup` 的 `Entity` 类，它继承自 `HanaVectorEntity`：
 [source,java]
 ----
 package com.interviewpedia.spring.ai.hana;
@@ -139,7 +138,7 @@ public class CricketWorldCup extends HanaVectorEntity {
 
 ----
 
-* Create a `Repository` named `CricketWorldCupRepository` that implements `HanaVectorRepository` interface:
+* 创建一个名为 `CricketWorldCupRepository` 的 `Repository`，它实现 `HanaVectorRepository` 接口：
 
 [source,java]
 ----
@@ -210,12 +209,12 @@ public class CricketWorldCupRepository implements HanaVectorRepository<CricketWo
 }
 ----
 
-* Now, create a REST Controller class `CricketWorldCupHanaController`, and autowire `ChatModel` and `VectorStore` as dependencies
-In this controller class, create the following REST endpoints:
+* 现在，创建一个 REST Controller 类 `CricketWorldCupHanaController`，并将 `ChatModel` 和 `VectorStore` 作为依赖项自动装配
+在这个控制器类中，创建以下 REST 端点：
 
-    - `/ai/hana-vector-store/cricket-world-cup/purge-embeddings` - to purge all the embeddings from the Vector Store
-    - `/ai/hana-vector-store/cricket-world-cup/upload` - to upload the Cricket_World_Cup.pdf so that its data gets stored in SAP Hana Cloud Vector DB as embeddings
-    - `/ai/hana-vector-store/cricket-world-cup` - to implement `RAG` using link:https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-vector-engine-guide/vectors-vector-embeddings-and-metrics[Cosine_Similarity in SAP Hana DB]
+    - `/ai/hana-vector-store/cricket-world-cup/purge-embeddings` - 从向量存储中清除所有嵌入
+    - `/ai/hana-vector-store/cricket-world-cup/upload` - 上传 Cricket_World_Cup.pdf，以便将其数据作为嵌入存储在 SAP Hana Cloud Vector DB 中
+    - `/ai/hana-vector-store/cricket-world-cup` - 使用 link:https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-vector-engine-guide/vectors-vector-embeddings-and-metrics[SAP Hana DB 中的余弦相似度] 实现 `RAG`
 
 [source,java]
 ----
@@ -294,7 +293,7 @@ public class CricketWorldCupHanaController {
 }
 ----
 
-Since HanaDB vector store support does not provide the autoconfiguration module, you also need to provide the vector store bean in your application, as shown below, as an example.
+由于 HanaDB 向量存储支持不提供自动配置模块，您还需要在应用程序中提供向量存储 bean，如下所示，作为示例。
 
 [source,java]
 ----
@@ -310,10 +309,10 @@ public VectorStore hanaCloudVectorStore(CricketWorldCupRepository cricketWorldCu
 ----
 
 
-* Use a `contextual` pdf file from wikipedia
+* 使用来自维基百科的 `contextual` pdf 文件
 
-Go to link:https://en.wikipedia.org/wiki/Cricket_World_Cup[wikipedia] and link:https://en.wikipedia.org/w/index.php?title=Special:DownloadAsPdf&page=Cricket_World_Cup&action=show-download-screen[download] `Cricket World Cup` page as a PDF file.
+访问 link:https://en.wikipedia.org/wiki/Cricket_World_Cup[维基百科] 并 link:https://en.wikipedia.org/w/index.php?title=Special:DownloadAsPdf&page=Cricket_World_Cup&action=show-download-screen[下载] `Cricket World Cup` 页面作为 PDF 文件。
 
 image::hanadb/wikipedia.png[width=800]
 
-Upload this PDF file using the file-upload REST endpoint that we created in the previous step.
+使用我们在上一步中创建的文件上传 REST 端点上传此 PDF 文件。

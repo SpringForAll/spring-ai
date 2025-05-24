@@ -1,18 +1,18 @@
-= Oracle Database 23ai - AI Vector Search
+= Oracle Database 23ai - AI 向量搜索
 
-The link:https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/overview-ai-vector-search.html[AI Vector Search] capabilities of the Oracle Database 23ai (23.4+) are available as a Spring AI `VectorStore` to help you to store document embeddings and perform similarity searches. Of course, all other features are also available.
+Oracle Database 23ai（23.4+）的 link:https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/overview-ai-vector-search.html[AI 向量搜索] 功能可作为 Spring AI `VectorStore` 使用，帮助您存储文档嵌入并执行相似性搜索。当然，所有其他功能也都可用。
 
-TIP: The <<Run Oracle Database 23ai locally,Run Oracle Database 23ai locally>> appendix shows how to start a database with a lightweight Docker container.
+提示：<<Run Oracle Database 23ai locally,在本地运行 Oracle Database 23ai>> 附录展示了如何使用轻量级 Docker 容器启动数据库。
 
-== Auto-Configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 的自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Start by adding the Oracle Vector Store boot starter dependency to your project:
+首先，将 Oracle 向量存储启动器依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -22,7 +22,7 @@ Start by adding the Oracle Vector Store boot starter dependency to your project:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -31,14 +31,14 @@ dependencies {
 }
 ----
 
-If you need this vector store to initialize the schema for you then you'll need to pass true for the `initializeSchema` boolean parameter in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+如果您需要此向量存储为您初始化模式，则需要在适当的构造函数中为 `initializeSchema` 布尔参数传递 true，或在 `application.properties` 文件中设置 `...initialize-schema=true`。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+注意：这是一个破坏性更改！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-The Vector Store, also requires an `EmbeddingModel` instance to calculate embeddings for the documents.
-You can pick one of the available xref:api/embeddings.adoc#available-implementations[EmbeddingModel Implementations].
+向量存储还需要一个 `EmbeddingModel` 实例来计算文档的嵌入。
+您可以选择一个可用的 xref:api/embeddings.adoc#available-implementations[EmbeddingModel 实现]。
 
-For example to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel] add the following dependency to your project:
+例如，要使用 xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel]，请将以下依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -48,7 +48,7 @@ For example to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI Embeddi
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -57,11 +57,11 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
+请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-To connect to and configure the `OracleVectorStore`, you need to provide access details for your database.
-A simple configuration can either be provided via Spring Boot's `application.yml`
+要连接到并配置 `OracleVectorStore`，您需要提供数据库的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [yml]
 ----
@@ -78,9 +78,9 @@ spring:
 		dimensions: 1536
 ----
 
-TIP: Check the list of xref:#oracle-properties[configuration parameters] to learn about the default values and configuration options.
+提示：查看 xref:#oracle-properties[配置参数] 列表，了解默认值和配置选项。
 
-Now you can Auto-wire the `OracleVectorStore` in your application and use it:
+现在您可以在应用程序中自动装配 `OracleVectorStore` 并使用它：
 
 [source,java]
 ----
@@ -93,43 +93,43 @@ List<Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to Oracle Vector Store
+// 将文档添加到 Oracle 向量存储
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
 [[oracle-properties]]
-=== Configuration properties
+=== 配置属性
 
-You can use the following properties in your Spring Boot configuration to customize the `OracleVectorStore`.
+您可以在 Spring Boot 配置中使用以下属性来自定义 `OracleVectorStore`。
 
 [cols="2,5,1",stripes=even]
 |===
-|Property| Description | Default value
+|属性| 描述 | 默认值
 
-|`spring.ai.vectorstore.oracle.index-type`|  Nearest neighbor search index type. Options are `NONE` - exact nearest neighbor search, `IVF` - Inverted Flat File index. It has faster build times and uses less memory than HNSW, but has lower query performance (in terms of speed-recall tradeoff). `HNSW` - creates a multilayer graph. It has slower build times and uses more memory than IVF, but has better query performance (in terms of speed-recall tradeoff). | NONE
-|`spring.ai.vectorstore.oracle.distance-type`| Search distance type among `COSINE` (default), `DOT`, `EUCLIDEAN`, `EUCLIDEAN_SQUARED`, and `MANHATTAN`.
+|`spring.ai.vectorstore.oracle.index-type`|  最近邻搜索索引类型。选项有 `NONE` - 精确最近邻搜索，`IVF` - 倒排平面文件索引。它比 HNSW 有更快的构建时间和更少的内存使用，但查询性能较低（在速度-召回权衡方面）。`HNSW` - 创建多层图。它比 IVF 有更慢的构建时间和更多的内存使用，但有更好的查询性能（在速度-召回权衡方面）。 | NONE
+|`spring.ai.vectorstore.oracle.distance-type`| 搜索距离类型，包括 `COSINE`（默认）、`DOT`、`EUCLIDEAN`、`EUCLIDEAN_SQUARED` 和 `MANHATTAN`。
 
-NOTE: If vectors are normalized, you can use `DOT` or `COSINE` for best performance.| COSINE
-|`spring.ai.vectorstore.oracle.forced-normalization`| Allows enabling vector normalization (if true) before insertion and for similarity search.
+注意：如果向量已归一化，您可以使用 `DOT` 或 `COSINE` 获得最佳性能。| COSINE
+|`spring.ai.vectorstore.oracle.forced-normalization`| 允许在插入和相似性搜索之前启用向量归一化（如果为 true）。
 
-CAUTION: Setting this to true is a requirement to allow for xref:api/vectordbs.adoc#api-overview[search request similarity threshold].
+警告：将此设置为 true 是允许 xref:api/vectordbs.adoc#api-overview[搜索请求相似性阈值] 的要求。
 
-NOTE: If vectors are normalized, you can use `DOT` or `COSINE` for best performance. | false
-|`spring.ai.vectorstore.oracle.dimensions`| Embeddings dimension. If not specified explicitly the OracleVectorStore will allow the maximum: 65535. Dimensions are set to the embedding column on table creation. If you change the dimensions your would have to re-create the table as well. | 65535
-|`spring.ai.vectorstore.oracle.remove-existing-vector-store-table` | Drops the existing table on start up.  | false
-|`spring.ai.vectorstore.oracle.initialize-schema` | Whether to initialize the required schema. | false
-|`spring.ai.vectorstore.oracle.search-accuracy` | Denote the requested accuracy target in the presence of index. Disabled by default. You need to provide an integer in the range [1,100] to override the default index accuracy (95). Using lower accuracy provides approximate similarity search trading off speed versus accuracy. | -1 (`DEFAULT_SEARCH_ACCURACY`)
+注意：如果向量已归一化，您可以使用 `DOT` 或 `COSINE` 获得最佳性能。 | false
+|`spring.ai.vectorstore.oracle.dimensions`| 嵌入维度。如果未明确指定，OracleVectorStore 将允许最大值：65535。维度在表创建时设置到嵌入列。如果您更改维度，您也需要重新创建表。 | 65535
+|`spring.ai.vectorstore.oracle.remove-existing-vector-store-table` | 在启动时删除现有表。  | false
+|`spring.ai.vectorstore.oracle.initialize-schema` | 是否初始化所需的模式。 | false
+|`spring.ai.vectorstore.oracle.search-accuracy` | 表示在存在索引时请求的准确性目标。默认禁用。您需要提供一个 [1,100] 范围内的整数来覆盖默认索引准确性（95）。使用较低的准确性提供近似相似性搜索，在速度与准确性之间进行权衡。 | -1 (`DEFAULT_SEARCH_ACCURACY`)
 
 |===
 
-== Metadata filtering
+== 元数据过滤
 
-You can leverage the generic, portable link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[metadata filters] with the `OracleVectorStore`.
+您也可以利用通用的、可移植的 link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[元数据过滤器] 与 `OracleVectorStore`。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -141,7 +141,7 @@ vectorStore.similaritySearch(
     .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -156,12 +156,12 @@ vectorStore.similaritySearch(SearchRequest.builder()
         b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: These filter expressions are converted into the equivalent `OracleVectorStore` filters.
+注意：这些过滤表达式被转换为等效的 `OracleVectorStore` 过滤器。
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the `OracleVectorStore`.
-For this you need to add the Oracle JDBC driver and `JdbcTemplate` auto-configuration dependencies to your project:
+除了使用 Spring Boot 自动配置外，您还可以手动配置 `OracleVectorStore`。
+为此，您需要将 Oracle JDBC 驱动程序和 `JdbcTemplate` 自动配置依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -182,9 +182,9 @@ For this you need to add the Oracle JDBC driver and `JdbcTemplate` auto-configur
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-To configure the `OracleVectorStore` in your application, you can use the following setup:
+要在应用程序中配置 `OracleVectorStore`，您可以使用以下设置：
 
 [source,java]
 ----
@@ -201,21 +201,21 @@ public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddi
 }
 ----
 
-== Run Oracle Database 23ai locally
+== 在本地运行 Oracle Database 23ai
 
 ----
 docker run --rm --name oracle23ai -p 1521:1521 -e APP_USER=mlops -e APP_USER_PASSWORD=mlops -e ORACLE_PASSWORD=mlops gvenzl/oracle-free:23-slim
 ----
 
-You can then connect to the database using:
+然后您可以使用以下命令连接到数据库：
 
 ----
 sql mlops/mlops@localhost/freepdb1
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Oracle Vector Store implementation provides access to the underlying native Oracle client (`OracleConnection`) through the `getNativeClient()` method:
+Oracle 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Oracle 客户端（`OracleConnection`）的访问：
 
 [source,java]
 ----
@@ -224,8 +224,8 @@ Optional<OracleConnection> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     OracleConnection connection = nativeClient.get();
-    // Use the native client for Oracle-specific operations
+    // 使用原生客户端进行 Oracle 特定的操作
 }
 ----
 
-The native client gives you access to Oracle-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口暴露的 Oracle 特定功能和操作。

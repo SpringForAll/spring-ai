@@ -1,68 +1,68 @@
-= Apache Cassandra Vector Store
+= Apache Cassandra 向量存储
 
-This section walks you through setting up `CassandraVectorStore` to store document embeddings and perform similarity searches.
+本节将指导您如何设置 `CassandraVectorStore` 来存储文档嵌入并执行相似性搜索。
 
-== What is Apache Cassandra?
+== 什么是 Apache Cassandra？
 
-link:https://cassandra.apache.org[Apache Cassandra®] is a true open source distributed database renowned for linear scalability, proven fault-tolerance and low latency, making it the perfect platform for mission-critical transactional data.
+link:https://cassandra.apache.org[Apache Cassandra®] 是一个真正的开源分布式数据库，以其线性可扩展性、经过验证的容错性和低延迟而闻名，使其成为关键事务数据的理想平台。
 
-Its Vector Similarity Search (VSS) is based on the JVector library that ensures best-in-class performance and relevancy.
+其向量相似性搜索(VSS)基于 JVector 库，确保最佳性能和相关性。
 
-A vector search in Apache Cassandra is done as simply as:
+在 Apache Cassandra 中进行向量搜索非常简单：
 [source,sql]
 ----
 SELECT content FROM table ORDER BY content_vector ANN OF query_embedding;
 ----
 
-More docs on this can be read https://cassandra.apache.org/doc/latest/cassandra/getting-started/vector-search-quickstart.html[here].
+更多文档可以在这里阅读 https://cassandra.apache.org/doc/latest/cassandra/getting-started/vector-search-quickstart.html[这里]。
 
-This Spring AI Vector Store is designed to work for both brand-new RAG applications and be able to be retrofitted on top of existing data and tables.
+这个 Spring AI 向量存储设计用于全新的 RAG 应用程序，并且能够适应现有的数据和表。
 
-The store can also be used for non-RAG use-cases in an existing database, e.g. semantic searches, geo-proximity searches, etc.
+该存储还可以用于现有数据库中的非 RAG 用例，例如语义搜索、地理邻近搜索等。
 
-The store will automatically create, or enhance, the schema as needed according to its configuration. If you don't want the schema modifications, configure the store with `initializeSchema`.
+存储将根据其配置自动创建或增强所需的模式。如果您不希望进行模式修改，请使用 `initializeSchema` 配置存储。
 
-When using spring-boot-autoconfigure `initializeSchema` defaults to `false`, per Spring Boot standards, and you must opt-in to schema creation/modifications by setting `...initialize-schema=true` in the `application.properties` file.
+当使用 spring-boot-autoconfigure 时，`initializeSchema` 默认为 `false`，符合 Spring Boot 标准，您必须通过在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入模式创建/修改。
 
-== What is JVector?
+== 什么是 JVector？
 
-link:https://github.com/jbellis/jvector[JVector] is a pure Java embedded vector search engine.
+link:https://github.com/jbellis/jvector[JVector] 是一个纯 Java 嵌入式向量搜索引擎。
 
-It stands out from other HNSW Vector Similarity Search implementations by being:
+它通过以下特点在其他 HNSW 向量相似性搜索实现中脱颖而出：
 
-* Algorithmic-fast. JVector uses state of the art graph algorithms inspired by DiskANN and related research that offer high recall and low latency.
-* Implementation-fast. JVector uses the Panama SIMD API to accelerate index build and queries.
-* Memory efficient. JVector compresses vectors using product quantization so they can stay in memory during searches.
-* Disk-aware. JVector's disk layout is designed to do the minimum necessary iops at query time.
-* Concurrent. Index builds scale linearly to at least 32 threads. Double the threads, half the build time.
-* Incremental. Query your index as you build it. No delay between adding a vector and being able to find it in search results.
-* Easy to embed. API designed for easy embedding, by people using it in production.
+* 算法快速。JVector 使用受 DiskANN 和相关研究启发的先进图算法，提供高召回率和低延迟。
+* 实现快速。JVector 使用 Panama SIMD API 加速索引构建和查询。
+* 内存高效。JVector 使用产品量化压缩向量，使它们可以在搜索期间保留在内存中。
+* 磁盘感知。JVector 的磁盘布局设计为在查询时执行最少的必要 IOPS。
+* 并发。索引构建至少可以线性扩展到 32 个线程。线程数翻倍，构建时间减半。
+* 增量。在构建索引时查询索引。添加向量后立即可以在搜索结果中找到它。
+* 易于嵌入。API 设计易于嵌入，由在生产中使用它的人设计。
 
-== Prerequisites
+== 先决条件
 
-1. A `EmbeddingModel` instance to compute the document embeddings. This is usually configured as a Spring Bean. Several options are available:
+1. 一个用于计算文档嵌入的 `EmbeddingModel` 实例。这通常配置为 Spring Bean。有多个选项可用：
 
-- `Transformers Embedding` - computes the embedding in your local environment. The default is via ONNX and the all-MiniLM-L6-v2 Sentence Transformers. This just works.
-- If you want to use OpenAI's Embeddings - uses the OpenAI embedding endpoint. You need to create an account at link:https://platform.openai.com/signup[OpenAI Signup] and generate the api-key token at link:https://platform.openai.com/account/api-keys[API Keys].
-- There are many more choices, see `Embeddings API` docs.
+- `Transformers Embedding` - 在本地环境中计算嵌入。默认是通过 ONNX 和 all-MiniLM-L6-v2 Sentence Transformers。这可以直接使用。
+- 如果您想使用 OpenAI 的 Embeddings - 使用 OpenAI 嵌入端点。您需要在 link:https://platform.openai.com/signup[OpenAI 注册] 创建一个账户，并在 link:https://platform.openai.com/account/api-keys[API Keys] 生成 api-key 令牌。
+- 还有更多选择，请参阅 `Embeddings API` 文档。
 
-2. An Apache Cassandra instance, from version 5.0-beta1
-a. link:https://cassandra.apache.org/_/quickstart.html[DIY Quick Start]
-b. For a managed offering https://astra.datastax.com/[Astra DB] offers a healthy free tier offering.
+2. 一个 Apache Cassandra 实例，版本 5.0-beta1 或更高
+a. link:https://cassandra.apache.org/_/quickstart.html[DIY 快速入门]
+b. 对于托管服务，https://astra.datastax.com/[Astra DB] 提供了一个健康的免费层级服务。
 
-== Dependencies
+== 依赖项
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-TIP: For dependency management, we recommend using the Spring AI BOM as explained in the xref:getting-started.adoc#dependency-management[Dependency Management] section.
+提示：对于依赖管理，我们建议使用 Spring AI BOM，如 xref:getting-started.adoc#dependency-management[依赖管理] 部分所述。
 
-Add these dependencies to your project:
+将这些依赖项添加到您的项目中：
 
-* For just the Cassandra Vector Store:
+* 仅用于 Cassandra 向量存储：
 
 [source,xml]
 ----
@@ -72,7 +72,7 @@ Add these dependencies to your project:
 </dependency>
 ----
 
-* Or, for everything you need in a RAG application (using the default ONNX Embedding Model):
+* 或者，用于 RAG 应用程序所需的一切（使用默认的 ONNX 嵌入模型）：
 
 [source,xml]
 ----
@@ -82,13 +82,13 @@ Add these dependencies to your project:
 </dependency>
 ----
 
-== Configuration Properties
+== 配置属性
 
-You can use the following properties in your Spring Boot configuration to customize the Apache Cassandra vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 Apache Cassandra 向量存储。
 
 [cols="2,1",stripes=even]
 |===
-|Property|Default Value
+|属性|默认值
 
 |`spring.ai.vectorstore.cassandra.keyspace`|springframework
 |`spring.ai.vectorstore.cassandra.table`|ai_vector_store
@@ -99,11 +99,11 @@ You can use the following properties in your Spring Boot configuration to custom
 |`spring.ai.vectorstore.cassandra.fixed-thread-pool-executor-size`|16
 |===
 
-== Usage
+== 使用方法
 
-=== Basic Usage
+=== 基本用法
 
-Create a CassandraVectorStore instance as a Spring Bean:
+创建一个 CassandraVectorStore 实例作为 Spring Bean：
 
 [source,java]
 ----
@@ -117,17 +117,17 @@ public VectorStore vectorStore(CqlSession session, EmbeddingModel embeddingModel
 }
 ----
 
-Once you have the vector store instance, you can add documents and perform searches:
+一旦您有了向量存储实例，您就可以添加文档并执行搜索：
 
 [source,java]
 ----
-// Add documents
+// 添加文档
 vectorStore.add(List.of(
     new Document("1", "content1", Map.of("key1", "value1")),
     new Document("2", "content2", Map.of("key2", "value2"))
 ));
 
-// Search with filters
+// 使用过滤器搜索
 List<Document> results = vectorStore.similaritySearch(
     SearchRequest.query("search text")
         .withTopK(5)
@@ -136,9 +136,9 @@ List<Document> results = vectorStore.similaritySearch(
 );
 ----
 
-=== Advanced Configuration
+=== 高级配置
 
-For more complex use cases, you can configure additional settings in your Spring Bean:
+对于更复杂的用例，您可以在 Spring Bean 中配置其他设置：
 
 [source,java]
 ----
@@ -148,7 +148,7 @@ public VectorStore vectorStore(CqlSession session, EmbeddingModel embeddingModel
         .session(session)
         .keyspace("my_keyspace")
         .table("my_vectors")
-        // Configure primary keys
+        // 配置主键
         .partitionKeys(List.of(
             new SchemaColumn("id", DataTypes.TEXT),
             new SchemaColumn("category", DataTypes.TEXT)
@@ -156,29 +156,29 @@ public VectorStore vectorStore(CqlSession session, EmbeddingModel embeddingModel
         .clusteringKeys(List.of(
             new SchemaColumn("timestamp", DataTypes.TIMESTAMP)
         ))
-        // Add metadata columns with optional indexing
+        // 添加带可选索引的元数据列
         .addMetadataColumns(
             new SchemaColumn("category", DataTypes.TEXT, SchemaColumnTags.INDEXED),
             new SchemaColumn("score", DataTypes.DOUBLE)
         )
-        // Customize column names
+        // 自定义列名
         .contentColumnName("text")
         .embeddingColumnName("vector")
-        // Performance tuning
+        // 性能调优
         .fixedThreadPoolExecutorSize(32)
-        // Schema management
+        // 模式管理
         .initializeSchema(true)
-        // Custom batching strategy
+        // 自定义批处理策略
         .batchingStrategy(new TokenCountBatchingStrategy())
         .build();
 }
 ----
 
-=== Connection Configuration
+=== 连接配置
 
-There are two ways to configure the connection to Cassandra:
+有两种方式配置 Cassandra 连接：
 
-* Using an injected CqlSession (recommended):
+* 使用注入的 CqlSession（推荐）：
 
 [source,java]
 ----
@@ -192,7 +192,7 @@ public VectorStore vectorStore(CqlSession session, EmbeddingModel embeddingModel
 }
 ----
 
-* Using connection details directly in the builder:
+* 在构建器中直接使用连接详情：
 
 [source,java]
 ----
@@ -206,11 +206,11 @@ public VectorStore vectorStore(EmbeddingModel embeddingModel) {
 }
 ----
 
-=== Metadata Filtering
+=== 元数据过滤
 
-You can leverage the generic, portable metadata filters with the CassandraVectorStore. For metadata columns to be searchable they must be either primary keys or SAI indexed. To make non-primary-key columns indexed, configure the metadata column with the `SchemaColumnTags.INDEXED`.
+您可以利用 CassandraVectorStore 的通用、可移植的元数据过滤器。要使元数据列可搜索，它们必须是主键或 SAI 索引。要使非主键列可索引，请使用 `SchemaColumnTags.INDEXED` 配置元数据列。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -220,7 +220,7 @@ vectorStore.similaritySearch(
         .filterExpression("country in ['UK', 'NL'] && year >= 2020").build());
 ----
 
-or programmatically using the expression DSL:
+或使用表达式 DSL 以编程方式：
 
 [source,java]
 ----
@@ -236,13 +236,13 @@ vectorStore.similaritySearch(
         .filterExpression(f).build());
 ----
 
-The portable filter expressions get automatically converted into link:https://cassandra.apache.org/doc/latest/cassandra/developing/cql/index.html[CQL queries].
+可移植的过滤器表达式会自动转换为 link:https://cassandra.apache.org/doc/latest/cassandra/developing/cql/index.html[CQL 查询]。
 
-== Advanced Example: Vector Store on top of Wikipedia Dataset
+== 高级示例：基于 Wikipedia 数据集的向量存储
 
-The following example demonstrates how to use the store on an existing schema. Here we use the schema from the https://github.com/datastax-labs/colbert-wikipedia-data project which comes with the full wikipedia dataset ready vectorized for you.
+以下示例演示如何在现有模式上使用存储。这里我们使用来自 https://github.com/datastax-labs/colbert-wikipedia-data 项目的模式，该项目提供了完整的维基百科数据集，已经为您向量化好了。
 
-First, create the schema in the Cassandra database:
+首先，在 Cassandra 数据库中创建模式：
 
 [source,bash]
 ----
@@ -250,7 +250,7 @@ wget https://s.apache.org/colbert-wikipedia-schema-cql -O colbert-wikipedia-sche
 cqlsh -f colbert-wikipedia-schema.cql
 ----
 
-Then configure the store using the builder pattern:
+然后使用构建器模式配置存储：
 
 [source,java]
 ----
@@ -301,18 +301,18 @@ public VectorStore vectorStore(CqlSession session, EmbeddingModel embeddingModel
 
 @Bean
 public EmbeddingModel embeddingModel() {
-    // default is ONNX all-MiniLM-L6-v2 which is what we want
+    // 默认是 ONNX all-MiniLM-L6-v2，这正是我们想要的
     return new TransformersEmbeddingModel();
 }
 ----
 
-=== Loading the Complete Wikipedia Dataset
+=== 加载完整的维基百科数据集
 
-To load the full wikipedia dataset:
+要加载完整的维基百科数据集：
 
-1. Download `simplewiki-sstable.tar` from https://s.apache.org/simplewiki-sstable-tar (this will take a while, the file is tens of GBs)
+1. 从 https://s.apache.org/simplewiki-sstable-tar 下载 `simplewiki-sstable.tar`（这需要一段时间，文件有几十 GB）
 
-2. Load the data:
+2. 加载数据：
 [source,bash]
 ----
 tar -xf simplewiki-sstable.tar -C ${CASSANDRA_DATA}/data/wikidata/articles-*/
@@ -321,14 +321,14 @@ nodetool import wikidata articles ${CASSANDRA_DATA}/data/wikidata/articles-*/
 
 [NOTE]
 ====
-* If you have existing data in this table, check the tarball's files don't clobber existing sstables when doing the `tar`.
-* An alternative to `nodetool import` is to just restart Cassandra.
-* If there are any failures in the indexes they will be rebuilt automatically.
+* 如果此表中已有现有数据，请在执行 `tar` 时检查 tarball 的文件不会覆盖现有的 sstables。
+* `nodetool import` 的替代方案是重启 Cassandra。
+* 如果索引有任何故障，它们将自动重建。
 ====
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Cassandra Vector Store implementation provides access to the underlying native Cassandra client (`CqlSession`) through the `getNativeClient()` method:
+Cassandra 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Cassandra 客户端（`CqlSession`）的访问：
 
 [source,java]
 ----
@@ -337,8 +337,8 @@ Optional<CqlSession> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     CqlSession session = nativeClient.get();
-    // Use the native client for Cassandra-specific operations
+    // 使用原生客户端进行 Cassandra 特定操作
 }
 ----
 
-The native client gives you access to Cassandra-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口公开的 Cassandra 特定功能和操作。

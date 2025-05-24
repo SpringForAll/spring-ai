@@ -1,34 +1,38 @@
-In a recent research publication, https://www.anthropic.com/research/building-effective-agents[Building Effective Agents], Anthropic shared valuable insights about building effective Large Language Model (LLM) agents. What makes this research particularly interesting is its emphasis on simplicity and composability over complex frameworks. Let's explore how these principles translate into practical implementations using https://docs.spring.io/spring-ai/reference/index.html[Spring AI].
+在最近的研究出版物中，https://www.anthropic.com/research/building-effective-agents[构建有效的代理]，Anthropic 分享了关于构建有效的大型语言模型（LLM）代理的宝贵见解。
+这项研究特别有趣的是它强调简单性和可组合性，而不是复杂的框架。
+让我们探索这些原则如何通过 https://docs.spring.io/spring-ai/reference/index.html[Spring AI] 转化为实际实现。
 
-image::https://raw.githubusercontent.com/spring-io/spring-io-static/refs/heads/main/blog/tzolov/spring-ai-agentic-systems.jpg[Agent Systems, width=350]
+image::https://raw.githubusercontent.com/spring-io/spring-io-static/refs/heads/main/blog/tzolov/spring-ai-agentic-systems.jpg[代理系统, width=350]
 
-While the pattern descriptions and diagrams are sourced from Anthropic's original publication, we'll focus on how to implement these patterns using Spring AI's features for model portability and structured output. We recommend reading the original paper first.
+虽然模式描述和图表来自 Anthropic 的原始出版物，但我们将重点介绍如何使用 Spring AI 的模型可移植性和结构化输出功能来实现这些模式。
+我们建议先阅读原始论文。
 
-The https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns[agentic-patterns] directory in the spring-ai-examples repository contains all the code for the examples that follow.
+https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns[agentic-patterns] 目录在 spring-ai-examples 仓库中包含以下示例的所有代码。
 
-== Agentic Systems
+== 代理系统
 
-The research publication makes an important architectural distinction between two types of agentic systems:
+研究出版物对两种类型的代理系统做出了重要的架构区分：
 
-. *Workflows*: Systems where LLMs and tools are orchestrated through predefined code paths (e.g., prescriptive systems)
-. *Agents*: Systems where LLMs dynamically direct their own processes and tool usage
+. *工作流*：通过预定义代码路径编排 LLM 和工具的系统（例如，规范性系统）
+. *代理*：LLM 动态指导自己的过程和工具使用的系统
 
-The key insight is that while fully autonomous agents might seem appealing, workflows often provide better predictability and consistency for well-defined tasks. This aligns perfectly with enterprise requirements where reliability and maintainability are crucial.
+关键见解是，虽然完全自主的代理可能看起来很吸引人，但对于明确定义的任务，工作流通常提供更好的可预测性和一致性。
+这与企业要求完美契合，因为可靠性和可维护性至关重要。
 
-Let's examine how Spring AI implements these concepts through five fundamental patterns, each serving specific use cases:
+让我们通过五个基本模式来研究 Spring AI 如何实现这些概念，每个模式都服务于特定的用例：
 
-=== 1. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/chain-workflow[Chain Workflow]
+=== 1. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/chain-workflow[链式工作流]
 
-The Chain Workflow pattern exemplifies the principle of breaking down complex tasks into simpler, more manageable steps.
+链式工作流模式体现了将复杂任务分解为更简单、更易于管理的步骤的原则。
 
-image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F7418719e3dab222dccb379b8879e1dc08ad34c78-2401x1000.png&w=3840&q=75[Prompt Chaining Workflow]
+image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F7418719e3dab222dccb379b8879e1dc08ad34c78-2401x1000.png&w=3840&q=75[提示链接工作流]
 
-*When to Use:*
-- Tasks with clear sequential steps
-- When you want to trade latency for higher accuracy
-- When each step builds on the previous step's output
+*何时使用：*
+- 具有明确顺序步骤的任务
+- 当您想用延迟换取更高的准确性时
+- 当每个步骤都建立在前一个步骤的输出之上时
 
-Here's a practical example from Spring AI's implementation:
+以下是来自 Spring AI 实现的实践示例：
 
 [source,java]
 ----
@@ -47,48 +51,48 @@ public class ChainWorkflow {
 }
 ----
 
-This implementation demonstrates several key principles:
+这个实现展示了几个关键原则：
 
-- Each step has a focused responsibility
-- Output from one step becomes input for the next
-- The chain is easily extensible and maintainable
+- 每个步骤都有明确的职责
+- 一个步骤的输出成为下一个步骤的输入
+- 链易于扩展和维护
 
-=== 2. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/parallelization-workflow[Parallelization Workflow]
+=== 2. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/parallelization-workflow[并行化工作流]
 
-LLMs can work simultaneously on tasks and have their outputs aggregated programmatically.
+LLM 可以同时处理任务，并通过编程方式聚合它们的输出。
 
-image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F406bb032ca007fd1624f261af717d70e6ca86286-2401x1000.png&w=3840&q=75[Parallelization Workflow]
+image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F406bb032ca007fd1624f261af717d70e6ca86286-2401x1000.png&w=3840&q=75[并行化工作流]
 
-*When to Use:*
-- Processing large volumes of similar but independent items
-- Tasks requiring multiple independent perspectives
-- When processing time is critical and tasks are parallelizable
+*何时使用：*
+- 处理大量相似但独立的项目
+- 需要多个独立视角的任务
+- 当处理时间至关重要且任务可并行化时
 
 [source,java]
 ----
 List<String> parallelResponse = new ParallelizationWorkflow(chatClient)
     .parallel(
-        "Analyze how market changes will impact this stakeholder group.",
+        "分析市场变化将如何影响这个利益相关者群体。",
         List.of(
-            "Customers: ...",
-            "Employees: ...",
-            "Investors: ...",
-            "Suppliers: ..."
+            "客户：...",
+            "员工：...",
+            "投资者：...",
+            "供应商：..."
         ),
         4
     );
 ----
 
-=== 3. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/routing-workflow[Routing Workflow]
+=== 3. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/routing-workflow[路由工作流]
 
-The Routing pattern implements intelligent task distribution, enabling specialized handling for different types of input.
+路由模式实现了智能任务分发，使不同类型的输入能够进行专门处理。
 
-image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F5c0c0e9fe4def0b584c04d37849941da55e5e71c-2401x1000.png&w=3840&q=75[Routing Workflow]
+image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F5c0c0e9fe4def0b584c04d37849941da55e5e71c-2401x1000.png&w=3840&q=75[路由工作流]
 
-*When to Use:*
-- Complex tasks with distinct categories of input
-- When different inputs require specialized processing
-- When classification can be handled accurately
+*何时使用：*
+- 具有不同输入类别的复杂任务
+- 当不同输入需要专门处理时
+- 当分类可以准确处理时
 
 [source,java]
 ----
@@ -98,63 +102,63 @@ private ChatClient chatClient;
 RoutingWorkflow workflow = new RoutingWorkflow(chatClient);
 
 Map<String, String> routes = Map.of(
-    "billing", "You are a billing specialist. Help resolve billing issues...",
-    "technical", "You are a technical support engineer. Help solve technical problems...",
-    "general", "You are a customer service representative. Help with general inquiries..."
+    "billing", "您是账单专家。帮助解决账单问题...",
+    "technical", "您是技术支持工程师。帮助解决技术问题...",
+    "general", "您是客户服务代表。帮助处理一般查询..."
 );
 
-String input = "My account was charged twice last week";
+String input = "我的账户上周被重复收费了";
 String response = workflow.route(input, routes);
 ----
 
-=== 4. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/orchestrator-workers-workflow[Orchestrator-Workers]
+=== 4. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/orchestrator-workers-workflow[编排器-工作者]
 
-image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F8985fc683fae4780fb34eab1365ab78c7e51bc8e-2401x1000.png&w=3840&q=75[Orchestration Workflow]
+image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F8985fc683fae4780fb34eab1365ab78c7e51bc8e-2401x1000.png&w=3840&q=75[编排工作流]
 
-*When to Use:*
-- Complex tasks where subtasks can't be predicted upfront
-- Tasks requiring different approaches or perspectives
-- Situations needing adaptive problem-solving
+*何时使用：*
+- 子任务无法预先预测的复杂任务
+- 需要不同方法或视角的任务
+- 需要自适应问题解决的情况
 
 [source,java]
 ----
 public class OrchestratorWorkersWorkflow {
     public WorkerResponse process(String taskDescription) {
-        // 1. Orchestrator analyzes task and determines subtasks
+        // 1. 编排器分析任务并确定子任务
         OrchestratorResponse orchestratorResponse = // ...
 
-        // 2. Workers process subtasks in parallel
+        // 2. 工作者并行处理子任务
         List<String> workerResponses = // ...
 
-        // 3. Results are combined into final response
+        // 3. 结果合并为最终响应
         return new WorkerResponse(/*...*/);
     }
 }
 ----
 
-Usage Example:
+使用示例：
 
 [source,java]
 ----
-ChatClient chatClient = // ... initialize chat client
+ChatClient chatClient = // ... 初始化聊天客户端
 OrchestratorWorkersWorkflow workflow = new OrchestratorWorkersWorkflow(chatClient);
 
 WorkerResponse response = workflow.process(
-    "Generate both technical and user-friendly documentation for a REST API endpoint"
+    "为 REST API 端点生成技术和用户友好的文档"
 );
 
-System.out.println("Analysis: " + response.analysis());
-System.out.println("Worker Outputs: " + response.workerResponses());
+System.out.println("分析：" + response.analysis());
+System.out.println("工作者输出：" + response.workerResponses());
 ----
 
-=== 5. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/evaluator-optimizer-workflow[Evaluator-Optimizer]
+=== 5. https://github.com/spring-projects/spring-ai-examples/tree/main/agentic-patterns/evaluator-optimizer-workflow[评估器-优化器]
 
-image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F14f51e6406ccb29e695da48b17017e899a6119c7-2401x1000.png&w=3840&q=75[Evaluator-Optimizer Workflow]
+image::https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F14f51e6406ccb29e695da48b17017e899a6119c7-2401x1000.png&w=3840&q=75[评估器-优化器工作流]
 
-*When to Use:*
-- Clear evaluation criteria exist
-- Iterative refinement provides measurable value
-- Tasks benefit from multiple rounds of critique
+*何时使用：*
+- 存在明确的评估标准
+- 迭代优化提供可衡量的价值
+- 任务受益于多轮评估
 
 [source,java]
 ----
@@ -167,26 +171,26 @@ public class EvaluatorOptimizerWorkflow {
 }
 ----
 
-Usage Example:
+使用示例：
 
 [source,java]
 ----
-ChatClient chatClient = // ... initialize chat client
+ChatClient chatClient = // ... 初始化聊天客户端
 EvaluatorOptimizerWorkflow workflow = new EvaluatorOptimizerWorkflow(chatClient);
 
 RefinedResponse response = workflow.loop(
-    "Create a Java class implementing a thread-safe counter"
+    "创建一个实现线程安全计数器的 Java 类"
 );
 
-System.out.println("Final Solution: " + response.solution());
-System.out.println("Evolution: " + response.chainOfThought());
+System.out.println("最终解决方案：" + response.solution());
+System.out.println("演进过程：" + response.chainOfThought());
 ----
 
-== Spring AI's Implementation Advantages
+== Spring AI 的实现优势
 
-Spring AI's implementation of these patterns offers several benefits that align with Anthropic's recommendations:
+Spring AI 对这些模式的实现提供了几个与 Anthropic 建议一致的优势：
 
-=== https://docs.spring.io/spring-ai/reference/api/chat/comparison.html[Model Portability]
+=== https://docs.spring.io/spring-ai/reference/api/chat/comparison.html[模型可移植性]
 
 [source,xml]
 ----
@@ -196,7 +200,7 @@ Spring AI's implementation of these patterns offers several benefits that align 
 </dependency>
 ----
 
-=== https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html[Structured Output]
+=== https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html[结构化输出]
 
 [source,java]
 ----
@@ -205,52 +209,52 @@ EvaluationResponse response = chatClient.prompt(prompt)
     .entity(EvaluationResponse.class);
 ----
 
-=== https://docs.spring.io/spring-ai/reference/api/chatclient.html[Consistent API]
+=== https://docs.spring.io/spring-ai/reference/api/chatclient.html[一致的 API]
 
-- Uniform interface across different LLM providers
-- Built-in error handling and retries
-- Flexible prompt management
+- 跨不同 LLM 提供商的统一接口
+- 内置错误处理和重试
+- 灵活的提示管理
 
-== Best Practices and Recommendations
+== 最佳实践和建议
 
-- *Start Simple*
-- Begin with basic workflows before adding complexity
-- Use the simplest pattern that meets your requirements
-- Add sophistication only when needed
+- *从简单开始*
+- 在添加复杂性之前从基本工作流开始
+- 使用满足您要求的最简单模式
+- 仅在需要时添加复杂性
 
-- *Design for Reliability*
-- Implement clear error handling
-- Use type-safe responses where possible
-- Build in validation at each step
+- *为可靠性而设计*
+- 实现清晰的错误处理
+- 尽可能使用类型安全的响应
+- 在每个步骤中构建验证
 
-- *Consider Trade-offs*
-- Balance latency vs. accuracy
-- Evaluate when to use parallel processing
-- Choose between fixed workflows and dynamic agents
+- *考虑权衡*
+- 平衡延迟与准确性
+- 评估何时使用并行处理
+- 在固定工作流和动态代理之间选择
 
-== Future Work
+== 未来工作
 
-These guides will be updated to explore how to build more advanced Agents that combine these foundational patterns with sophisticated features:
+这些指南将更新，以探索如何构建更高级的代理，将这些基础模式与复杂功能相结合：
 
-*Pattern Composition*
-- Combining multiple patterns to create more powerful workflows
-- Building hybrid systems that leverage the strengths of each pattern
-- Creating flexible architectures that can adapt to changing requirements
+*模式组合*
+- 组合多个模式以创建更强大的工作流
+- 构建利用每个模式优势的混合系统
+- 创建能够适应不断变化需求的灵活架构
 
-*Advanced Agent Memory Management*
-- Implementing persistent memory across conversations
-- Managing context windows efficiently
-- Developing strategies for long-term knowledge retention
+*高级代理内存管理*
+- 实现跨对话的持久内存
+- 高效管理上下文窗口
+- 开发长期知识保留策略
 
-*Tools and Model-Context Protocol (MCP) Integration*
-- Leveraging external tools through standardized interfaces
-- Implementing MCP for enhanced model interactions
-- Building extensible agent architectures
+*工具和模型上下文协议（MCP）集成*
+- 通过标准化接口利用外部工具
+- 实现 MCP 以增强模型交互
+- 构建可扩展的代理架构
 
-== Conclusion
+== 结论
 
-The combination of Anthropic's research insights and Spring AI's practical implementations provides a powerful framework for building effective LLM-based systems.
+Anthropic 的研究见解和 Spring AI 的实际实现的结合为构建有效的基于 LLM 的系统提供了强大的框架。
 
-By following these patterns and principles, developers can create robust, maintainable, and effective AI applications that deliver real value while avoiding unnecessary complexity.
+通过遵循这些模式和实践，开发人员可以创建健壮、可维护和有效的 AI 应用程序，提供真正的价值，同时避免不必要的复杂性。
 
-The key is to remember that sometimes the simplest solution is the most effective. Start with basic patterns, understand your use case thoroughly, and only add complexity when it demonstrably improves your system's performance or capabilities.
+关键是要记住，有时最简单的解决方案是最有效的。从基本模式开始，彻底理解您的用例，并且仅在能够明显改善系统性能或能力时才添加复杂性。

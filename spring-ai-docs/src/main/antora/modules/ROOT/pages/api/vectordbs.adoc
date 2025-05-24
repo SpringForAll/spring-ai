@@ -1,30 +1,30 @@
 [[vector-databases]]
-= Vector Databases
+= 向量数据库
 
-A vector database is a specialized type of database that plays an essential role in AI applications.
+向量数据库是一种专门类型的数据库，在 AI 应用中扮演着重要角色。
 
-In vector databases, queries differ from traditional relational databases.
-Instead of exact matches, they perform similarity searches.
-When given a vector as a query, a vector database returns vectors that are "`similar`" to the query vector.
-Further details on how this similarity is calculated at a high-level is provided in a xref:api/vectordbs/understand-vectordbs.adoc#vectordbs-similarity[Vector Similarity].
+在向量数据库中，查询与传统关系型数据库不同。
+它们不是进行精确匹配，而是执行相似性搜索。
+当给定一个向量作为查询时，向量数据库会返回与查询向量"相似"的向量。
+关于这种相似性如何在高层次上计算的更多细节，请参见 xref:api/vectordbs/understand-vectordbs.adoc#vectordbs-similarity[向量相似性]。
 
-Vector databases are used to integrate your data with AI models.
-The first step in their usage is to load your data into a vector database.
-Then, when a user query is to be sent to the AI model, a set of similar documents is first retrieved.
-These documents then serve as the context for the user's question and are sent to the AI model, along with the user's query.
-This technique is known as xref:concepts.adoc#concept-rag[Retrieval Augmented Generation (RAG)].
+向量数据库用于将你的数据与 AI 模型集成。
+使用它们的第一步是将数据加载到向量数据库中。
+然后，当用户查询要发送到 AI 模型时，首先检索一组相似的文档。
+这些文档随后作为用户问题的上下文，与用户的查询一起发送到 AI 模型。
+这种技术被称为 xref:concepts.adoc#concept-rag[检索增强生成 (RAG)]。
 
-The following sections describe the Spring AI interface for using multiple vector database implementations and some high-level sample usage.
+以下各节描述了 Spring AI 用于使用多个向量数据库实现的接口和一些高级示例用法。
 
-The last section is intended to demystify the underlying approach of similarity searching in vector databases.
+最后一节旨在揭开向量数据库中相似性搜索底层方法的神秘面纱。
 
 [[api-overview]]
-== API Overview
-This section serves as a guide to the `VectorStore` interface and its associated classes within the Spring AI framework.
+== API 概述
+本节作为 Spring AI 框架中 `VectorStore` 接口及其相关类的指南。
 
-Spring AI offers an abstracted API for interacting with vector databases through the `VectorStore` interface.
+Spring AI 通过 `VectorStore` 接口提供了与向量数据库交互的抽象 API。
 
-Here is the `VectorStore` interface definition:
+以下是 `VectorStore` 接口的定义：
 
 ```java
 public interface VectorStore extends DocumentWriter {
@@ -51,7 +51,7 @@ public interface VectorStore extends DocumentWriter {
 }
 ```
 
-and the related `SearchRequest` builder:
+以及相关的 `SearchRequest` 构建器：
 
 ```java
 public class SearchRequest {
@@ -128,45 +128,45 @@ public class SearchRequest {
 
 ```
 
-To insert data into the vector database, encapsulate it within a `Document` object.
-The `Document` class encapsulates content from a data source, such as a PDF or Word document, and includes text represented as a string.
-It also contains metadata in the form of key-value pairs, including details such as the filename.
+要将数据插入向量数据库，需要将其封装在 `Document` 对象中。
+`Document` 类封装了来自数据源（如 PDF 或 Word 文档）的内容，并包含以字符串形式表示的文本。
+它还包含以键值对形式存储的元数据，包括文件名等详细信息。
 
-Upon insertion into the vector database, the text content is transformed into a numerical array, or a `float[]`, known as vector embeddings, using an embedding model. Embedding models, such as https://en.wikipedia.org/wiki/Word2vec[Word2Vec], https://en.wikipedia.org/wiki/GloVe_(machine_learning)[GLoVE], and https://en.wikipedia.org/wiki/BERT_(language_model)[BERT], or OpenAI's `text-embedding-ada-002`, are used to convert words, sentences, or paragraphs into these vector embeddings.
+在插入向量数据库时，文本内容使用嵌入模型转换为数值数组或 `float[]`，称为向量嵌入。嵌入模型，如 https://en.wikipedia.org/wiki/Word2vec[Word2Vec]、https://en.wikipedia.org/wiki/GloVe_(machine_learning)[GLoVE] 和 https://en.wikipedia.org/wiki/BERT_(language_model)[BERT]，或 OpenAI 的 `text-embedding-ada-002`，用于将单词、句子或段落转换为这些向量嵌入。
 
-The vector database's role is to store and facilitate similarity searches for these embeddings. It does not generate the embeddings itself. For creating vector embeddings, the `EmbeddingModel` should be utilized.
+向量数据库的作用是存储和促进这些嵌入的相似性搜索。它本身不生成嵌入。对于创建向量嵌入，应该使用 `EmbeddingModel`。
 
-The `similaritySearch` methods in the interface allow for retrieving documents similar to a given query string. These methods can be fine-tuned by using the following parameters:
+接口中的 `similaritySearch` 方法允许检索与给定查询字符串相似的文档。这些方法可以通过使用以下参数进行微调：
 
-* `k`: An integer that specifies the maximum number of similar documents to return. This is often referred to as a 'top K' search, or 'K nearest neighbors' (KNN).
-* `threshold`: A double value ranging from 0 to 1, where values closer to 1 indicate higher similarity. By default, if you set a threshold of 0.75, for instance, only documents with a similarity above this value are returned.
-* `Filter.Expression`: A class used for passing a fluent DSL (Domain-Specific Language) expression that functions similarly to a 'where' clause in SQL, but it applies exclusively to the metadata key-value pairs of a `Document`.
-* `filterExpression`: An external DSL based on ANTLR4 that accepts filter expressions as strings. For example, with metadata keys like country, year, and `isActive`, you could use an expression such as: `country == 'UK' && year >= 2020 && isActive == true.`
+* `k`：一个整数，指定要返回的相似文档的最大数量。这通常被称为"top K"搜索，或"K 最近邻"（KNN）。
+* `threshold`：一个范围从 0 到 1 的双精度值，其中值越接近 1 表示相似度越高。默认情况下，如果你设置阈值为 0.75，例如，只返回相似度高于此值的文档。
+* `Filter.Expression`：一个用于传递流畅 DSL（领域特定语言）表达式的类，其功能类似于 SQL 中的"where"子句，但它仅适用于 `Document` 的元数据键值对。
+* `filterExpression`：基于 ANTLR4 的外部 DSL，接受字符串形式的过滤表达式。例如，对于元数据键如 country、year 和 `isActive`，你可以使用如下表达式：`country == 'UK' && year >= 2020 && isActive == true.`
 
-Find more information on the `Filter.Expression` in the <<metadata-filters>> section.
+有关 `Filter.Expression` 的更多信息，请参见 <<metadata-filters>> 部分。
 
-== Schema Initialization
+== 模式初始化
 
-Some vector stores require their backend schema to be initialized before usage.
-It will not be initialized for you by default.
-You must opt-in, by passing a `boolean` for the appropriate constructor argument or, if using Spring Boot, setting the appropriate `initialize-schema` property to `true` in `application.properties` or `application.yml`.
-Check the documentation for the vector store you are using for the specific property name.
+一些向量存储需要在使用前初始化其后端模式。
+默认情况下不会为你初始化。
+你必须通过传递适当的构造函数参数布尔值来选择加入，或者如果使用 Spring Boot，在 `application.properties` 或 `application.yml` 中将适当的 `initialize-schema` 属性设置为 `true`。
+查看你使用的向量存储的文档以获取特定的属性名称。
 
-== Batching Strategy
+== 批处理策略
 
-When working with vector stores, it's often necessary to embed large numbers of documents.
-While it might seem straightforward to make a single call to embed all documents at once, this approach can lead to issues.
-Embedding models process text as tokens and have a maximum token limit, often referred to as the context window size.
-This limit restricts the amount of text that can be processed in a single embedding request.
-Attempting to embed too many tokens in one call can result in errors or truncated embeddings.
+在使用向量存储时，通常需要嵌入大量文档。
+虽然一次性嵌入所有文档似乎很简单，但这种方法可能会导致问题。
+嵌入模型将文本作为令牌处理，并且有最大令牌限制，通常称为上下文窗口大小。
+这个限制限制了可以在单个嵌入请求中处理的文本量。
+尝试在一次调用中嵌入太多令牌可能会导致错误或截断的嵌入。
 
-To address this token limit, Spring AI implements a batching strategy.
-This approach breaks down large sets of documents into smaller batches that fit within the embedding model's maximum context window.
-Batching not only solves the token limit issue but can also lead to improved performance and more efficient use of API rate limits.
+为了解决这个令牌限制，Spring AI 实现了批处理策略。
+这种方法将大型文档集分解成适合嵌入模型最大上下文窗口的较小批次。
+批处理不仅解决了令牌限制问题，还可以提高性能并更有效地使用 API 速率限制。
 
-Spring AI provides this functionality through the `BatchingStrategy` interface, which allows for processing documents in sub-batches based on their token counts.
+Spring AI 通过 `BatchingStrategy` 接口提供此功能，该接口允许基于其令牌计数处理子批次中的文档。
 
-The core `BatchingStrategy` interface is defined as follows:
+核心 `BatchingStrategy` 接口定义如下：
 
 [source,java]
 ----
@@ -175,24 +175,24 @@ public interface BatchingStrategy {
 }
 ----
 
-This interface defines a single method, `batch`, which takes a list of documents and returns a list of document batches.
+此接口定义了一个方法 `batch`，它接受一个文档列表并返回一个文档批次列表。
 
-=== Default Implementation
+=== 默认实现
 
-Spring AI provides a default implementation called `TokenCountBatchingStrategy`.
-This strategy batches documents based on their token counts, ensuring that each batch does not exceed a calculated maximum input token count.
+Spring AI 提供了一个名为 `TokenCountBatchingStrategy` 的默认实现。
+此策略基于文档的令牌计数进行批处理，确保每个批次不超过计算的最大输入令牌计数。
 
-Key features of `TokenCountBatchingStrategy`:
+`TokenCountBatchingStrategy` 的主要特点：
 
-1. Uses https://platform.openai.com/docs/guides/embeddings/embedding-models[OpenAI's max input token count] (8191) as the default upper limit.
-2. Incorporates a reserve percentage (default 10%) to provide a buffer for potential overhead.
-3. Calculates the actual max input token count as: `actualMaxInputTokenCount = originalMaxInputTokenCount * (1 - RESERVE_PERCENTAGE)`
+1. 使用 https://platform.openai.com/docs/guides/embeddings/embedding-models[OpenAI 的最大输入令牌计数]（8191）作为默认上限。
+2. 包含保留百分比（默认 10%）以为潜在开销提供缓冲。
+3. 计算实际最大输入令牌计数为：`actualMaxInputTokenCount = originalMaxInputTokenCount * (1 - RESERVE_PERCENTAGE)`
 
-The strategy estimates the token count for each document, groups them into batches without exceeding the max input token count, and throws an exception if a single document exceeds this limit.
+该策略估计每个文档的令牌计数，将它们分组为不超过最大输入令牌计数的批次，如果单个文档超过此限制则抛出异常。
 
-You can also customize the `TokenCountBatchingStrategy` to better suit your specific requirements. This can be done by creating a new instance with custom parameters in a Spring Boot `@Configuration` class.
+你还可以自定义 `TokenCountBatchingStrategy` 以更好地满足你的特定需求。这可以通过在 Spring Boot `@Configuration` 类中创建具有自定义参数的新实例来完成。
 
-Here's an example of how to create a custom `TokenCountBatchingStrategy` bean:
+以下是如何创建自定义 `TokenCountBatchingStrategy` bean 的示例：
 
 [source,java]
 ----
@@ -201,28 +201,27 @@ public class EmbeddingConfig {
     @Bean
     public BatchingStrategy customTokenCountBatchingStrategy() {
         return new TokenCountBatchingStrategy(
-            EncodingType.CL100K_BASE,  // Specify the encoding type
-            8000,                      // Set the maximum input token count
-            0.1                        // Set the reserve percentage
+            EncodingType.CL100K_BASE,  // 指定编码类型
+            8000,                      // 设置最大输入令牌计数
+            0.1                        // 设置保留百分比
         );
     }
 }
 ----
 
-In this configuration:
+在此配置中：
 
-1. `EncodingType.CL100K_BASE`: Specifies the encoding type used for tokenization. This encoding type is used by the `JTokkitTokenCountEstimator` to accurately estimate token counts.
-2. `8000`: Sets the maximum input token count. This value should be less than or equal to the maximum context window size of your embedding model.
-3. `0.1`: Sets the reserve percentage. The percentage of tokens to reserve from the max input token count. This creates a buffer for potential token count increases during processing.
+1. `EncodingType.CL100K_BASE`：指定用于令牌化的编码类型。此编码类型由 `JTokkitTokenCountEstimator` 使用以准确估计令牌计数。
+2. `8000`：设置最大输入令牌计数。此值应小于或等于你的嵌入模型的最大上下文窗口大小。
+3. `0.1`：设置保留百分比。从最大输入令牌计数中保留的令牌百分比。这为处理过程中潜在的令牌计数增加创建了缓冲。
 
-By default, this constructor uses `Document.DEFAULT_CONTENT_FORMATTER` for content formatting and `MetadataMode.NONE` for metadata handling. If you need to customize these parameters, you can use the full constructor with additional parameters.
+默认情况下，此构造函数使用 `Document.DEFAULT_CONTENT_FORMATTER` 进行内容格式化，使用 `MetadataMode.NONE` 进行元数据处理。如果你需要自定义这些参数，可以使用带有附加参数的完整构造函数。
 
-Once defined, this custom `TokenCountBatchingStrategy` bean will be automatically used by the `EmbeddingModel` implementations in your application, replacing the default strategy.
+一旦定义，这个自定义 `TokenCountBatchingStrategy` bean 将被你的应用程序中的 `EmbeddingModel` 实现自动使用，替换默认策略。
 
-The `TokenCountBatchingStrategy` internally uses a `TokenCountEstimator` (specifically, `JTokkitTokenCountEstimator`) to calculate token counts for efficient batching. This ensures accurate token estimation based on the specified encoding type.
+`TokenCountBatchingStrategy` 内部使用 `TokenCountEstimator`（特别是 `JTokkitTokenCountEstimator`）来计算令牌计数以进行高效批处理。这确保了基于指定编码类型的准确令牌估计。
 
-
-Additionally, `TokenCountBatchingStrategy` provides flexibility by allowing you to pass in your own implementation of the `TokenCountEstimator` interface. This feature enables you to use custom token counting strategies tailored to your specific needs. For example:
+此外，`TokenCountBatchingStrategy` 通过允许你传入自己的 `TokenCountEstimator` 接口实现来提供灵活性。此功能使你能够使用针对特定需求定制的自定义令牌计数策略。例如：
 
 [source,java]
 ----
@@ -236,17 +235,17 @@ TokenCountBatchingStrategy strategy = new TokenCountBatchingStrategy(
 );
 ----
 
-=== Working with Auto-Truncation
+=== 使用自动截断
 
-Some embedding models, such as Vertex AI text embedding, support an `auto_truncate` feature. When enabled, the model silently truncates text inputs that exceed the maximum size and continues processing; when disabled, it throws an explicit error for inputs that are too large.
+一些嵌入模型，如 Vertex AI 文本嵌入，支持 `auto_truncate` 功能。启用后，模型会静默截断超过最大大小的文本输入并继续处理；禁用时，它会为过大的输入抛出明确的错误。
 
-When using auto-truncation with the batching strategy, you must configure your batching strategy with a much higher input token count than the model's actual maximum. This prevents the batching strategy from raising exceptions for large documents, allowing the embedding model to handle truncation internally.
+在使用自动截断的批处理策略时，你必须将批处理策略配置为比模型实际最大值高得多的输入令牌计数。这可以防止批处理策略对大型文档引发异常，允许嵌入模型在内部处理截断。
 
-==== Configuration for Auto-Truncation
+==== 自动截断的配置
 
-When enabling auto-truncation, set your batching strategy's maximum input token count much higher than the model's actual limit. This prevents the batching strategy from raising exceptions for large documents, allowing the embedding model to handle truncation internally.
+启用自动截断时，将批处理策略的最大输入令牌计数设置得比模型的实际限制高得多。这可以防止批处理策略对大型文档引发异常，允许嵌入模型在内部处理截断。
 
-Here's an example configuration for using Vertex AI with auto-truncation and custom `BatchingStrategy` and then using them in the PgVectorStore:
+以下是使用 Vertex AI 的自动截断和自定义 `BatchingStrategy` 的配置示例，然后在 PgVectorStore 中使用它们：
 
 [source,java]
 ----
@@ -259,7 +258,7 @@ public class AutoTruncationEmbeddingConfig {
 
         VertexAiTextEmbeddingOptions options = VertexAiTextEmbeddingOptions.builder()
                 .model(VertexAiTextEmbeddingOptions.DEFAULT_MODEL_NAME)
-                .autoTruncate(true)  // Enable auto-truncation
+                .autoTruncate(true)  // 启用自动截断
                 .build();
 
         return new VertexAiTextEmbeddingModel(connectionDetails, options);
@@ -267,76 +266,76 @@ public class AutoTruncationEmbeddingConfig {
 
     @Bean
     public BatchingStrategy batchingStrategy() {
-        // Only use a high token limit if auto-truncation is enabled in your embedding model.
-        // Set a much higher token count than the model actually supports
-        // (e.g., 132,900 when Vertex AI supports only up to 20,000)
+        // 仅当嵌入模型中启用了自动截断时才使用高令牌限制。
+        // 设置比模型实际支持的令牌计数高得多
+        // （例如，当 Vertex AI 仅支持最多 20,000 时设置为 132,900）
         return new TokenCountBatchingStrategy(
                 EncodingType.CL100K_BASE,
-                132900,  // Artificially high limit
-                0.1      // 10% reserve
+                132900,  // 人为设置的高限制
+                0.1      // 10% 保留
         );
     }
 
     @Bean
     public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel, BatchingStrategy batchingStrategy) {
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-            // other properties omitted here
+            // 此处省略其他属性
             .build();
     }
 }
 ----
 
-In this configuration:
+在此配置中：
 
-1. The embedding model has auto-truncation enabled, allowing it to handle oversized inputs gracefully.
-2. The batching strategy uses an artificially high token limit (132,900) that's much larger than the actual model limit (20,000).
-3. The vector store uses the configured embedding model and the custom `BatchingStrategy` bean.
+1. 嵌入模型启用了自动截断，允许它优雅地处理过大的输入。
+2. 批处理策略使用人为设置的高令牌限制（132,900），这比实际模型限制（20,000）大得多。
+3. 向量存储使用配置的嵌入模型和自定义 `BatchingStrategy` bean。
 
-==== Why This Works
+==== 为什么这样做有效
 
-This approach works because:
+这种方法有效是因为：
 
-1. The `TokenCountBatchingStrategy` checks if any single document exceeds the configured maximum and throws an `IllegalArgumentException` if it does.
-2. By setting a very high limit in the batching strategy, we ensure that this check never fails.
-3. Documents or batches exceeding the model's limit are silently truncated and processed by the embedding model's auto-truncation feature.
+1. `TokenCountBatchingStrategy` 检查是否有任何单个文档超过配置的最大值，如果超过则抛出 `IllegalArgumentException`。
+2. 通过在批处理策略中设置非常高的限制，我们确保此检查永远不会失败。
+3. 超过模型限制的文档或批次会被嵌入模型的自动截断功能静默截断和处理。
 
-==== Best Practices
+==== 最佳实践
 
-When using auto-truncation:
+使用自动截断时：
 
-- Set the batching strategy's max input token count to be at least 5-10x larger than the model's actual limit to avoid premature exceptions from the batching strategy.
-- Monitor your logs for truncation warnings from the embedding model (note: not all models log truncation events).
-- Consider the implications of silent truncation on your embedding quality.
-- Test with sample documents to ensure truncated embeddings still meet your requirements.
-- Document this configuration for future maintainers, as it is non-standard.
+- 将批处理策略的最大输入令牌计数设置为至少比模型的实际限制高 5-10 倍，以避免批处理策略过早引发异常。
+- 监控你的日志以获取来自嵌入模型的截断警告（注意：并非所有模型都记录截断事件）。
+- 考虑静默截断对嵌入质量的影响。
+- 使用示例文档测试以确保截断的嵌入仍然满足你的要求。
+- 为未来的维护者记录此配置，因为它是非标准的。
 
-CAUTION: While auto-truncation prevents errors, it can result in incomplete embeddings. Important information at the end of long documents may be lost. If your application requires all content to be embedded, split documents into smaller chunks before embedding.
+警告：虽然自动截断可以防止错误，但它可能导致不完整的嵌入。长文档末尾的重要信息可能会丢失。如果你的应用程序需要嵌入所有内容，请在嵌入前将文档分割成较小的块。
 
-==== Spring Boot Auto-Configuration
+==== Spring Boot 自动配置
 
-If you're using Spring Boot auto-configuration, you must provide a custom `BatchingStrategy` bean to override the default one that comes with Spring AI:
+如果你使用 Spring Boot 自动配置，你必须提供一个自定义 `BatchingStrategy` bean 来覆盖 Spring AI 附带的默认策略：
 
 [source,java]
 ----
 @Bean
 public BatchingStrategy customBatchingStrategy() {
-    // This bean will override the default BatchingStrategy
+    // 此 bean 将覆盖默认的 BatchingStrategy
     return new TokenCountBatchingStrategy(
             EncodingType.CL100K_BASE,
-            132900,  // Much higher than model's actual limit
+            132900,  // 比模型的实际限制高得多
             0.1
     );
 }
 ----
 
-The presence of this bean in your application context will automatically replace the default batching strategy used by all vector stores.
+此 bean 在你的应用程序上下文中的存在将自动替换所有向量存储使用的默认批处理策略。
 
-=== Custom Implementation
+=== 自定义实现
 
-While `TokenCountBatchingStrategy` provides a robust default implementation, you can customize the batching strategy to fit your specific needs.
-This can be done through Spring Boot's auto-configuration.
+虽然 `TokenCountBatchingStrategy` 提供了强大的默认实现，但你可以自定义批处理策略以适应特定需求。
+这可以通过 Spring Boot 的自动配置来完成。
 
-To customize the batching strategy, define a `BatchingStrategy` bean in your Spring Boot application:
+要自定义批处理策略，在你的 Spring Boot 应用程序中定义一个 `BatchingStrategy` bean：
 
 [source,java]
 ----
@@ -349,53 +348,53 @@ public class EmbeddingConfig {
 }
 ----
 
-This custom `BatchingStrategy` will then be automatically used by the `EmbeddingModel` implementations in your application.
+然后，这个自定义 `BatchingStrategy` 将被你的应用程序中的 `EmbeddingModel` 实现自动使用。
 
-NOTE: Vector stores supported by Spring AI are configured to use the default `TokenCountBatchingStrategy`.
-SAP Hana vector store is not currently configured for batching.
+注意：Spring AI 支持的向量存储配置为使用默认的 `TokenCountBatchingStrategy`。
+SAP Hana 向量存储目前未配置批处理。
 
-== VectorStore Implementations
+== VectorStore 实现
 
-These are the available implementations of the `VectorStore` interface:
+以下是 `VectorStore` 接口的可用实现：
 
-* xref:api/vectordbs/azure.adoc[Azure Vector Search] - The https://learn.microsoft.com/en-us/azure/search/vector-search-overview[Azure] vector store.
-* xref:api/vectordbs/apache-cassandra.adoc[Apache Cassandra] - The https://cassandra.apache.org/doc/latest/cassandra/vector-search/overview.html[Apache Cassandra] vector store.
-* xref:api/vectordbs/chroma.adoc[Chroma Vector Store] - The https://www.trychroma.com/[Chroma] vector store.
-* xref:api/vectordbs/elasticsearch.adoc[Elasticsearch Vector Store] - The https://www.elastic.co/[Elasticsearch] vector store.
-* xref:api/vectordbs/gemfire.adoc[GemFire Vector Store] - The https://tanzu.vmware.com/content/blog/vmware-gemfire-vector-database-extension[GemFire] vector store.
-* xref:api/vectordbs/mariadb.adoc[MariaDB Vector Store] - The https://mariadb.com/[MariaDB] vector store.
-* xref:api/vectordbs/milvus.adoc[Milvus Vector Store] - The https://milvus.io/[Milvus] vector store.
-* xref:api/vectordbs/mongodb.adoc[MongoDB Atlas Vector Store] - The https://www.mongodb.com/atlas/database[MongoDB Atlas] vector store.
-* xref:api/vectordbs/neo4j.adoc[Neo4j Vector Store] - The https://neo4j.com/[Neo4j] vector store.
-* xref:api/vectordbs/opensearch.adoc[OpenSearch Vector Store] - The https://opensearch.org/platform/search/vector-database.html[OpenSearch] vector store.
-* xref:api/vectordbs/oracle.adoc[Oracle Vector Store] - The https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/overview-ai-vector-search.html[Oracle Database] vector store.
-* xref:api/vectordbs/pgvector.adoc[PgVector Store] - The https://github.com/pgvector/pgvector[PostgreSQL/PGVector] vector store.
-* xref:api/vectordbs/pinecone.adoc[Pinecone Vector Store] - https://www.pinecone.io/[PineCone] vector store.
-* xref:api/vectordbs/qdrant.adoc[Qdrant Vector Store] - https://www.qdrant.tech/[Qdrant] vector store.
-* xref:api/vectordbs/redis.adoc[Redis Vector Store] - The https://redis.io/[Redis] vector store.
-* xref:api/vectordbs/hana.adoc[SAP Hana Vector Store] - The https://news.sap.com/2024/04/sap-hana-cloud-vector-engine-ai-with-business-context/[SAP HANA] vector store.
-* xref:api/vectordbs/typesense.adoc[Typesense Vector Store] - The https://typesense.org/docs/0.24.0/api/vector-search.html[Typesense] vector store.
-* xref:api/vectordbs/weaviate.adoc[Weaviate Vector Store] - The https://weaviate.io/[Weaviate] vector store.
-* link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-vector-store/src/main/java/org/springframework/ai/vectorstore/SimpleVectorStore.java[SimpleVectorStore] - A simple implementation of persistent vector storage, good for educational purposes.
+* xref:api/vectordbs/azure.adoc[Azure Vector Search] - https://learn.microsoft.com/en-us/azure/search/vector-search-overview[Azure] 向量存储。
+* xref:api/vectordbs/apache-cassandra.adoc[Apache Cassandra] - https://cassandra.apache.org/doc/latest/cassandra/vector-search/overview.html[Apache Cassandra] 向量存储。
+* xref:api/vectordbs/chroma.adoc[Chroma Vector Store] - https://www.trychroma.com/[Chroma] 向量存储。
+* xref:api/vectordbs/elasticsearch.adoc[Elasticsearch Vector Store] - https://www.elastic.co/[Elasticsearch] 向量存储。
+* xref:api/vectordbs/gemfire.adoc[GemFire Vector Store] - https://tanzu.vmware.com/content/blog/vmware-gemfire-vector-database-extension[GemFire] 向量存储。
+* xref:api/vectordbs/mariadb.adoc[MariaDB Vector Store] - https://mariadb.com/[MariaDB] 向量存储。
+* xref:api/vectordbs/milvus.adoc[Milvus Vector Store] - https://milvus.io/[Milvus] 向量存储。
+* xref:api/vectordbs/mongodb.adoc[MongoDB Atlas Vector Store] - https://www.mongodb.com/atlas/database[MongoDB Atlas] 向量存储。
+* xref:api/vectordbs/neo4j.adoc[Neo4j Vector Store] - https://neo4j.com/[Neo4j] 向量存储。
+* xref:api/vectordbs/opensearch.adoc[OpenSearch Vector Store] - https://opensearch.org/platform/search/vector-database.html[OpenSearch] 向量存储。
+* xref:api/vectordbs/oracle.adoc[Oracle Vector Store] - https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/overview-ai-vector-search.html[Oracle Database] 向量存储。
+* xref:api/vectordbs/pgvector.adoc[PgVector Store] - https://github.com/pgvector/pgvector[PostgreSQL/PGVector] 向量存储。
+* xref:api/vectordbs/pinecone.adoc[Pinecone Vector Store] - https://www.pinecone.io/[PineCone] 向量存储。
+* xref:api/vectordbs/qdrant.adoc[Qdrant Vector Store] - https://www.qdrant.tech/[Qdrant] 向量存储。
+* xref:api/vectordbs/redis.adoc[Redis Vector Store] - https://redis.io/[Redis] 向量存储。
+* xref:api/vectordbs/hana.adoc[SAP Hana Vector Store] - https://news.sap.com/2024/04/sap-hana-cloud-vector-engine-ai-with-business-context/[SAP HANA] 向量存储。
+* xref:api/vectordbs/typesense.adoc[Typesense Vector Store] - https://typesense.org/docs/0.24.0/api/vector-search.html[Typesense] 向量存储。
+* xref:api/vectordbs/weaviate.adoc[Weaviate Vector Store] - https://weaviate.io/[Weaviate] 向量存储。
+* link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-vector-store/src/main/java/org/springframework/ai/vectorstore/SimpleVectorStore.java[SimpleVectorStore] - 一个简单的持久化向量存储实现，适合教育目的。
 
-More implementations may be supported in future releases.
+未来版本可能会支持更多实现。
 
-If you have a vector database that needs to be supported by Spring AI, open an issue on GitHub or, even better, submit a pull request with an implementation.
+如果你有一个需要 Spring AI 支持的向量数据库，请在 GitHub 上提出 issue，或者更好的是，提交一个带有实现的 pull request。
 
-Information on each of the `VectorStore` implementations can be found in the subsections of this chapter.
+每个 `VectorStore` 实现的信息可以在本章的各个小节中找到。
 
-== Example Usage
+== 示例用法
 
-To compute the embeddings for a vector database, you need to pick an embedding model that matches the higher-level AI model being used.
+要为向量数据库计算嵌入，你需要选择一个与使用的高级 AI 模型匹配的嵌入模型。
 
-For example, with OpenAI's ChatGPT, we use the `OpenAiEmbeddingModel` and a model named `text-embedding-ada-002`.
+例如，对于 OpenAI 的 ChatGPT，我们使用 `OpenAiEmbeddingModel` 和名为 `text-embedding-ada-002` 的模型。
 
-The Spring Boot starter's auto-configuration for OpenAI makes an implementation of `EmbeddingModel` available in the Spring application context for dependency injection.
+Spring Boot starter 的 OpenAI 自动配置使 `EmbeddingModel` 的实现可用于 Spring 应用程序上下文中的依赖注入。
 
-The general usage of loading data into a vector store is something you would do in a batch-like job, by first loading data into Spring AI's `Document` class and then calling the `save` method.
+将数据加载到向量存储中的一般用法是在批处理类作业中完成的，首先将数据加载到 Spring AI 的 `Document` 类中，然后调用 `save` 方法。
 
-Given a `String` reference to a source file that represents a JSON file with data we want to load into the vector database, we use Spring AI's `JsonReader` to load specific fields in the JSON, which splits them up into small pieces and then passes those small pieces to the vector store implementation.
-The `VectorStore` implementation computes the embeddings and stores the JSON and the embedding in the vector database:
+给定一个表示 JSON 文件的源文件的 `String` 引用，其中包含我们要加载到向量数据库中的数据，我们使用 Spring AI 的 `JsonReader` 来加载 JSON 中的特定字段，将它们分割成小块，然后将这些小块传递给向量存储实现。
+`VectorStore` 实现计算嵌入并将 JSON 和嵌入存储在向量数据库中：
 
 ```java
   @Autowired
@@ -409,23 +408,23 @@ The `VectorStore` implementation computes the embeddings and stores the JSON and
   }
 ```
 
-Later, when a user question is passed into the AI model, a similarity search is done to retrieve similar documents, which are then "'stuffed'" into the prompt as context for the user's question.
+稍后，当用户问题传递到 AI 模型时，会进行相似性搜索以检索相似文档，然后将这些文档"填充"到提示中作为用户问题的上下文。
 
 ```java
    String question = <question from user>
    List<Document> similarDocuments = store.similaritySearch(this.question);
 ```
 
-Additional options can be passed into the `similaritySearch` method to define how many documents to retrieve and a threshold of the similarity search.
+可以将其他选项传递到 `similaritySearch` 方法中，以定义要检索的文档数量和相似性搜索的阈值。
 
-== Metadata Filters [[metadata-filters]]
+== 元数据过滤器 [[metadata-filters]]
 
-This section describes various filters that you can use against the results of a query.
+本节描述了你可以用于查询结果的各种过滤器。
 
-=== Filter String
-You can pass in an SQL-like filter expressions as a `String` to one of the `similaritySearch` overloads.
+=== 过滤器字符串
+你可以将类似 SQL 的过滤表达式作为 `String` 传递给 `similaritySearch` 重载之一。
 
-Consider the following examples:
+考虑以下示例：
 
 * `"country == 'BG'"`
 * `"genre == 'drama' && year >= 2020"`
@@ -433,8 +432,8 @@ Consider the following examples:
 
 === Filter.Expression
 
-You can create an instance of `Filter.Expression` with a `FilterExpressionBuilder` that exposes a fluent API.
-A simple example is as follows:
+你可以使用 `FilterExpressionBuilder` 创建一个 `Filter.Expression` 实例，它提供了一个流畅的 API。
+一个简单的例子如下：
 
 [source, java]
 ----
@@ -442,7 +441,7 @@ FilterExpressionBuilder b = new FilterExpressionBuilder();
 Expression expression = this.b.eq("country", "BG").build();
 ----
 
-You can build up sophisticated expressions by using the following operators:
+你可以通过使用以下运算符构建复杂的表达式：
 
 [source, text]
 ----
@@ -456,7 +455,7 @@ LE: '<='
 NE: '!='
 ----
 
-You can combine expressions by using the following operators:
+你可以通过使用以下运算符组合表达式：
 
 [source,text]
 ----
@@ -464,14 +463,14 @@ AND: 'AND' | 'and' | '&&';
 OR: 'OR' | 'or' | '||';
 ----
 
-Considering the following example:
+考虑以下示例：
 
 [source,java]
 ----
 Expression exp = b.and(b.eq("genre", "drama"), b.gte("year", 2020)).build();
 ----
 
-You can also use the following operators:
+你还可以使用以下运算符：
 
 [source,text]
 ----
@@ -480,66 +479,66 @@ NIN: 'NIN' | 'nin';
 NOT: 'NOT' | 'not';
 ----
 
-Consider the following example:
+考虑以下示例：
 
 [source,java]
 ----
 Expression exp = b.and(b.in("genre", "drama", "documentary"), b.not(b.lt("year", 2020))).build();
 ----
 
-== Deleting Documents from Vector Store
+== 从向量存储中删除文档
 
-The Vector Store interface provides multiple methods for deleting documents, allowing you to remove data either by specific document IDs or using filter expressions.
+Vector Store 接口提供了多种删除文档的方法，允许你通过特定文档 ID 或使用过滤表达式删除数据。
 
-=== Delete by Document IDs
+=== 通过文档 ID 删除
 
-The simplest way to delete documents is by providing a list of document IDs:
+删除文档的最简单方法是提供文档 ID 列表：
 
 [source,java]
 ----
 void delete(List<String> idList);
 ----
 
-This method removes all documents whose IDs match those in the provided list.
-If any ID in the list doesn't exist in the store, it will be ignored.
+此方法删除 ID 与提供的列表匹配的所有文档。
+如果列表中的任何 ID 在存储中不存在，它将被忽略。
 
-.Example usage
+.示例用法
 [source,java]
 ----
-// Create and add document
+// 创建并添加文档
 Document document = new Document("The World is Big",
     Map.of("country", "Netherlands"));
 vectorStore.add(List.of(document));
 
-// Delete document by ID
+// 通过 ID 删除文档
 vectorStore.delete(List.of(document.getId()));
 ----
 
-=== Delete by Filter Expression
+=== 通过过滤表达式删除
 
-For more complex deletion criteria, you can use filter expressions:
+对于更复杂的删除条件，你可以使用过滤表达式：
 
 [source,java]
 ----
 void delete(Filter.Expression filterExpression);
 ----
 
-This method accepts a `Filter.Expression` object that defines the criteria for which documents should be deleted.
-It's particularly useful when you need to delete documents based on their metadata properties.
+此方法接受一个 `Filter.Expression` 对象，该对象定义了应删除哪些文档的条件。
+当你需要基于文档的元数据属性删除文档时，这特别有用。
 
-.Example usage
+.示例用法
 [source,java]
 ----
-// Create test documents with different metadata
+// 创建具有不同元数据的测试文档
 Document bgDocument = new Document("The World is Big",
     Map.of("country", "Bulgaria"));
 Document nlDocument = new Document("The World is Big",
     Map.of("country", "Netherlands"));
 
-// Add documents to the store
+// 将文档添加到存储中
 vectorStore.add(List.of(bgDocument, nlDocument));
 
-// Delete documents from Bulgaria using filter expression
+// 使用过滤表达式删除保加利亚的文档
 Filter.Expression filterExpression = new Filter.Expression(
     Filter.ExpressionType.EQ,
     new Filter.Key("country"),
@@ -547,56 +546,56 @@ Filter.Expression filterExpression = new Filter.Expression(
 );
 vectorStore.delete(filterExpression);
 
-// Verify deletion with search
+// 通过搜索验证删除
 SearchRequest request = SearchRequest.builder()
     .query("World")
     .filterExpression("country == 'Bulgaria'")
     .build();
 List<Document> results = vectorStore.similaritySearch(request);
-// results will be empty as Bulgarian document was deleted
+// results 将为空，因为保加利亚文档已被删除
 ----
 
-=== Delete by String Filter Expression
+=== 通过字符串过滤表达式删除
 
-For convenience, you can also delete documents using a string-based filter expression:
+为了方便，你还可以使用基于字符串的过滤表达式删除文档：
 
 [source,java]
 ----
 void delete(String filterExpression);
 ----
 
-This method converts the provided string filter into a `Filter.Expression` object internally.
-It's useful when you have filter criteria in string format.
+此方法在内部将提供的字符串过滤器转换为 `Filter.Expression` 对象。
+当你有字符串格式的过滤条件时，这很有用。
 
-.Example usage
+.示例用法
 [source,java]
 ----
-// Create and add documents
+// 创建并添加文档
 Document bgDocument = new Document("The World is Big",
     Map.of("country", "Bulgaria"));
 Document nlDocument = new Document("The World is Big",
     Map.of("country", "Netherlands"));
 vectorStore.add(List.of(bgDocument, nlDocument));
 
-// Delete Bulgarian documents using string filter
+// 使用字符串过滤器删除保加利亚文档
 vectorStore.delete("country == 'Bulgaria'");
 
-// Verify remaining documents
+// 验证剩余文档
 SearchRequest request = SearchRequest.builder()
     .query("World")
     .topK(5)
     .build();
 List<Document> results = vectorStore.similaritySearch(request);
-// results will only contain the Netherlands document
+// results 将只包含荷兰文档
 ----
 
-=== Error Handling When Calling the Delete API
+=== 调用删除 API 时的错误处理
 
-All deletion methods may throw exceptions in case of errors:
+所有删除方法在发生错误时都可能抛出异常：
 
-The best practice is to wrap delete operations in try-catch blocks:
+最佳实践是将删除操作包装在 try-catch 块中：
 
-.Example usage
+.示例用法
 [source,java]
 ----
 try {
@@ -607,14 +606,14 @@ catch (Exception  e) {
 }
 ----
 
-=== Document Versioning Use Case
+=== 文档版本控制用例
 
-A common scenario is managing document versions where you need to upload a new version of a document while removing the old version. Here's how to handle this using filter expressions:
+一个常见的场景是管理文档版本，你需要上传文档的新版本同时删除旧版本。以下是使用过滤表达式处理这种情况的方法：
 
-.Example usage
+.示例用法
 [source,java]
 ----
-// Create initial document (v1) with version metadata
+// 创建初始文档（v1）并添加版本元数据
 Document documentV1 = new Document(
     "AI and Machine Learning Best Practices",
     Map.of(
@@ -624,10 +623,10 @@ Document documentV1 = new Document(
     )
 );
 
-// Add v1 to the vector store
+// 将 v1 添加到向量存储
 vectorStore.add(List.of(documentV1));
 
-// Create updated version (v2) of the same document
+// 创建同一文档的更新版本（v2）
 Document documentV2 = new Document(
     "AI and Machine Learning Best Practices - Updated",
     Map.of(
@@ -637,7 +636,7 @@ Document documentV2 = new Document(
     )
 );
 
-// First, delete the old version using filter expression
+// 首先，使用过滤表达式删除旧版本
 Filter.Expression deleteOldVersion = new Filter.Expression(
     Filter.ExpressionType.AND,
     Arrays.asList(
@@ -655,37 +654,37 @@ Filter.Expression deleteOldVersion = new Filter.Expression(
 );
 vectorStore.delete(deleteOldVersion);
 
-// Add the new version
+// 添加新版本
 vectorStore.add(List.of(documentV2));
 
-// Verify only v2 exists
+// 验证只存在 v2
 SearchRequest request = SearchRequest.builder()
     .query("AI and Machine Learning")
     .filterExpression("docId == 'AIML-001'")
     .build();
 List<Document> results = vectorStore.similaritySearch(request);
-// results will contain only v2 of the document
+// results 将只包含文档的 v2 版本
 ----
 
-You can also accomplish the same using the string filter expression:
+你也可以使用字符串过滤表达式完成相同的操作：
 
-.Example usage
+.示例用法
 [source,java]
 ----
-// Delete old version using string filter
+// 使用字符串过滤器删除旧版本
 vectorStore.delete("docId == 'AIML-001' AND version == '1.0'");
 
-// Add new version
+// 添加新版本
 vectorStore.add(List.of(documentV2));
 ----
 
-=== Performance Considerations While Deleting Documents
+=== 删除文档时的性能考虑
 
-* Deleting by ID list is generally faster when you know exactly which documents to remove.
-* Filter-based deletion may require scanning the index to find matching documents; however, this is vector store implementation-specific.
-* Large deletion operations should be batched to avoid overwhelming the system.
-* Consider using filter expressions when deleting based on document properties rather than collecting IDs first.
+* 当你确切知道要删除哪些文档时，通过 ID 列表删除通常更快。
+* 基于过滤器的删除可能需要扫描索引以查找匹配的文档；但是，这是向量存储实现特定的。
+* 大型删除操作应该分批进行，以避免系统过载。
+* 考虑在基于文档属性删除时使用过滤表达式，而不是先收集 ID。
 
-== Understanding Vectors
+== 理解向量
 
-xref:api/vectordbs/understand-vectordbs.adoc[Understanding Vectors]
+xref:api/vectordbs/understand-vectordbs.adoc[理解向量]

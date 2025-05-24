@@ -1,95 +1,90 @@
 [[understand-vector-databases]]
-= Understanding Vectors
+= 理解向量
 
 image::vector_2d_coordinates.png[width=150, role = "right"]
 
-Vectors have dimensionality and a direction.
-For example, the following image depicts a two-dimensional vector stem:[\vec{a}] in the cartesian coordinate system pictured as an arrow.
+向量具有维度和方向。
+例如，下图在笛卡尔坐标系中描绘了一个二维向量 stem:[\vec{a}]，用箭头表示。
 
-The head of the vector stem:[\vec{a}] is at the point stem:[(a_1, a_2)].
-The *x* coordinate value is stem:[a_1] and the *y* coordinate value is stem:[a_2]. The coordinates are also referred to as the components of the vector.
+向量 stem:[\vec{a}] 的头部位于点 stem:[(a_1, a_2)]。
+*x* 坐标值为 stem:[a_1]，*y* 坐标值为 stem:[a_2]。这些坐标也被称为向量的分量。
 
 [[vectordbs-similarity]]
-== Similarity
+== 相似性
 
-Several mathematical formulas can be used to determine if two vectors are similar.
-One of the most intuitive to visualize and understand is cosine similarity.
-Consider the following images that show three sets of graphs:
+可以使用多种数学公式来确定两个向量是否相似。
+其中最直观且易于理解的是余弦相似度。
+考虑以下显示三组图表的图像：
 
 image::vector_similarity.png[align="center",width=600]
 
-The vectors stem:[\vec{A}] and stem:[\vec{B}] are considered similar, when they are pointing close to each other, as in the first diagram.
-The vectors are considered unrelated when pointing perpendicular to each other and opposite when they point away from each other.
+当向量 stem:[\vec{A}] 和 stem:[\vec{B}] 指向彼此接近时，它们被认为是相似的，如第一个图表所示。
+当向量彼此垂直时，它们被认为是不相关的；当它们指向相反方向时，它们被认为是相反的。
 
-The angle between them, stem:[\theta], is a good measure of their similarity.
-How can the angle stem:[\theta] be computed?
+它们之间的角度 stem:[\theta] 是衡量它们相似性的好方法。
+如何计算角度 stem:[\theta]？
 
 image:pythagorean-triangle.png[align="center",width=100, role="left", trim="10 10 10 100"]
 
-We are all familiar with the https://en.wikipedia.org/wiki/Pythagorean_theorem#History[Pythagorean Theorem].
+我们都熟悉 https://en.wikipedia.org/wiki/Pythagorean_theorem#History[毕达哥拉斯定理]。
 
-What about when the angle between *a* and *b* is not 90 degrees?
+当 *a* 和 *b* 之间的角度不是 90 度时怎么办？
 
+引入 https://en.wikipedia.org/wiki/Law_of_cosines[余弦定律]。
 
-Enter the https://en.wikipedia.org/wiki/Law_of_cosines[Law of cosines].
-
-
-.Law of Cosines
+.余弦定律
 ****
 stem:[a^2 + b^2 - 2ab\cos\theta = c^2]
 ****
 
-The following image shows this approach as a vector diagram:
+下图显示了这种方法的向量图：
 image:lawofcosines.png[align="center",width=200]
 
-The magnitude of this vector is defined in terms of its components as:
+这个向量的大小根据其分量定义如下：
 
-.Magnitude
+.大小
 ****
 stem:[\vec{A} * \vec{A} = ||\vec{A}||^2 = A_1^2 + A_2^2 ]
 ****
 
-The dot product between two vectors stem:[\vec{A}] and stem:[\vec{B}] is defined in terms of its components as:
+两个向量 stem:[\vec{A}] 和 stem:[\vec{B}] 之间的点积根据其分量定义如下：
 
-.Dot Product
+.点积
 ****
 stem:[\vec{A} * \vec{B} = A_1B_1 + A_2B_2]
 ****
 
-Rewriting the Law of Cosines with vector magnitudes and dot products gives the following:
+用向量大小和点积重写余弦定律得到以下结果：
 
-.Law of Cosines in Vector form
+.向量形式的余弦定律
 ****
 stem:[||\vec{A}||^2 + ||\vec{B}||^2 - 2||\vec{A}||||\vec{B}||\cos\theta = ||\vec{C}||^2]
 ****
 
+将 stem:[||\vec{C}||^2] 替换为 stem:[||\vec{B} - \vec{A}||^2] 得到以下结果：
 
-Replacing stem:[||\vec{C}||^2] with stem:[||\vec{B} - \vec{A}||^2] gives the following:
-
-.Law of Cosines in Vector form only in terms of stem:[\vec{A}] and stem:[\vec{B}]
-
+.仅用 stem:[\vec{A}] 和 stem:[\vec{B}] 表示的向量形式余弦定律
 ****
 stem:[||\vec{A}||^2 + ||\vec{B}||^2 - 2||\vec{A}||||\vec{B}||\cos\theta = ||\vec{B} - \vec{A}||^2]
 ****
 
+https://towardsdatascience.com/cosine-similarity-how-does-it-measure-the-similarity-maths-behind-and-usage-in-python-50ad30aad7db[展开这个式子] 就得到了 https://en.wikipedia.org/wiki/Cosine_similarity[余弦相似度] 的公式。
 
-https://towardsdatascience.com/cosine-similarity-how-does-it-measure-the-similarity-maths-behind-and-usage-in-python-50ad30aad7db[Expanding this out] gives us the formula for https://en.wikipedia.org/wiki/Cosine_similarity[Cosine Similarity].
-
-.Cosine Similarity
+.余弦相似度
 ****
 stem:[similarity(vec{A},vec{B}) = \cos(\theta) = \frac{\vec{A}\cdot\vec{B}}{||\vec{A}\||\cdot||\vec{B}||]
 ****
 
-This formula works for dimensions higher than 2 or 3, though it is hard to visualize. However, https://projector.tensorflow.org/[it can be visualized to some extent].
-It is common for vectors in AI/ML applications to have hundreds or even thousands of dimensions.
+这个公式适用于高于 2 或 3 维的情况，虽然难以可视化。但是，https://projector.tensorflow.org/[可以在一定程度上进行可视化]。
+在 AI/ML 应用中，向量通常有数百甚至数千个维度。
 
-The similarity function in higher dimensions using the components of the vector is shown below.
-It expands the two-dimensional definitions of Magnitude and Dot Product given previously to *N* dimensions by using https://en.wikipedia.org/wiki/Summation[Summation mathematical syntax].
+使用向量分量在更高维度中的相似度函数如下所示。
+它通过使用 https://en.wikipedia.org/wiki/Summation[求和数学语法] 将前面给出的二维大小和点积定义扩展到 *N* 维。
 
-.Cosine Similarity with vector components
+.使用向量分量的余弦相似度
 ****
 stem:[similarity(vec{A},vec{B}) = \cos(\theta) = \frac{ \sum_{i=1}^{n} {A_i  B_i} }{ \sqrt{\sum_{i=1}^{n}{A_i^2} \cdot \sum_{i=1}^{n}{B_i^2}}]
 ****
 
-This is the key formula used in the simple implementation of a vector store and can be found in the `SimpleVectorStore` implementation.
+这是向量存储简单实现中使用的关键公式，可以在 `SimpleVectorStore` 实现中找到。
 

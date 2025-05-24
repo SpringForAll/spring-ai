@@ -1,29 +1,29 @@
-= OpenAI Embeddings
+= OpenAI 嵌入模型
 
-Spring AI supports the OpenAI's text embeddings models.
-OpenAI’s text embeddings measure the relatedness of text strings.
-An embedding is a vector (list) of floating point numbers. The distance between two vectors measures their relatedness. Small distances suggest high relatedness and large distances suggest low relatedness.
+Spring AI 支持 OpenAI 的文本嵌入模型。
+OpenAI 的文本嵌入用于测量文本字符串之间的相关性。
+嵌入是一个浮点数的向量（列表）。两个向量之间的距离衡量它们的相关性。距离小表示高度相关，距离大表示低相关性。
 
-== Prerequisites
+== 前提条件
 
-You will need to create an API with OpenAI to access OpenAI embeddings models.
+你需要创建一个 OpenAI API 来访问 OpenAI 嵌入模型。
 
-Create an account at https://platform.openai.com/signup[OpenAI signup page] and generate the token on the https://platform.openai.com/account/api-keys[API Keys page].
+在 https://platform.openai.com/signup[OpenAI 注册页面] 创建账户，并在 https://platform.openai.com/account/api-keys[API Keys 页面] 生成令牌。
 
-The Spring AI project defines a configuration property named `spring.ai.openai.api-key` that you should set to the value of the `API Key` obtained from openai.com.
+Spring AI 项目定义了一个名为 `spring.ai.openai.api-key` 的配置属性，你应该将其设置为从 openai.com 获取的 `API Key` 值。
 
-You can set this configuration property in your `application.properties` file:
+你可以在 `application.properties` 文件中设置此配置属性：
 
 [source,properties]
 ----
 spring.ai.openai.api-key=<your-openai-api-key>
 ----
 
-For enhanced security when handling sensitive information like API keys, you can use Spring Expression Language (SpEL) to reference an environment variable:
+为了增强处理敏感信息（如 API 密钥）的安全性，你可以使用 Spring 表达式语言（SpEL）来引用环境变量：
 
 [source,yaml]
 ----
-# In application.yml
+# 在 application.yml 中
 spring:
   ai:
     openai:
@@ -32,36 +32,35 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在你的环境或 .env 文件中
 export OPENAI_API_KEY=<your-openai-api-key>
 ----
 
-You can also set this configuration programmatically in your application code:
+你也可以在应用程序代码中以编程方式设置此配置：
 
 [source,java]
 ----
-// Retrieve API key from a secure source or environment variable
+// 从安全源或环境变量中获取 API 密钥
 String apiKey = System.getenv("OPENAI_API_KEY");
 ----
 
-=== Add Repositories and BOM
+=== 添加仓库和 BOM
 
-Spring AI artifacts are published in Maven Central and Spring Snapshot repositories.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add these repositories to your build system.
+Spring AI 构件发布在 Maven Central 和 Spring Snapshot 仓库中。
+请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将这些仓库添加到你的构建系统中。
 
-To help with dependency management, Spring AI provides a BOM (bill of materials) to ensure that a consistent version of Spring AI is used throughout the entire project. Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build system.
+为了帮助依赖管理，Spring AI 提供了 BOM（物料清单）以确保在整个项目中使用一致版本的 Spring AI。请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到你的构建系统中。
 
-
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the OpenAI Embedding Model.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 OpenAI 嵌入模型提供了 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -71,7 +70,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -80,94 +79,94 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到你的构建文件中。
 
-=== Embedding Properties
+=== 嵌入属性
 
-==== Retry Properties
+==== 重试属性
 
-The prefix `spring.ai.retry` is used as the property prefix that lets you configure the retry mechanism for the OpenAI Embedding model.
-
-[cols="3,5,1", stripes=even]
-|====
-| Property | Description | Default
-
-| spring.ai.retry.max-attempts   | Maximum number of retry attempts. |  10
-| spring.ai.retry.backoff.initial-interval | Initial sleep duration for the exponential backoff policy. |  2 sec.
-| spring.ai.retry.backoff.multiplier | Backoff interval multiplier. |  5
-| spring.ai.retry.backoff.max-interval | Maximum backoff duration. |  3 min.
-| spring.ai.retry.on-client-errors | If false, throw a NonTransientAiException, and do not attempt retry for `4xx` client error codes | false
-| spring.ai.retry.exclude-on-http-codes | List of HTTP status codes that should not trigger a retry (e.g. to throw NonTransientAiException). | empty
-| spring.ai.retry.on-http-codes | List of HTTP status codes that should trigger a retry (e.g. to throw TransientAiException). | empty
-|====
-
-==== Connection Properties
-
-The prefix `spring.ai.openai` is used as the property prefix that lets you connect to OpenAI.
+前缀 `spring.ai.retry` 用作属性前缀，让你可以为 OpenAI 嵌入模型配置重试机制。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.openai.base-url   | The URL to connect to |  +https://api.openai.com+
-| spring.ai.openai.api-key    | The API Key           |  -
-| spring.ai.openai.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.project-id      | Optionally, you can specify which project is used for an API request. |  -
+| spring.ai.retry.max-attempts   | 最大重试尝试次数。 |  10
+| spring.ai.retry.backoff.initial-interval | 指数退避策略的初始睡眠持续时间。 |  2 秒
+| spring.ai.retry.backoff.multiplier | 退避间隔乘数。 |  5
+| spring.ai.retry.backoff.max-interval | 最大退避持续时间。 |  3 分钟
+| spring.ai.retry.on-client-errors | 如果为 false，则抛出 NonTransientAiException，并且不对 `4xx` 客户端错误代码进行重试 | false
+| spring.ai.retry.exclude-on-http-codes | 不应触发重试的 HTTP 状态代码列表（例如抛出 NonTransientAiException）。 | empty
+| spring.ai.retry.on-http-codes | 应触发重试的 HTTP 状态代码列表（例如抛出 TransientAiException）。 | empty
 |====
 
-TIP: For users that belong to multiple organizations (or are accessing their projects through their legacy user API key), optionally, you can specify which organization and project is used for an API request. 
-Usage from these API requests will count as usage for the specified organization and project.
+==== 连接属性
 
-==== Configuration Properties
+前缀 `spring.ai.openai` 用作属性前缀，让你可以连接到 OpenAI。
+
+[cols="3,5,1", stripes=even]
+|====
+| 属性 | 描述 | 默认值
+
+| spring.ai.openai.base-url   | 连接 URL |  +https://api.openai.com+
+| spring.ai.openai.api-key    | API 密钥           |  -
+| spring.ai.openai.organization-id | 可选，你可以指定用于 API 请求的组织。 |  -
+| spring.ai.openai.project-id      | 可选，你可以指定用于 API 请求的项目。 |  -
+|====
+
+提示：对于属于多个组织的用户（或通过其旧版用户 API 密钥访问其项目），你可以选择指定用于 API 请求的组织和项目。
+这些 API 请求的使用将计入指定组织和项目的使用量。
+
+==== 配置属性
 
 [NOTE]
 ====
-Enabling and disabling of the embedding auto-configurations are now configured via top level properties with the prefix `spring.ai.model.embedding`.
+嵌入自动配置的启用和禁用现在通过前缀为 `spring.ai.model.embedding` 的顶级属性进行配置。
 
-To enable, spring.ai.model.embedding=openai (It is enabled by default)
+要启用，spring.ai.model.embedding=openai（默认启用）
 
-To disable, spring.ai.model.embedding=none (or any value which doesn't match openai)
+要禁用，spring.ai.model.embedding=none（或任何不匹配 openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.openai.embedding` is property prefix that configures the `EmbeddingModel` implementation for OpenAI.
+前缀 `spring.ai.openai.embedding` 是配置 OpenAI 的 `EmbeddingModel` 实现的属性前缀。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.openai.embedding.enabled (Required and no longer valid) | Enable OpenAI embedding model.  | true
-| spring.ai.model.embedding | Enable OpenAI embedding model.  | openai
-| spring.ai.openai.embedding.base-url   | Optional overrides the spring.ai.openai.base-url to provide embedding specific url | -
-| spring.ai.openai.embedding.embeddings-path   | The path to append to the base-url  |  `/v1/embeddings`
-| spring.ai.openai.embedding.api-key    | Optional overrides the spring.ai.openai.api-key to provide embedding specific api-key  | -
-| spring.ai.openai.embedding.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.embedding.project-id      | Optionally, you can specify which project is used for an API request. |  -
-| spring.ai.openai.embedding.metadata-mode      | Document content extraction mode.      | EMBED
-| spring.ai.openai.embedding.options.model      | The model to use      | text-embedding-ada-002 (other options: text-embedding-3-large, text-embedding-3-small)
-| spring.ai.openai.embedding.options.encodingFormat   | The format to return the embeddings in. Can be either float or base64.  | -
-| spring.ai.openai.embedding.options.user   | A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.  | -
-| spring.ai.openai.embedding.options.dimensions   | The number of dimensions the resulting output embeddings should have. Only supported in `text-embedding-3` and later models.  | -
+| spring.ai.openai.embedding.enabled（必需且不再有效） | 启用 OpenAI 嵌入模型。  | true
+| spring.ai.model.embedding | 启用 OpenAI 嵌入模型。  | openai
+| spring.ai.openai.embedding.base-url   | 可选覆盖 spring.ai.openai.base-url 以提供特定于嵌入的 url | -
+| spring.ai.openai.embedding.embeddings-path   | 附加到 base-url 的路径  |  `/v1/embeddings`
+| spring.ai.openai.embedding.api-key    | 可选覆盖 spring.ai.openai.api-key 以提供特定于嵌入的 api-key  | -
+| spring.ai.openai.embedding.organization-id | 可选，你可以指定用于 API 请求的组织。 |  -
+| spring.ai.openai.embedding.project-id      | 可选，你可以指定用于 API 请求的项目。 |  -
+| spring.ai.openai.embedding.metadata-mode      | 文档内容提取模式。      | EMBED
+| spring.ai.openai.embedding.options.model      | 要使用的模型      | text-embedding-ada-002（其他选项：text-embedding-3-large、text-embedding-3-small）
+| spring.ai.openai.embedding.options.encodingFormat   | 返回嵌入的格式。可以是 float 或 base64。  | -
+| spring.ai.openai.embedding.options.user   | 代表你的最终用户的唯一标识符，可以帮助 OpenAI 监控和检测滥用。  | -
+| spring.ai.openai.embedding.options.dimensions   | 结果输出嵌入应具有的维度数。仅在 `text-embedding-3` 及更高版本的模型中支持。  | -
 |====
 
-NOTE: You can override the common `spring.ai.openai.base-url` and `spring.ai.openai.api-key` for the `ChatModel` and `EmbeddingModel` implementations.
-The `spring.ai.openai.embedding.base-url` and `spring.ai.openai.embedding.api-key` properties if set take precedence over the common properties.
-Similarly, the `spring.ai.openai.chat.base-url` and `spring.ai.openai.chat.api-key` properties if set take precedence over the common properties.
-This is useful if you want to use different OpenAI accounts for different models and different model endpoints.
+注意：你可以覆盖 `ChatModel` 和 `EmbeddingModel` 实现的通用 `spring.ai.openai.base-url` 和 `spring.ai.openai.api-key`。
+如果设置了 `spring.ai.openai.embedding.base-url` 和 `spring.ai.openai.embedding.api-key` 属性，它们将优先于通用属性。
+同样，如果设置了 `spring.ai.openai.chat.base-url` 和 `spring.ai.openai.chat.api-key` 属性，它们将优先于通用属性。
+如果你想为不同的模型和不同的模型端点使用不同的 OpenAI 账户，这很有用。
 
-TIP: All properties prefixed with `spring.ai.openai.embedding.options` can be overridden at runtime by adding a request specific <<embedding-options>> to the `EmbeddingRequest` call.
+提示：所有以 `spring.ai.openai.embedding.options` 为前缀的属性都可以通过在 `EmbeddingRequest` 调用中添加请求特定的 <<embedding-options>> 在运行时被覆盖。
 
-== Runtime Options [[embedding-options]]
+== 运行时选项 [[embedding-options]]
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiEmbeddingOptions.java[OpenAiEmbeddingOptions.java] provides the OpenAI configurations, such as the model to use and etc.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiEmbeddingOptions.java[OpenAiEmbeddingOptions.java] 提供了 OpenAI 配置，例如要使用的模型等。
 
-The default options can be configured using the `spring.ai.openai.embedding.options` properties as well.
+默认选项也可以使用 `spring.ai.openai.embedding.options` 属性进行配置。
 
-At start-time use the `OpenAiEmbeddingModel` constructor to set the  default options used for all embedding requests.
-At run-time you can override the default options, using a `OpenAiEmbeddingOptions` instance as part of your `EmbeddingRequest`.
+在启动时使用 `OpenAiEmbeddingModel` 构造函数设置用于所有嵌入请求的默认选项。
+在运行时，你可以通过在 `EmbeddingRequest` 中使用 `OpenAiEmbeddingOptions` 实例来覆盖默认选项。
 
-For example to override the default model name for a specific request:
+例如，为特定请求覆盖默认模型名称：
 
 [source,java]
 ----
@@ -178,10 +177,10 @@ EmbeddingResponse embeddingResponse = embeddingModel.call(
         .build()));
 ----
 
-== Sample Controller
+== 示例控制器
 
-This will create a `EmbeddingModel` implementation that you can inject into your class.
-Here is an example of a simple `@Controller` class that uses the `EmbeddingModel` implementation.
+这将创建一个 `EmbeddingModel` 实现，你可以将其注入到你的类中。
+以下是一个使用 `EmbeddingModel` 实现的简单 `@Controller` 类示例。
 
 [source,application.properties]
 ----
@@ -209,10 +208,10 @@ public class EmbeddingController {
 }
 ----
 
-== Manual Configuration
+== 手动配置
 
-If you are not using Spring Boot, you can manually configure the OpenAI Embedding Model.
-For this add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
+如果你不使用 Spring Boot，你可以手动配置 OpenAI 嵌入模型。
+为此，将 `spring-ai-openai` 依赖项添加到项目的 Maven `pom.xml` 文件中：
 [source, xml]
 ----
 <dependency>
@@ -221,7 +220,7 @@ For this add the `spring-ai-openai` dependency to your project's Maven `pom.xml`
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -230,12 +229,12 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到你的构建文件中。
 
-NOTE: The `spring-ai-openai` dependency provides access also to the `OpenAiChatModel`.
-For more information about the `OpenAiChatModel` refer to the link:../chat/openai-chat.html[OpenAI Chat Client] section.
+注意：`spring-ai-openai` 依赖项还提供对 `OpenAiChatModel` 的访问。
+有关 `OpenAiChatModel` 的更多信息，请参阅 link:../chat/openai-chat.html[OpenAI Chat Client] 部分。
 
-Next, create an `OpenAiEmbeddingModel` instance and use it to compute the similarity between two input texts:
+接下来，创建一个 `OpenAiEmbeddingModel` 实例并使用它来计算两个输入文本之间的相似度：
 
 [source,java]
 ----
@@ -256,7 +255,7 @@ EmbeddingResponse embeddingResponse = this.embeddingModel
         .embedForResponse(List.of("Hello World", "World is big and salvation is near"));
 ----
 
-The `OpenAiEmbeddingOptions` provides the configuration information for the embedding requests.
-The api and options class offers a `builder()` for easy options creation.
+`OpenAiEmbeddingOptions` 提供嵌入请求的配置信息。
+api 和 options 类提供了 `builder()` 用于轻松创建选项。
 
 

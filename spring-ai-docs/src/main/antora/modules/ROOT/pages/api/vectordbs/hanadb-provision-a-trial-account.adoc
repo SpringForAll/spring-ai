@@ -1,163 +1,163 @@
-== Provision SAP HANA Cloud trial account
+== 配置 SAP HANA Cloud 试用账户
 
-Below are the steps to provision SAP Hana Database using a trial account
+以下是使用试用账户配置 SAP Hana 数据库的步骤
 
-Let's start with creating a link:https://temp-mail.org/en/[temporary email] for registration purposes
+首先，让我们创建一个 link:https://temp-mail.org/en/[临时邮箱] 用于注册
 
 image::hanadb/0.png[width=800]
 
-TIP: Don't close the above window, otherwise a new email id would get generated.
+提示：不要关闭上述窗口，否则会生成新的邮箱地址。
 
-Go to link:https://sap.com/[sap.com] and navigate to `products` -> `Trials and Demos`
+访问 link:https://sap.com/[sap.com] 并导航到 `products` -> `Trials and Demos`
 
 image::hanadb/1.png[width=800]
 
-Click `Advanced Trials`
+点击 `Advanced Trials`
 
 image::hanadb/2.png[width=800]
 
-Click `SAP BTP Trial`
+点击 `SAP BTP Trial`
 
 image::hanadb/3.png[width=800]
 
-Click `Start your free 90-day trial`
+点击 `Start your free 90-day trial`
 
 image::hanadb/4.png[width=800]
 
-Paste the `temporary email id` that we created in the first step, and click `Next`
+粘贴我们在第一步创建的 `临时邮箱地址`，然后点击 `Next`
 
 image::hanadb/5.png[width=800]
 
-We fill in our details and click `Submit`
+填写我们的详细信息并点击 `Submit`
 
 image::hanadb/6.png[width=800]
 
-It's time to check the inbox of our temporary email account
+现在检查我们的临时邮箱账户的收件箱
 
 image::hanadb/7.png[width=800]
 
-Notice that there is an email received in our temporary email account
+注意我们的临时邮箱账户中收到了一封邮件
 
 image::hanadb/8.png[width=800]
 
-Open the email and `click to activate` the trial account
+打开邮件并点击 `click to activate` 激活试用账户
 
 image::hanadb/9.png[width=800]
 
-It will prompt to create a `password`. Provide a password and click `Submit`
+系统会提示创建 `密码`。提供密码并点击 `Submit`
 
 image::hanadb/10.png[width=800]
 
-The trial account is now created. Click to `start the trial`
+试用账户现已创建。点击 `start the trial`
 
 image::hanadb/11.png[width=800]
 
-Provide your phone number and click `Continue`
+提供您的电话号码并点击 `Continue`
 
 image::hanadb/13.png[width=800]
 
-We receive an OTP on the phone number. Provide the `code` and click `continue`
+我们会在电话号码上收到一个验证码。提供 `验证码` 并点击 `continue`
 
 image::hanadb/14.png[width=800]
 
-Select the `region` as `US East (VA) - AWS`
+选择 `region` 为 `US East (VA) - AWS`
 
 image::hanadb/15.png[width=800]
 
-Click `Continue`
+点击 `Continue`
 
 image::hanadb/16.png[width=800]
 
-The `SAP BTP trial` account is ready. Click `Go to your Trial account`
+`SAP BTP trial` 账户已准备就绪。点击 `Go to your Trial account`
 
 image::hanadb/17.png[width=800]
 
-Click the `Trial` sub-account
+点击 `Trial` 子账户
 
 image::hanadb/18.png[width=800]
 
-Open `Instances and Subscriptions`
+打开 `Instances and Subscriptions`
 
 image::hanadb/19.png[width=800]
 
-It's time to create a subscription. Click the `Create` button
+现在创建订阅。点击 `Create` 按钮
 
 image::hanadb/20.1.png[width=800]
 
-While creating a subscription, Select `service` as `SAP Hana Cloud` and `Plan` as `tools` and click `Create`
+创建订阅时，选择 `service` 为 `SAP Hana Cloud`，`Plan` 为 `tools`，然后点击 `Create`
 
 image::hanadb/20.2.png[width=800]
 
-Notice that `SAP Hana Cloud` subscription is now created. Click `Users` on the left panel
+注意 `SAP Hana Cloud` 订阅现已创建。点击左侧面板的 `Users`
 
 image::hanadb/21.png[width=800]
 
-Select the username (temporary email that we supplied earlier) and click `Assign Role Collection`
+选择用户名（我们之前提供的临时邮箱）并点击 `Assign Role Collection`
 
 image::hanadb/22.png[width=800]
 
-Search `hana` and select all the 3 role collections that gets displayed. Click `Assign Role Collection`
+搜索 `hana` 并选择显示的所有 3 个角色集合。点击 `Assign Role Collection`
 
 image::hanadb/23.png[width=800]
 
-Our `user` now has all the 3 role collections. Click `Instances and Subscriptions`
+我们的 `用户` 现在拥有所有 3 个角色集合。点击 `Instances and Subscriptions`
 
 image::hanadb/24.png[width=800]
 
-Now, click `SAP Hana Cloud` application under subscriptions
+现在，点击订阅下的 `SAP Hana Cloud` 应用程序
 
 image::hanadb/25.png[width=800]
 
-There are no instances yet. Let's click `Create Instance`
+还没有实例。让我们点击 `Create Instance`
 
 image::hanadb/26.png[width=800]
 
-Select Type as `SAP HANA Cloud, SAP HANA Database`. Click `Next Step`
+选择类型为 `SAP HANA Cloud, SAP HANA Database`。点击 `Next Step`
 
 image::hanadb/27.png[width=800]
 
-Provide `Instance Name`, `Description`, `password` for DBADMIN administrator.
-Select the latest version `2024.2 (QRC 1/2024)`. Click `Next Step`
+提供 `实例名称`、`描述`、DBADMIN 管理员的 `密码`。
+选择最新版本 `2024.2 (QRC 1/2024)`。点击 `Next Step`
 
 image::hanadb/28.png[width=800]
 
-Keep everything as default. Click `Next Step`
+保持所有默认设置。点击 `Next Step`
 
 image::hanadb/29.png[width=800]
 
-Click `Next Step`
+点击 `Next Step`
 
 image::hanadb/30.png[width=800]
 
-Select `Allow all IP addresses` and click `Next Step`
+选择 `Allow all IP addresses` 并点击 `Next Step`
 
 image::hanadb/31.png[width=800]
 
-Click `Review and Create`
+点击 `Review and Create`
 
 image::hanadb/32.png[width=800]
 
-Click `Create Instance`
+点击 `Create Instance`
 
 image::hanadb/33.png[width=800]
 
-Notice that the provisioning of `SAP Hana Database` instance has started. It takes some time to provision - please be patient.
+注意 `SAP Hana Database` 实例的配置已开始。配置需要一些时间 - 请耐心等待。
 
 image::hanadb/34.1.png[width=800]
 
-Once the instance is provisioned (status is displayed as `Running`) we can get the datasource url (`SQL Endpoint`) by clicking the instance and selecting `Connections`
+一旦实例配置完成（状态显示为 `Running`），我们可以通过点击实例并选择 `Connections` 获取数据源 URL（`SQL Endpoint`）
 
 image::hanadb/34.2.png[width=800]
 
-We navigate to `SAP Hana Database Explorer` by click the `...`
+我们通过点击 `...` 导航到 `SAP Hana Database Explorer`
 
 image::hanadb/35.png[width=800]
 
-Provide the administrator credentials and click `OK`
+提供管理员凭据并点击 `OK`
 
 image::hanadb/36.png[width=800]
 
-Open SQL console and create the table `CRICKET_WORLD_CUP` using the following DDL statement:
+打开 SQL 控制台并使用以下 DDL 语句创建表 `CRICKET_WORLD_CUP`：
 [sql]
 ----
 CREATE TABLE CRICKET_WORLD_CUP (
@@ -169,18 +169,18 @@ CREATE TABLE CRICKET_WORLD_CUP (
 
 image::hanadb/37.png[width=800]
 
-Navigate to `hana_dev_db -> Catalog -> Tables` to find our table `CRICKET_WORLD_CUP`
+导航到 `hana_dev_db -> Catalog -> Tables` 找到我们的表 `CRICKET_WORLD_CUP`
 
 image::hanadb/38.png[width=800]
 
-Right-click on the table and click `Open Data`
+右键点击表并点击 `Open Data`
 
 image::hanadb/39.png[width=800]
 
-Notice that the table data is now displayed. There are now rows as we didn't create any embeddings yet.
+注意表数据现在已显示。由于我们还没有创建任何嵌入，所以没有行。
 
 image::hanadb/40.png[width=800]
 
-Next steps: xref:api/vectordbs/hana.adoc[SAP Hana Vector Engine]
+下一步：xref:api/vectordbs/hana.adoc[SAP Hana Vector Engine]
 
 

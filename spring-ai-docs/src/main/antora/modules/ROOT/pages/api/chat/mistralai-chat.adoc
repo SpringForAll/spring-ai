@@ -1,30 +1,30 @@
-= Mistral AI Chat
+= Mistral AI 聊天
 
-Spring AI supports the various AI language models from Mistral AI. You can interact with Mistral AI language models and create a multilingual conversational assistant based on Mistral models.
+Spring AI支持来自Mistral AI的各种AI语言模型。您可以与Mistral AI语言模型交互，并基于Mistral模型创建多语言对话助手。
 
-TIP: Mistral AI offers an OpenAI API-compatible endpoint as well.
-Check the xref:_openai_api_compatibility[OpenAI API compatibility] section to learn how to use the xref:api/chat/openai-chat.adoc[Spring AI OpenAI] integration to talk to a Mistral endpoint.
+提示：Mistral AI也提供OpenAI API兼容的端点。
+请查看xref:_openai_api_compatibility[OpenAI API兼容性]部分，了解如何使用xref:api/chat/openai-chat.adoc[Spring AI OpenAI]集成与Mistral端点通信。
 
-== Prerequisites
+== 前提条件
 
-You will need to create an API with Mistral AI to access Mistral AI language models.
+您需要创建一个Mistral AI API来访问Mistral AI语言模型。
 
-Create an account at https://auth.mistral.ai/ui/registration[Mistral AI registration page] and generate the token on the https://console.mistral.ai/api-keys/[API Keys page].
+在https://auth.mistral.ai/ui/registration[Mistral AI注册页面]创建账户，并在https://console.mistral.ai/api-keys/[API密钥页面]生成令牌。
 
-The Spring AI project defines a configuration property named `spring.ai.mistralai.api-key` that you should set to the value of the `API Key` obtained from console.mistral.ai.
+Spring AI项目定义了一个名为`spring.ai.mistralai.api-key`的配置属性，您应该将其设置为从console.mistral.ai获取的`API密钥`值。
 
-You can set this configuration property in your `application.properties` file:
+您可以在`application.properties`文件中设置此配置属性：
 
 [source,properties]
 ----
 spring.ai.mistralai.api-key=<your-mistralai-api-key>
 ----
 
-For enhanced security when handling sensitive information like API keys, you can use Spring Expression Language (SpEL) to reference a custom environment variable:
+为了在处理API密钥等敏感信息时增强安全性，您可以使用Spring表达式语言(SpEL)来引用自定义环境变量：
 
 [source,yaml]
 ----
-# In application.yml
+# 在application.yml中
 spring:
   ai:
     mistralai:
@@ -33,35 +33,35 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在您的环境或.env文件中
 export MISTRALAI_API_KEY=<your-mistralai-api-key>
 ----
 
-You can also set this configuration programmatically in your application code:
+您也可以在应用程序代码中以编程方式设置此配置：
 
 [source,java]
 ----
-// Retrieve API key from a secure source or environment variable
+// 从安全源或环境变量中获取API密钥
 String apiKey = System.getenv("MISTRALAI_API_KEY");
 ----
 
-=== Add Repositories and BOM
+=== 添加仓库和BOM
 
-Spring AI artifacts are published in Maven Central and Spring Snapshot repositories.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add these repositories to your build system.
+Spring AI构件发布在Maven Central和Spring Snapshot仓库中。
+请参阅xref:getting-started.adoc#artifact-repositories[构件仓库]部分，将这些仓库添加到您的构建系统中。
 
-To help with dependency management, Spring AI provides a BOM (bill of materials) to ensure that a consistent version of Spring AI is used throughout the entire project. Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build system.
+为了帮助依赖管理，Spring AI提供了BOM（物料清单）以确保在整个项目中使用一致版本的Spring AI。请参阅xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建系统中。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI自动配置、starter模块的构件名称发生了重大变化。
+请参阅https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明]了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Mistral AI Chat Client.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI为Mistral AI聊天客户端提供Spring Boot自动配置。
+要启用它，请在项目的Maven `pom.xml`文件中添加以下依赖：
 
 [source, xml]
 ----
@@ -71,7 +71,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -80,91 +80,91 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建文件中。
 
-=== Chat Properties
+=== 聊天属性
 
-==== Retry Properties
+==== 重试属性
 
-The prefix `spring.ai.retry` is used as the property prefix that lets you configure the retry mechanism for the Mistral AI chat model.
-
-[cols="3,5,1", stripes=even]
-|====
-| Property | Description | Default
-
-| spring.ai.retry.max-attempts   | Maximum number of retry attempts. |  10
-| spring.ai.retry.backoff.initial-interval | Initial sleep duration for the exponential backoff policy. |  2 sec.
-| spring.ai.retry.backoff.multiplier | Backoff interval multiplier. |  5
-| spring.ai.retry.backoff.max-interval | Maximum backoff duration. |  3 min.
-| spring.ai.retry.on-client-errors | If false, throw a NonTransientAiException, and do not attempt retry for `4xx` client error codes | false
-| spring.ai.retry.exclude-on-http-codes | List of HTTP status codes that should not trigger a retry (e.g. to throw NonTransientAiException). | empty
-| spring.ai.retry.on-http-codes | List of HTTP status codes that should trigger a retry (e.g. to throw TransientAiException). | empty
-|====
-
-==== Connection Properties
-
-The prefix `spring.ai.mistralai` is used as the property prefix that lets you connect to OpenAI.
+前缀`spring.ai.retry`用作属性前缀，允许您配置Mistral AI聊天模型的重试机制。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.mistralai.base-url   | The URL to connect to |  https://api.mistral.ai
-| spring.ai.mistralai.api-key    | The API Key           |  -
+| spring.ai.retry.max-attempts   | 最大重试尝试次数。 |  10
+| spring.ai.retry.backoff.initial-interval | 指数退避策略的初始睡眠持续时间。 |  2秒
+| spring.ai.retry.backoff.multiplier | 退避间隔乘数。 |  5
+| spring.ai.retry.backoff.max-interval | 最大退避持续时间。 |  3分钟
+| spring.ai.retry.on-client-errors | 如果为false，对于`4xx`客户端错误代码抛出NonTransientAiException，不尝试重试 | false
+| spring.ai.retry.exclude-on-http-codes | 不应触发重试的HTTP状态代码列表（例如抛出NonTransientAiException）。 | 空
+| spring.ai.retry.on-http-codes | 应触发重试的HTTP状态代码列表（例如抛出TransientAiException）。 | 空
 |====
 
-==== Configuration Properties
+==== 连接属性
+
+前缀`spring.ai.mistralai`用作属性前缀，允许您连接到OpenAI。
+
+[cols="3,5,1", stripes=even]
+|====
+| 属性 | 描述 | 默认值
+
+| spring.ai.mistralai.base-url   | 要连接的URL |  https://api.mistral.ai
+| spring.ai.mistralai.api-key    | API密钥           |  -
+|====
+
+==== 配置属性
 
 [NOTE]
 ====
-Enabling and disabling of the chat auto-configurations are now configured via top level properties with the prefix `spring.ai.model.chat`.
+聊天自动配置的启用和禁用现在通过前缀为`spring.ai.model.chat`的顶级属性进行配置。
 
-To enable, spring.ai.model.chat=mistral (It is enabled by default)
+要启用，spring.ai.model.chat=mistral（默认启用）
 
-To disable, spring.ai.model.chat=none (or any value which doesn't match mistral)
+要禁用，spring.ai.model.chat=none（或任何不匹配mistral的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.mistralai.chat` is the property prefix that lets you configure the chat model implementation for Mistral AI.
+前缀`spring.ai.mistralai.chat`是允许您配置Mistral AI聊天模型实现的属性前缀。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.mistralai.chat.enabled (Removed and no longer valid) | Enable Mistral AI chat model.  | true
-| spring.ai.model.chat | Enable Mistral AI chat model.  | mistral
-| spring.ai.mistralai.chat.base-url   | Optional override for the `spring.ai.mistralai.base-url` property to provide chat-specific URL. |  -
-| spring.ai.mistralai.chat.api-key   | Optional override for the `spring.ai.mistralai.api-key` to provide chat-specific API Key. |  -
-| spring.ai.mistralai.chat.options.model | This is the Mistral AI Chat model to use | `open-mistral-7b`, `open-mixtral-8x7b`, `open-mixtral-8x22b`, `mistral-small-latest`, `mistral-large-latest`
-| spring.ai.mistralai.chat.options.temperature | The sampling temperature to use that controls the apparent creativity of generated completions. Higher values will make output more random while lower values will make results more focused and deterministic. It is not recommended to modify `temperature` and `top_p` for the same completions request as the interaction of these two settings is difficult to predict. | 0.8
-| spring.ai.mistralai.chat.options.maxTokens | The maximum number of tokens to generate in the chat completion. The total length of input tokens and generated tokens is limited by the model's context length. | -
-| spring.ai.mistralai.chat.options.safePrompt | Indicates whether to inject a security prompt before all conversations. | false
-| spring.ai.mistralai.chat.options.randomSeed | This feature is in Beta. If specified, our system will make a best effort to sample deterministically, such that repeated requests with the same seed and parameters should return the same result. | -
-| spring.ai.mistralai.chat.options.stop | Stop generation if this token is detected. Or if one of these tokens is detected when providing an array. | -
-| spring.ai.mistralai.chat.options.topP | An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered. We generally recommend altering this or `temperature` but not both. | -
-| spring.ai.mistralai.chat.options.responseFormat | An object specifying the format that the model must output. Setting to `{ "type": "json_object" }` enables JSON mode, which guarantees the message the model generates is valid JSON.| -
-| spring.ai.mistralai.chat.options.tools | A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list of functions the model may generate JSON inputs for. | -
-| spring.ai.mistralai.chat.options.toolChoice | Controls which (if any) function is called by the model. `none` means the model will not call a function and instead generates a message. `auto` means the model can pick between generating a message or calling a function. Specifying a particular function via `{"type: "function", "function": {"name": "my_function"}}` forces the model to call that function. `none` is the default when no functions are present. `auto` is the default if functions are present. | -
-| spring.ai.mistralai.chat.options.functions | List of functions, identified by their names, to enable for function calling in a single prompt requests. Functions with those names must exist in the functionCallbacks registry. | -
-| spring.ai.mistralai.chat.options.functionCallbacks | Mistral AI Tool Function Callbacks to register with the ChatModel. | -
-| spring.ai.mistralai.chat.options.proxy-tool-calls | If true, the Spring AI will not handle the function calls internally, but will proxy them to the client. Then is the client's responsibility to handle the function calls, dispatch them to the appropriate function, and return the results. If false (the default), the Spring AI will handle the function calls internally. Applicable only for chat models with function calling support | false
+| spring.ai.mistralai.chat.enabled (已移除且不再有效) | 启用Mistral AI聊天模型。  | true
+| spring.ai.model.chat | 启用Mistral AI聊天模型。  | mistral
+| spring.ai.mistralai.chat.base-url   | 可选覆盖`spring.ai.mistralai.base-url`属性以提供聊天特定的URL。 |  -
+| spring.ai.mistralai.chat.api-key   | 可选覆盖`spring.ai.mistralai.api-key`以提供聊天特定的API密钥。 |  -
+| spring.ai.mistralai.chat.options.model | 这是要使用的Mistral AI聊天模型 | `open-mistral-7b`、`open-mixtral-8x7b`、`open-mixtral-8x22b`、`mistral-small-latest`、`mistral-large-latest`
+| spring.ai.mistralai.chat.options.temperature | 用于控制生成完成项的明显创造性的采样温度。较高的值将使输出更随机，而较低的值将使结果更集中和确定性。不建议为相同的完成请求同时修改`temperature`和`top_p`，因为这两个设置的交互很难预测。 | 0.8
+| spring.ai.mistralai.chat.options.maxTokens | 在聊天完成中生成的最大令牌数。输入令牌和生成令牌的总长度受模型上下文长度的限制。 | -
+| spring.ai.mistralai.chat.options.safePrompt | 指示是否在所有对话之前注入安全提示。 | false
+| spring.ai.mistralai.chat.options.randomSeed | 此功能处于测试阶段。如果指定，我们的系统将尽最大努力进行确定性采样，使得具有相同种子和参数的重复请求应该返回相同的结果。 | -
+| spring.ai.mistralai.chat.options.stop | 如果检测到此令牌，则停止生成。或者在提供数组时检测到这些令牌之一时停止。 | -
+| spring.ai.mistralai.chat.options.topP | 温度采样的替代方案，称为核采样，其中模型考虑具有top_p概率质量的令牌的结果。所以0.1意味着只考虑构成前10%概率质量的令牌。我们通常建议修改这个或`temperature`，但不要同时修改两者。 | -
+| spring.ai.mistralai.chat.options.responseFormat | 指定模型必须输出的格式的对象。设置为`{ "type": "json_object" }`启用JSON模式，这保证模型生成的消息是有效的JSON。| -
+| spring.ai.mistralai.chat.options.tools | 模型可能调用的工具列表。目前，仅支持函数作为工具。使用此选项提供模型可能为其生成JSON输入的函数列表。 | -
+| spring.ai.mistralai.chat.options.toolChoice | 控制模型调用哪个（如果有）函数。`none`意味着模型不会调用函数，而是生成消息。`auto`意味着模型可以在生成消息或调用函数之间选择。通过`{"type: "function", "function": {"name": "my_function"}}`指定特定函数会强制模型调用该函数。当没有函数存在时，`none`是默认值。当存在函数时，`auto`是默认值。 | -
+| spring.ai.mistralai.chat.options.functions | 要在单个提示请求中启用的函数调用函数列表，由其名称标识。具有这些名称的函数必须存在于functionCallbacks注册表中。 | -
+| spring.ai.mistralai.chat.options.functionCallbacks | 要注册到ChatModel的Mistral AI工具函数回调。 | -
+| spring.ai.mistralai.chat.options.proxy-tool-calls | 如果为true，Spring AI将不会在内部处理函数调用，而是将它们代理到客户端。然后由客户端负责处理函数调用，将它们分派到适当的函数，并返回结果。如果为false（默认值），Spring AI将在内部处理函数调用。仅适用于具有函数调用支持的聊天模型 | false
 |====
 
-NOTE: You can override the common `spring.ai.mistralai.base-url` and `spring.ai.mistralai.api-key` for the `ChatModel` and `EmbeddingModel` implementations.
-The `spring.ai.mistralai.chat.base-url` and `spring.ai.mistralai.chat.api-key` properties, if set, take precedence over the common properties.
-This is useful if you want to use different Mistral AI accounts for different models and different model endpoints.
+注意：您可以为`ChatModel`和`EmbeddingModel`实现覆盖通用的`spring.ai.mistralai.base-url`和`spring.ai.mistralai.api-key`。
+如果设置了`spring.ai.mistralai.chat.base-url`和`spring.ai.mistralai.chat.api-key`属性，它们将优先于通用属性。
+如果您想为不同的模型和不同的模型端点使用不同的Mistral AI账户，这很有用。
 
-TIP: All properties prefixed with `spring.ai.mistralai.chat.options` can be overridden at runtime by adding request-specific <<chat-options>> to the `Prompt` call.
+提示：所有以`spring.ai.mistralai.chat.options`为前缀的属性都可以通过在`Prompt`调用中添加请求特定的<<chat-options>>在运行时覆盖。
 
-== Runtime Options [[chat-options]]
+== 运行时选项 [[chat-options]]
 
-The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatOptions.java[MistralAiChatOptions.java] provides model configurations, such as the model to use, the temperature, the frequency penalty, etc.
+link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatOptions.java[MistralAiChatOptions.java]提供模型配置，如要使用的模型、温度、频率惩罚等。
 
-On start-up, the default options can be configured with the `MistralAiChatModel(api, options)` constructor or the `spring.ai.mistralai.chat.options.*` properties.
+在启动时，可以通过`MistralAiChatModel(api, options)`构造函数或`spring.ai.mistralai.chat.options.*`属性配置默认选项。
 
-At run-time, you can override the default options by adding new, request-specific options to the `Prompt` call.
-For example, to override the default model and temperature for a specific request:
+在运行时，您可以通过在`Prompt`调用中添加新的、请求特定的选项来覆盖默认选项。
+例如，要覆盖特定请求的默认模型和温度：
 
 [source,java]
 ----
@@ -178,29 +178,29 @@ ChatResponse response = chatModel.call(
     ));
 ----
 
-TIP: In addition to the model specific link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatOptions.java[MistralAiChatOptions] you can use a portable https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/prompt/ChatOptions.java[ChatOptions] instance, created with https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/prompt/ChatOptionsBuilder.java[ChatOptionsBuilder#builder()].
+提示：除了模型特定的link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatOptions.java[MistralAiChatOptions]外，您还可以使用可移植的https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/prompt/ChatOptions.java[ChatOptions]实例，使用https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/prompt/ChatOptionsBuilder.java[ChatOptionsBuilder#builder()]创建。
 
-== Function Calling
+== 函数调用
 
-You can register custom Java functions with the `MistralAiChatModel` and have the Mistral AI model intelligently choose to output a JSON object containing arguments to call one or many of the registered functions.
-This is a powerful technique to connect the LLM capabilities with external tools and APIs.
-Read more about xref:api/tools.adoc[Tool Calling].
+您可以在`MistralAiChatModel`中注册自定义Java函数，并让Mistral AI模型智能地选择输出包含调用一个或多个已注册函数的参数的JSON对象。
+这是一种强大的技术，可以将LLM功能与外部工具和API连接起来。
+阅读更多关于xref:api/tools.adoc[工具调用]。
 
-== Multimodal
+== 多模态
 
-Multimodality refers to a model's ability to simultaneously understand and process information from various sources, including text, images, audio, and other data formats.
-Mistral AI supports text and vision modalities.
+多模态性是指模型同时理解和处理来自各种来源的信息的能力，包括文本、图像、音频和其他数据格式。
+Mistral AI支持文本和视觉模态。
 
-=== Vision
+=== 视觉
 
-Mistral AI models that offer vision multimodal support include `pixtral-large-latest`.
-Refer to the link:https://docs.mistral.ai/capabilities/vision/[Vision] guide for more information.
+提供视觉多模态支持的Mistral AI模型包括`pixtral-large-latest`。
+请参阅link:https://docs.mistral.ai/capabilities/vision/[视觉]指南了解更多信息。
 
-The Mistral AI link:https://docs.mistral.ai/api/#tag/chat/operation/chat_completion_v1_chat_completions_post[User Message API] can incorporate a list of base64-encoded images or image urls with the message.
-Spring AI’s link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/messages/Message.java[Message] interface facilitates multimodal AI models by introducing the link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/model/Media.java[Media] type.
-This type encompasses data and details regarding media attachments in messages, utilizing Spring’s `org.springframework.util.MimeType` and a `org.springframework.core.io.Resource` for the raw media data.
+Mistral AI link:https://docs.mistral.ai/api/#tag/chat/operation/chat_completion_v1_chat_completions_post[用户消息API]可以在消息中合并base64编码的图像或图像URL列表。
+Spring AI的link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-client-chat/src/main/java/org/springframework/ai/chat/messages/Message.java[Message]接口通过引入link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/model/Media.java[Media]类型来促进多模态AI模型。
+此类型包含有关消息中媒体附件的数据和详细信息，使用Spring的`org.springframework.util.MimeType`和`org.springframework.core.io.Resource`来存储原始媒体数据。
 
-Below is a code example excerpted from `MistralAiChatModelIT.java`, illustrating the fusion of user text with an image.
+以下是摘自`MistralAiChatModelIT.java`的代码示例，展示了如何将用户文本与图像融合：
 
 [source,java]
 ----
@@ -213,7 +213,7 @@ ChatResponse response = chatModel.call(new Prompt(this.userMessage,
         ChatOptions.builder().model(MistralAiApi.ChatModel.PIXTRAL_LARGE.getValue()).build()));
 ----
 
-or the image URL equivalent:
+或图像URL等效：
 
 [source,java]
 ----
@@ -225,35 +225,30 @@ ChatResponse response = chatModel.call(new Prompt(this.userMessage,
         ChatOptions.builder().model(MistralAiApi.ChatModel.PIXTRAL_LARGE.getValue()).build()));
 ----
 
-TIP: You can pass multiple images as well.
+提示：您也可以传递多个图像。
 
-The example shows a model taking as an input the `multimodal.test.png` image:
+该示例显示了一个模型将`multimodal.test.png`图像作为输入：
 
-image::multimodal.test.png[Multimodal Test Image, 200, 200, align="left"]
+image::multimodal.test.png[多模态测试图像, 200, 200, align="left"]
 
-along with the text message "Explain what do you see on this picture?", and generating a response like this:
+以及文本消息"Explain what do you see on this picture?"，并生成如下响应：
 
 ----
-This is an image of a fruit bowl with a simple design. The bowl is made of metal with curved wire edges that
-create an open structure, allowing the fruit to be visible from all angles. Inside the bowl, there are two
-yellow bananas resting on top of what appears to be a red apple. The bananas are slightly overripe, as
-indicated by the brown spots on their peels. The bowl has a metal ring at the top, likely to serve as a handle
-for carrying. The bowl is placed on a flat surface with a neutral-colored background that provides a clear
-view of the fruit inside.
+这是一个水果碗的图像，设计简单。碗由金属制成，带有弯曲的金属丝边缘，形成一个开放的结构，使水果可以从各个角度看到。碗内有两个黄色香蕉，放在一个红色苹果上面。香蕉稍微过熟，从香蕉皮上的棕色斑点可以看出。碗顶部有一个金属环，可能是用来携带的把手。碗放在一个平面上，背景为中性色，可以清晰地看到里面的水果。
 ----
 
-== OpenAI API Compatibility
+== OpenAI API兼容性
 
-Mistral is OpenAI API-compatible and you can use the xref:api/chat/openai-chat.adoc[Spring AI OpenAI] client to talk to Mistrial.
-For this, you need to configure the OpenAI base URL to the Mistral AI platform: `spring.ai.openai.chat.base-url=https://api.mistral.ai`, and select a Mistral model: `spring.ai.openai.chat.options.model=mistral-small-latest` and set the Mistral AI API key: `spring.ai.openai.chat.api-key=<YOUR MISTRAL API KEY`.
+Mistral是OpenAI API兼容的，您可以使用xref:api/chat/openai-chat.adoc[Spring AI OpenAI]客户端与Mistrial通信。
+为此，您需要将OpenAI基础URL配置为Mistral AI平台：`spring.ai.openai.chat.base-url=https://api.mistral.ai`，并选择Mistral模型：`spring.ai.openai.chat.options.model=mistral-small-latest`，并设置Mistral AI API密钥：`spring.ai.openai.chat.api-key=<YOUR MISTRAL API KEY>`。
 
-Check the link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/test/java/org/springframework/ai/openai/chat/proxy/MistralWithOpenAiChatModelIT.java[MistralWithOpenAiChatModelIT.java] tests for examples of using Mistral over Spring AI OpenAI.
+查看link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/test/java/org/springframework/ai/openai/chat/proxy/MistralWithOpenAiChatModelIT.java[MistralWithOpenAiChatModelIT.java]测试，了解通过Spring AI OpenAI使用Mistral的示例。
 
-== Sample Controller (Auto-configuration)
+== 示例控制器（自动配置）
 
-https://start.spring.io/[Create] a new Spring Boot project and add the `spring-ai-starter-model-mistral-ai` to your pom (or gradle) dependencies.
+https://start.spring.io/[创建]一个新的Spring Boot项目，并将`spring-ai-starter-model-mistral-ai`添加到您的pom（或gradle）依赖中。
 
-Add a `application.properties` file under the `src/main/resources` directory to enable and configure the Mistral AI chat model:
+在`src/main/resources`目录下添加一个`application.properties`文件，以启用和配置Mistral AI聊天模型：
 
 [source,application.properties]
 ----
@@ -262,10 +257,10 @@ spring.ai.mistralai.chat.options.model=mistral-small
 spring.ai.mistralai.chat.options.temperature=0.7
 ----
 
-TIP: Replace the `api-key` with your Mistral AI credentials.
+提示：用您的Mistral AI凭据替换`api-key`。
 
-This will create a `MistralAiChatModel` implementation that you can inject into your classes.
-Here is an example of a simple `@RestController` class that uses the chat model for text generations.
+这将创建一个`MistralAiChatModel`实现，您可以将其注入到您的类中。
+以下是一个简单的`@RestController`类示例，它使用聊天模型进行文本生成。
 
 [source,java]
 ----
@@ -292,11 +287,11 @@ public class ChatController {
 }
 ----
 
-== Manual Configuration
+== 手动配置
 
-The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatModel.java[MistralAiChatModel] implements the `ChatModel` and `StreamingChatModel` and uses the <<low-level-api>> to connect to the Mistral AI service.
+link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/MistralAiChatModel.java[MistralAiChatModel]实现了`ChatModel`和`StreamingChatModel`，并使用<<low-level-api>>连接到Mistral AI服务。
 
-Add the `spring-ai-mistral-ai` dependency to your project's Maven `pom.xml` file:
+在项目的Maven `pom.xml`文件中添加`spring-ai-mistral-ai`依赖：
 
 [source, xml]
 ----
@@ -306,7 +301,7 @@ Add the `spring-ai-mistral-ai` dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -315,9 +310,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建文件中。
 
-Next, create a `MistralAiChatModel` and use it for text generations:
+接下来，创建一个`MistralAiChatModel`并使用它进行文本生成：
 
 [source,java]
 ----
@@ -332,19 +327,19 @@ var chatModel = new MistralAiChatModel(this.mistralAiApi, MistralAiChatOptions.b
 ChatResponse response = this.chatModel.call(
     new Prompt("Generate the names of 5 famous pirates."));
 
-// Or with streaming responses
+// 或使用流式响应
 Flux<ChatResponse> response = this.chatModel.stream(
     new Prompt("Generate the names of 5 famous pirates."));
 ----
 
-The `MistralAiChatOptions` provides the configuration information for the chat requests.
-The `MistralAiChatOptions.Builder` is a fluent options-builder.
+`MistralAiChatOptions`提供聊天请求的配置信息。
+`MistralAiChatOptions.Builder`是一个流畅的选项构建器。
 
-=== Low-level MistralAiApi Client [[low-level-api]]
+=== 低级MistralAiApi客户端 [[low-level-api]]
 
-The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/api/MistralAiApi.java[MistralAiApi] provides is lightweight Java client for link:https://docs.mistral.ai/api/[Mistral AI API].
+link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/api/MistralAiApi.java[MistralAiApi]提供了link:https://docs.mistral.ai/api/[Mistral AI API]的轻量级Java客户端。
 
-Here is a simple snippet showing how to use the API programmatically:
+以下是一个简单的代码片段，展示如何以编程方式使用API：
 
 [source,java]
 ----
@@ -353,20 +348,20 @@ MistralAiApi mistralAiApi = new MistralAiApi(System.getenv("MISTRAL_AI_API_KEY")
 ChatCompletionMessage chatCompletionMessage =
     new ChatCompletionMessage("Hello world", Role.USER);
 
-// Sync request
+// 同步请求
 ResponseEntity<ChatCompletion> response = this.mistralAiApi.chatCompletionEntity(
     new ChatCompletionRequest(List.of(this.chatCompletionMessage), MistralAiApi.ChatModel.LARGE.getValue(), 0.8, false));
 
-// Streaming request
+// 流式请求
 Flux<ChatCompletionChunk> streamResponse = this.mistralAiApi.chatCompletionStream(
         new ChatCompletionRequest(List.of(this.chatCompletionMessage), MistralAiApi.ChatModel.LARGE.getValue(), 0.8, true));
 ----
 
-Follow the https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/api/MistralAiApi.java[MistralAiApi.java]'s JavaDoc for further information.
+请参阅https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/main/java/org/springframework/ai/mistralai/api/MistralAiApi.java[MistralAiApi.java]的JavaDoc获取更多信息。
 
-==== MistralAiApi Samples
+==== MistralAiApi示例
 
-* The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/test/java/org/springframework/ai/mistralai/api/MistralAiApiIT.java[MistralAiApiIT.java] tests provide some general examples of how to use the lightweight library.
+* link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/test/java/org/springframework/ai/mistralai/api/MistralAiApiIT.java[MistralAiApiIT.java]测试提供了一些关于如何使用轻量级库的一般示例。
 
-* The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/test/java/org/springframework/ai/mistralai/api/tool/PaymentStatusFunctionCallingIT.java[PaymentStatusFunctionCallingIT.java] tests show how to use the low-level API to call tool functions.
-Based on the link:https://docs.mistral.ai/guides/function-calling/[Mistral AI Function Calling] tutorial.
+* link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-mistral-ai/src/test/java/org/springframework/ai/mistralai/api/tool/PaymentStatusFunctionCallingIT.java[PaymentStatusFunctionCallingIT.java]测试展示了如何使用低级API调用工具函数。
+基于https://docs.mistral.ai/guides/function-calling/[Mistral AI函数调用]教程。

@@ -1,28 +1,28 @@
 = OpenSearch
 
-This section walks you through setting up `OpenSearchVectorStore` to store document embeddings and perform similarity searches.
+本节将指导您如何设置 `OpenSearchVectorStore` 来存储文档嵌入并执行相似性搜索。
 
-link:https://opensearch.org[OpenSearch] is an open-source search and analytics engine originally forked from Elasticsearch, distributed under the Apache License 2.0. It enhances AI application development by simplifying the integration and management of AI-generated assets. OpenSearch supports vector, lexical, and hybrid search capabilities, leveraging advanced vector database functionalities to facilitate low-latency queries and similarity searches as detailed on the link:https://opensearch.org/platform/search/vector-database.html[vector database page].
+link:https://opensearch.org[OpenSearch] 是一个开源的搜索和分析引擎，最初是从 Elasticsearch 分叉而来，在 Apache License 2.0 下分发。它通过简化 AI 生成资产的集成和管理来增强 AI 应用程序开发。OpenSearch 支持向量、词汇和混合搜索功能，利用先进的向量数据库功能来促进低延迟查询和相似性搜索，如 link:https://opensearch.org/platform/search/vector-database.html[向量数据库页面] 所述。
 
-The link:https://opensearch.org/docs/latest/search-plugins/knn/index/[OpenSearch k-NN] functionality allows users to query vector embeddings from large datasets. An embedding is a numerical representation of a data object, such as text, image, audio, or document. Embeddings can be stored in the index and queried using various similarity functions.
+link:https://opensearch.org/docs/latest/search-plugins/knn/index/[OpenSearch k-NN] 功能允许用户从大型数据集中查询向量嵌入。嵌入是数据对象（如文本、图像、音频或文档）的数值表示。嵌入可以存储在索引中，并使用各种相似性函数进行查询。
 
-== Prerequisites
+== 前提条件
 
-* A running OpenSearch instance. The following options are available:
-** link:https://opensearch.org/docs/latest/opensearch/install/index/[Self-Managed OpenSearch]
+* 运行中的 OpenSearch 实例。以下选项可用：
+** link:https://opensearch.org/docs/latest/opensearch/install/index/[自托管 OpenSearch]
 ** link:https://docs.aws.amazon.com/opensearch-service/[Amazon OpenSearch Service]
-* If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `OpenSearchVectorStore`.
+* 如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 准备一个 API 密钥，用于生成存储在 `OpenSearchVectorStore` 中的嵌入。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 的自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the OpenSearch Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 OpenSearch 向量存储提供了 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source,xml]
 ----
@@ -32,7 +32,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -41,9 +41,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-For Amazon OpenSearch Service, use these dependencies instead:
+对于 Amazon OpenSearch Service，请使用以下依赖项：
 
 [source,xml]
 ----
@@ -53,7 +53,7 @@ For Amazon OpenSearch Service, use these dependencies instead:
 </dependency>
 ----
 
-or for Gradle:
+或对于 Gradle：
 
 [source,groovy]
 ----
@@ -62,11 +62,11 @@ dependencies {
 }
 ----
 
-Please have a look at the list of xref:#_configuration_properties[configuration parameters] for the vector store to learn about the default values and configuration options.
+请查看 xref:#_configuration_properties[配置参数] 列表，了解向量存储的默认值和配置选项。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
-Now you can auto-wire the `OpenSearchVectorStore` as a vector store in your application:
+现在您可以在应用程序中自动装配 `OpenSearchVectorStore` 作为向量存储：
 
 [source,java]
 ----
@@ -79,17 +79,17 @@ List<Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to OpenSearch
+// 将文档添加到 OpenSearch
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
-=== Configuration Properties
+=== 配置属性
 
-To connect to OpenSearch and use the `OpenSearchVectorStore`, you need to provide access details for your instance.
-A simple configuration can be provided via Spring Boot's `application.yml`:
+要连接到 OpenSearch 并使用 `OpenSearchVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [source,yaml]
 ----
@@ -97,74 +97,74 @@ spring:
   ai:
     vectorstore:
       opensearch:
-        uris: <opensearch instance URIs>
-        username: <opensearch username>
-        password: <opensearch password>
+        uris: <opensearch 实例 URIs>
+        username: <opensearch 用户名>
+        password: <opensearch 密码>
         index-name: spring-ai-document-index
         initialize-schema: true
         similarity-function: cosinesimil
-        read-timeout: <time to wait for response>
-        connect-timeout: <time to wait until connection established>
-        path-prefix: <custom path prefix>
-        ssl-bundle: <name of SSL bundle>
-        aws:  # Only for Amazon OpenSearch Service
-          host: <aws opensearch host>
-          service-name: <aws service name>
-          access-key: <aws access key>
-          secret-key: <aws secret key>
-          region: <aws region>
+        read-timeout: <等待响应的时间>
+        connect-timeout: <等待建立连接的时间>
+        path-prefix: <自定义路径前缀>
+        ssl-bundle: <SSL 包的名称>
+        aws:  # 仅适用于 Amazon OpenSearch Service
+          host: <aws opensearch 主机>
+          service-name: <aws 服务名称>
+          access-key: <aws 访问密钥>
+          secret-key: <aws 密钥>
+          region: <aws 区域>
 ----
 
-Properties starting with `spring.ai.vectorstore.opensearch.*` are used to configure the `OpenSearchVectorStore`:
+以 `spring.ai.vectorstore.opensearch.*` 开头的属性用于配置 `OpenSearchVectorStore`：
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
+|属性 | 描述 | 默认值
 
-|`spring.ai.vectorstore.opensearch.uris`| URIs of the OpenSearch cluster endpoints | -
-|`spring.ai.vectorstore.opensearch.username`| Username for accessing the OpenSearch cluster | -
-|`spring.ai.vectorstore.opensearch.password`| Password for the specified username | -
-|`spring.ai.vectorstore.opensearch.index-name`| Name of the index to store vectors | `spring-ai-document-index`
-|`spring.ai.vectorstore.opensearch.initialize-schema`| Whether to initialize the required schema | `false`
-|`spring.ai.vectorstore.opensearch.similarity-function`| The similarity function to use | `cosinesimil`
-|`spring.ai.vectorstore.opensearch.read-timeout`| Time to wait for response from the opposite endpoint. 0 - infinity. | -
-|`spring.ai.vectorstore.opensearch.connect-timeout`| Time to wait until connection established. 0 - infinity. | -
-|`spring.ai.vectorstore.opensearch.path-prefix`| Path prefix for OpenSearch API endpoints. Useful when OpenSearch is behind a reverse proxy with a non-root path. | -
-|`spring.ai.vectorstore.opensearch.ssl-bundle`| Name of the SSL Bundle to use in case of SSL connection | -
-|`spring.ai.vectorstore.opensearch.aws.host`| Hostname of the OpenSearch instance | -
-|`spring.ai.vectorstore.opensearch.aws.service-name`| AWS service name | -
-|`spring.ai.vectorstore.opensearch.aws.access-key`| AWS access key | -
-|`spring.ai.vectorstore.opensearch.aws.secret-key`| AWS secret key | -
-|`spring.ai.vectorstore.opensearch.aws.region`| AWS region | -
+|`spring.ai.vectorstore.opensearch.uris`| OpenSearch 集群端点的 URIs | -
+|`spring.ai.vectorstore.opensearch.username`| 访问 OpenSearch 集群的用户名 | -
+|`spring.ai.vectorstore.opensearch.password`| 指定用户的密码 | -
+|`spring.ai.vectorstore.opensearch.index-name`| 存储向量的索引名称 | `spring-ai-document-index`
+|`spring.ai.vectorstore.opensearch.initialize-schema`| 是否初始化所需的模式 | `false`
+|`spring.ai.vectorstore.opensearch.similarity-function`| 使用的相似性函数 | `cosinesimil`
+|`spring.ai.vectorstore.opensearch.read-timeout`| 等待对端响应的超时时间。0 - 无限。 | -
+|`spring.ai.vectorstore.opensearch.connect-timeout`| 等待建立连接的超时时间。0 - 无限。 | -
+|`spring.ai.vectorstore.opensearch.path-prefix`| OpenSearch API 端点的路径前缀。当 OpenSearch 在具有非根路径的反向代理后面时很有用。 | -
+|`spring.ai.vectorstore.opensearch.ssl-bundle`| 在 SSL 连接情况下使用的 SSL 包名称 | -
+|`spring.ai.vectorstore.opensearch.aws.host`| OpenSearch 实例的主机名 | -
+|`spring.ai.vectorstore.opensearch.aws.service-name`| AWS 服务名称 | -
+|`spring.ai.vectorstore.opensearch.aws.access-key`| AWS 访问密钥 | -
+|`spring.ai.vectorstore.opensearch.aws.secret-key`| AWS 密钥 | -
+|`spring.ai.vectorstore.opensearch.aws.region`| AWS 区域 | -
 |===
 
 [NOTE]
 ====
-You can control whether the AWS-specific OpenSearch auto-configuration is enabled using the `spring.ai.vectorstore.opensearch.aws.enabled` property.
+您可以使用 `spring.ai.vectorstore.opensearch.aws.enabled` 属性控制是否启用 AWS 特定的 OpenSearch 自动配置。
 
-- If this property is set to `false`, the non-AWS OpenSearch configuration is activated, even if AWS SDK classes are present on the classpath. This allows you to use self-managed or third-party OpenSearch clusters in environments where AWS SDKs are present for other services.
-- If AWS SDK classes are not present, the non-AWS configuration is always used.
-- If AWS SDK classes are present and the property is not set or set to `true`, the AWS-specific configuration is used by default.
+- 如果此属性设置为 `false`，即使类路径上存在 AWS SDK 类，也会激活非 AWS OpenSearch 配置。这允许您在其他服务需要 AWS SDK 的环境中使用自托管或第三方 OpenSearch 集群。
+- 如果不存在 AWS SDK 类，则始终使用非 AWS 配置。
+- 如果存在 AWS SDK 类且未设置该属性或设置为 `true`，则默认使用 AWS 特定配置。
 
-This fallback logic ensures that users have explicit control over the type of OpenSearch integration, preventing accidental activation of AWS-specific logic when not desired.
+这种回退逻辑确保用户对 OpenSearch 集成类型有明确的控制，防止在不需要时意外激活 AWS 特定逻辑。
 ====
 
 [NOTE]
 ====
-The `path-prefix` property allows you to specify a custom path prefix when OpenSearch is running behind a reverse proxy that uses a non-root path.
-For example, if your OpenSearch instance is accessible at `https://example.com/opensearch/` instead of `https://example.com/`, you would set `path-prefix: /opensearch`.
+`path-prefix` 属性允许您在 OpenSearch 在具有非根路径的反向代理后面运行时指定自定义路径前缀。
+例如，如果您的 OpenSearch 实例可通过 `https://example.com/opensearch/` 而不是 `https://example.com/` 访问，您将设置 `path-prefix: /opensearch`。
 ====
 
-The following similarity functions are available:
+以下相似性函数可用：
 
-* `cosinesimil` - Default, suitable for most use cases. Measures cosine similarity between vectors.
-* `l1` - Manhattan distance between vectors.
-* `l2` - Euclidean distance between vectors.
-* `linf` - Chebyshev distance between vectors.
+* `cosinesimil` - 默认值，适用于大多数用例。测量向量之间的余弦相似度。
+* `l1` - 向量之间的曼哈顿距离。
+* `l2` - 向量之间的欧几里得距离。
+* `linf` - 向量之间的切比雪夫距离。
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the OpenSearch vector store. For this you need to add the `spring-ai-opensearch-store` to your project:
+除了使用 Spring Boot 自动配置外，您还可以手动配置 OpenSearch 向量存储。为此，您需要将 `spring-ai-opensearch-store` 添加到项目中：
 
 [source,xml]
 ----
@@ -174,7 +174,7 @@ Instead of using the Spring Boot auto-configuration, you can manually configure 
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -183,9 +183,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Create an OpenSearch client bean:
+创建 OpenSearch 客户端 bean：
 
 [source,java]
 ----
@@ -200,44 +200,44 @@ public OpenSearchClient openSearchClient() {
 }
 ----
 
-Then create the `OpenSearchVectorStore` bean using the builder pattern:
+然后使用构建器模式创建 `OpenSearchVectorStore` bean：
 
 [source,java]
 ----
 @Bean
 public VectorStore vectorStore(OpenSearchClient openSearchClient, EmbeddingModel embeddingModel) {
     return OpenSearchVectorStore.builder(openSearchClient, embeddingModel)
-        .index("custom-index")                // Optional: defaults to "spring-ai-document-index"
-        .similarityFunction("l2")             // Optional: defaults to "cosinesimil"
-        .initializeSchema(true)               // Optional: defaults to false
-        .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+        .index("custom-index")                // 可选：默认为 "spring-ai-document-index"
+        .similarityFunction("l2")             // 可选：默认为 "cosinesimil"
+        .initializeSchema(true)               // 可选：默认为 false
+        .batchingStrategy(new TokenCountBatchingStrategy()) // 可选：默认为 TokenCountBatchingStrategy
         .build();
 }
 
-// This can be any EmbeddingModel implementation
+// 这可以是任何 EmbeddingModel 实现
 @Bean
 public EmbeddingModel embeddingModel() {
     return new OpenAiEmbeddingModel(new OpenAiApi(System.getenv("OPENAI_API_KEY")));
 }
 ----
 
-== Metadata Filtering
+== 元数据过滤
 
-You can leverage the generic, portable xref:api/vectordbs.adoc#metadata-filters[metadata filters] with OpenSearch as well.
+您也可以利用通用的、可移植的 xref:api/vectordbs.adoc#metadata-filters[元数据过滤器] 与 OpenSearch 存储。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
 vectorStore.similaritySearch(
     SearchRequest.builder()
-        .query("The World")
-        .topK(TOP_K)
-        .similarityThreshold(SIMILARITY_THRESHOLD)
-        .filterExpression("author in ['john', 'jill'] && 'article_type' == 'blog'").build());
+    .query("The World")
+    .topK(TOP_K)
+    .similarityThreshold(SIMILARITY_THRESHOLD)
+    .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -248,29 +248,29 @@ vectorStore.similaritySearch(SearchRequest.builder()
     .topK(TOP_K)
     .similarityThreshold(SIMILARITY_THRESHOLD)
     .filterExpression(b.and(
-        b.in("author", "john", "jill"),
+        b.in("author","john", "jill"),
         b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: Those (portable) filter expressions get automatically converted into the proprietary OpenSearch link:https://opensearch.org/docs/latest/query-dsl/full-text/query-string/[Query string query].
+注意：这些（可移植的）过滤表达式会自动转换为 OpenSearch 专有的 link:https://opensearch.org/docs/latest/query-dsl/full-text/query-string/[查询字符串查询]。
 
-For example, this portable filter expression:
+例如，这个可移植的过滤表达式：
 
 [source,sql]
 ----
 author in ['john', 'jill'] && 'article_type' == 'blog'
 ----
 
-is converted into the proprietary OpenSearch filter format:
+被转换为 OpenSearch 专有的过滤格式：
 
 [source,text]
 ----
 (metadata.author:john OR jill) AND metadata.article_type:blog
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The OpenSearch Vector Store implementation provides access to the underlying native OpenSearch client (`OpenSearchClient`) through the `getNativeClient()` method:
+OpenSearch 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 OpenSearch 客户端（`OpenSearchClient`）的访问：
 
 [source,java]
 ----
@@ -279,8 +279,8 @@ Optional<OpenSearchClient> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     OpenSearchClient client = nativeClient.get();
-    // Use the native client for OpenSearch-specific operations
+    // 使用原生客户端进行 OpenSearch 特定的操作
 }
 ----
 
-The native client gives you access to OpenSearch-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口暴露的 OpenSearch 特定功能和操作。

@@ -1,22 +1,21 @@
 [[ImageModel]]
-= Image Model API
+= 图像模型 API
 
+`Spring Image Model API`旨在成为一个简单且可移植的接口，用于与各种xref:concepts.adoc#_models[AI模型]进行交互，这些模型专门用于图像生成，使开发人员能够以最小的代码更改在不同图像相关模型之间切换。
+这种设计与Spring的模块化和可互换性理念保持一致，确保开发人员能够快速适应与图像处理相关的不同AI功能。
 
-The `Spring Image Model API` is designed to be a simple and portable interface for interacting with various xref:concepts.adoc#_models[AI Models] specialized in image generation, allowing developers to switch between different image-related models with minimal code changes.
-This design aligns with Spring's philosophy of modularity and interchangeability, ensuring developers can quickly adapt their applications to different AI capabilities related to image processing.
+此外，通过支持像`ImagePrompt`这样的输入封装和`ImageResponse`这样的输出处理的配套类，图像模型API统一了与专门用于图像生成的AI模型的通信。
+它管理请求准备和响应解析的复杂性，为图像生成功能提供直接和简化的API交互。
 
-Additionally, with the support of companion classes like `ImagePrompt` for input encapsulation and `ImageResponse` for output handling, the Image Model API unifies the communication with AI Models dedicated to image generation.
-It manages the complexity of request preparation and response parsing, offering a direct and simplified API interaction for image-generation functionalities.
+Spring图像模型API建立在Spring AI `通用模型API`之上，提供图像特定的抽象和实现。
 
-The Spring Image Model API is built on top of the Spring AI `Generic Model API`, providing image-specific abstractions and implementations.
+== API概述
 
-== API Overview
+本节提供了Spring图像模型API接口和相关类的指南。
 
-This section provides a guide to the Spring Image Model API interface and associated classes.
+== 图像模型
 
-== Image Model
-
-Here is the link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageModel.java[ImageModel] interface definition:
+这是link:https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageModel.java[ImageModel]接口定义：
 
 [source,java]
 ----
@@ -30,8 +29,8 @@ public interface ImageModel extends Model<ImagePrompt, ImageResponse> {
 
 === ImagePrompt
 
-The https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImagePrompt.java[ImagePrompt] is a `ModelRequest` that encapsulates a list of https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageMessage.java[ImageMessage] objects and optional model request options.
-The following listing shows a truncated version of the `ImagePrompt` class, excluding constructors and other utility methods:
+https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImagePrompt.java[ImagePrompt]是一个`ModelRequest`，它封装了一个https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageMessage.java[ImageMessage]对象列表和可选的模型请求选项。
+以下列表显示了`ImagePrompt`类的截断版本，不包括构造函数和其他实用方法：
 
 [source,java]
 ----
@@ -47,13 +46,13 @@ public class ImagePrompt implements ModelRequest<List<ImageMessage>> {
 	@Override
 	public ImageOptions getOptions() {...}
 
-    // constructors and utility methods omitted
+    // 构造函数和实用方法省略
 }
 ----
 
 ==== ImageMessage
 
-The `ImageMessage` class encapsulates the text to use and the weight that the text should have in influencing the generated image.  For models that support weights, they can be positive or negative.
+`ImageMessage`类封装了要使用的文本和该文本在影响生成图像时应该具有的权重。对于支持权重的模型，它们可以是正数或负数。
 
 [source,java]
 ----
@@ -67,15 +66,15 @@ public class ImageMessage {
 
 	public Float getWeight() {...}
 
-   // constructors and utility methods omitted
+   // 构造函数和实用方法省略
 }
 ----
 
 ==== ImageOptions
 
-Represents the options that can be passed to the Image generation model. The `ImageOptions` interface extends the `ModelOptions` interface and is used to define few portable options that can be passed to the AI model.
+表示可以传递给图像生成模型的选项。`ImageOptions`接口扩展了`ModelOptions`接口，用于定义可以传递给AI模型的几个可移植选项。
 
-The `ImageOptions` interface is defined as follows:
+`ImageOptions`接口定义如下：
 
 [source,java]
 ----
@@ -89,20 +88,18 @@ public interface ImageOptions extends ModelOptions {
 
 	Integer getHeight();
 
-	String getResponseFormat(); // openai - url or base64 : stability ai byte[] or base64
+	String getResponseFormat(); // openai - url或base64 : stability ai byte[]或base64
 
 }
 ----
 
-Additionally, every model specific ImageModel implementation can have its own options that can be passed to the AI model. For example, the OpenAI Image Generation model has its own options like `quality`, `style`, etc.
+此外，每个模型特定的ImageModel实现都可以有自己的选项，可以传递给AI模型。例如，OpenAI图像生成模型有自己的选项，如`quality`、`style`等。
 
-
-This is a powerful feature that allows developers to use model specific options when starting the application and then override them at runtime using the `ImagePrompt`.
-
+这是一个强大的功能，允许开发人员在启动应用程序时使用模型特定的选项，然后使用`ImagePrompt`在运行时覆盖它们。
 
 === ImageResponse
 
-The structure of the `ImageResponse` class is as follows:
+`ImageResponse`类的结构如下：
 
 [source,java]
 ----
@@ -114,7 +111,7 @@ public class ImageResponse implements ModelResponse<ImageGeneration> {
 
 	@Override
 	public ImageGeneration getResult() {
-		// get the first result
+		// 获取第一个结果
 	}
 
 	@Override
@@ -123,18 +120,18 @@ public class ImageResponse implements ModelResponse<ImageGeneration> {
 	@Override
 	public ImageResponseMetadata getMetadata() {...}
 
-    // other methods omitted
+    // 其他方法省略
 
 }
 ----
 
-The https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageResponse.java[ImageResponse] class holds the AI Model's output, with each `ImageGeneration` instance containing one of potentially multiple outputs resulting from a single prompt.
+https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageResponse.java[ImageResponse]类保存AI模型的输出，每个`ImageGeneration`实例包含从单个提示生成的潜在多个输出中的一个。
 
-The `ImageResponse` class also carries a `ImageResponseMetadata` object holding metadata about the AI Model's response.
+`ImageResponse`类还携带一个`ImageResponseMetadata`对象，保存有关AI模型响应的元数据。
 
 === ImageGeneration
 
-Finally, the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageGeneration.java[ImageGeneration] class extends from the `ModelResult` to represent the output response and related metadata about this result:
+最后，https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageGeneration.java[ImageGeneration]类从`ModelResult`扩展而来，表示输出响应和与此结果相关的元数据：
 
 [source,java]
 ----
@@ -150,25 +147,25 @@ public class ImageGeneration implements ModelResult<Image> {
 	@Override
 	public ImageGenerationMetadata getMetadata() {...}
 
-    // other methods omitted
+    // 其他方法省略
 
 }
 ----
 
-== Available Implementations
+== 可用实现
 
-`ImageModel` implementations are provided for the following Model providers:
+为以下模型提供商提供了`ImageModel`实现：
 
-* xref:api/image/openai-image.adoc[OpenAI Image Generation]
-* xref:api/image/azure-openai-image.adoc[Azure OpenAI Image Generation]
-* xref:api/image/qianfan-image.adoc[QianFan Image Generation]
-* xref:api/image/stabilityai-image.adoc[StabilityAI Image Generation]
-* xref:api/image/zhipuai-image.adoc[ZhiPuAI Image Generation]
+* xref:api/image/openai-image.adoc[OpenAI图像生成]
+* xref:api/image/azure-openai-image.adoc[Azure OpenAI图像生成]
+* xref:api/image/qianfan-image.adoc[QianFan图像生成]
+* xref:api/image/stabilityai-image.adoc[StabilityAI图像生成]
+* xref:api/image/zhipuai-image.adoc[ZhiPuAI图像生成]
 
-== API Docs
+== API文档
 
-You can find the Javadoc https://docs.spring.io/spring-ai/docs/current-SNAPSHOT/[here].
+您可以在https://docs.spring.io/spring-ai/docs/current-SNAPSHOT/[这里]找到Javadoc。
 
-== Feedback and Contributions
+== 反馈和贡献
 
-The project's https://github.com/spring-projects/spring-ai/discussions[GitHub discussions] is a great place to send feedback.
+项目的https://github.com/spring-projects/spring-ai/discussions[GitHub讨论]是发送反馈的好地方。

@@ -1,99 +1,99 @@
-= Model Context Protocol (MCP)
+= 模型上下文协议（MCP）
 
-The link:https://modelcontextprotocol.org/docs/concepts/architecture[Model Context Protocol] (MCP) is a standardized protocol that enables AI models to interact with external tools and resources in a structured way. 
-It supports multiple transport mechanisms to provide flexibility across different environments.
+link:https://modelcontextprotocol.org/docs/concepts/architecture[模型上下文协议]（MCP）是一个标准化协议，使 AI 模型能够以结构化的方式与外部工具和资源交互。
+它支持多种传输机制，以在不同环境中提供灵活性。
 
-The link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK] provides a Java implementation of the Model Context Protocol, enabling standardized interaction with AI models and tools through both synchronous and asynchronous communication patterns.
+link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK] 提供了模型上下文协议的 Java 实现，通过同步和异步通信模式实现与 AI 模型和工具的标准化交互。
 
-`**Spring AI MCP**` extends the MCP Java SDK with Spring Boot integration, providing both xref:api/mcp/mcp-client-boot-starter-docs.adoc[client] and xref:api/mcp/mcp-server-boot-starter-docs.adoc[server] starters. 
-Bootstrap your AI applications with MCP support using link:https://start.spring.io[Spring Initializer].
+`**Spring AI MCP**` 通过 Spring Boot 集成扩展了 MCP Java SDK，提供了 xref:api/mcp/mcp-client-boot-starter-docs.adoc[客户端] 和 xref:api/mcp/mcp-server-boot-starter-docs.adoc[服务器] 启动器。
+使用 link:https://start.spring.io[Spring Initializer] 引导具有 MCP 支持的 AI 应用程序。
 
 [NOTE]
 ====
-Breaking Changes in MCP Java SDK 0.8.0 ⚠️
+MCP Java SDK 0.8.0 中的重大变更 ⚠️
 
-MCP Java SDK version 0.8.0 introduces several breaking changes including a new session-based architecture. If you're upgrading from Java SDK 0.7.0, please refer to the https://github.com/modelcontextprotocol/java-sdk/blob/main/migration-0.8.0.md[Migration Guide] for detailed instructions.
+MCP Java SDK 0.8.0 版本引入了几个重大变更，包括新的基于会话的架构。如果您正在从 Java SDK 0.7.0 升级，请参阅 https://github.com/modelcontextprotocol/java-sdk/blob/main/migration-0.8.0.md[迁移指南] 获取详细说明。
 ====
 
-== MCP Java SDK Architecture
+== MCP Java SDK 架构
 
-TIP: This section provides an overview for the link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK architecture]. 
-For the Spring AI MCP integration, refer to the xref:#_spring_ai_mcp_integration[Spring AI MCP Boot Starters] documentation.
+提示：本节提供了 link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK 架构] 的概述。
+对于 Spring AI MCP 集成，请参阅 xref:#_spring_ai_mcp_integration[Spring AI MCP 启动器] 文档。
 
-The Java MCP implementation follows a three-layer architecture:
+Java MCP 实现遵循三层架构：
 
 |===
 |  |
-^a| image::mcp/mcp-stack.svg[MCP Stack Architecture]
-a| * *Client/Server Layer*: The McpClient handles client-side operations while the McpServer manages server-side protocol operations. Both utilize McpSession for communication management.
-* *Session Layer (McpSession)*: Manages communication patterns and state through the DefaultMcpSession implementation.
-* *Transport Layer (McpTransport)*: Handles JSON-RPC message serialization and deserialization with support for multiple transport implementations.
+^a| image::mcp/mcp-stack.svg[MCP 堆栈架构]
+a| * *客户端/服务器层*：McpClient 处理客户端操作，而 McpServer 管理服务器端协议操作。两者都使用 McpSession 进行通信管理。
+* *会话层（McpSession）*：通过 DefaultMcpSession 实现管理通信模式和状态。
+* *传输层（McpTransport）*：处理 JSON-RPC 消息的序列化和反序列化，支持多种传输实现。
 |===
 
 |===
-| link:https://modelcontextprotocol.io/sdk/java/mcp-client[MCP Client] |
+| link:https://modelcontextprotocol.io/sdk/java/mcp-client[MCP 客户端] |
 
-a| The MCP Client is a key component in the Model Context Protocol (MCP) architecture, responsible for establishing and managing connections with MCP servers. It implements the client-side of the protocol, handling:
+a| MCP 客户端是模型上下文协议（MCP）架构中的关键组件，负责建立和管理与 MCP 服务器的连接。它实现了协议的客户端部分，处理：
 
-* Protocol version negotiation to ensure compatibility with servers
-* Capability negotiation to determine available features
-* Message transport and JSON-RPC communication
-* Tool discovery and execution
-* Resource access and management
-* Prompt system interactions
-* Optional features:
-** Roots management
-** Sampling support
-* Synchronous and asynchronous operations
-* Transport options:
-** Stdio-based transport for process-based communication
-** Java HttpClient-based SSE client transport
-** WebFlux SSE client transport for reactive HTTP streaming
+* 协议版本协商以确保与服务器的兼容性
+* 能力协商以确定可用功能
+* 消息传输和 JSON-RPC 通信
+* 工具发现和执行
+* 资源访问和管理
+* 提示系统交互
+* 可选功能：
+** 根管理
+** 采样支持
+* 同步和异步操作
+* 传输选项：
+** 基于 Stdio 的传输用于基于进程的通信
+** 基于 Java HttpClient 的 SSE 客户端传输
+** WebFlux SSE 客户端传输用于反应式 HTTP 流
 
-^a| image::mcp/java-mcp-client-architecture.jpg[Java MCP Client Architecture, width=500]
+^a| image::mcp/java-mcp-client-architecture.jpg[Java MCP 客户端架构, width=500]
 |===
 
 |===
-| link:https://modelcontextprotocol.io/sdk/java/mcp-server[MCP Server] |
+| link:https://modelcontextprotocol.io/sdk/java/mcp-server[MCP 服务器] |
 
-a| The MCP Server is a foundational component in the Model Context Protocol (MCP) architecture that provides tools, resources, and capabilities to clients. It implements the server-side of the protocol, responsible for:
+a| MCP 服务器是模型上下文协议（MCP）架构中的基础组件，为客户端提供工具、资源和功能。它实现了协议的服务器端，负责：
 
-* Server-side protocol operations implementation
-** Tool exposure and discovery
-** Resource management with URI-based access
-** Prompt template provision and handling
-** Capability negotiation with clients
-** Structured logging and notifications
-* Concurrent client connection management
-* Synchronous and Asynchronous API support
-* Transport implementations:
-** Stdio-based transport for process-based communication
-** Servlet-based SSE server transport
-** WebFlux SSE server transport for reactive HTTP streaming
-** WebMVC SSE server transport for servlet-based HTTP streaming
+* 服务器端协议操作实现
+** 工具暴露和发现
+** 基于 URI 的资源管理
+** 提示模板提供和处理
+** 与客户端的能力协商
+** 结构化日志和通知
+* 并发客户端连接管理
+* 同步和异步 API 支持
+* 传输实现：
+** 基于 Stdio 的传输用于基于进程的通信
+** 基于 Servlet 的 SSE 服务器传输
+** 基于 WebFlux 的 SSE 服务器传输用于反应式 HTTP 流
+** 基于 WebMVC 的 SSE 服务器传输用于基于 Servlet 的 HTTP 流
 
-^a| image::mcp/java-mcp-server-architecture.jpg[Java MCP Server Architecture, width=600]
+^a| image::mcp/java-mcp-server-architecture.jpg[Java MCP 服务器架构, width=600]
 |===
 
-For detailed implementation guidance, using the low-level MCP Client/Server APIs, refer to the link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK documentation].
-For simplified setup using Spring Boot, use the MCP Boot Starters described below.
+有关使用低级 MCP 客户端/服务器 API 的详细实现指南，请参阅 link:https://modelcontextprotocol.io/sdk/java[MCP Java SDK 文档]。
+对于使用 Spring Boot 的简化设置，请使用下面描述的 MCP 启动器。
 
-== Spring AI MCP Integration
+== Spring AI MCP 集成
 
-Spring AI provides MCP integration through the following Spring Boot starters:
+Spring AI 通过以下 Spring Boot 启动器提供 MCP 集成：
 
-=== link:mcp-client-boot-starter-docs.html[Client Starters]
-* `spring-ai-starter-mcp-client` - Core starter providing STDIO and HTTP-based SSE support
-* `spring-ai-starter-mcp-client-webflux` - WebFlux-based SSE transport implementation
+=== link:mcp-client-boot-starter-docs.html[客户端启动器]
+* `spring-ai-starter-mcp-client` - 提供 STDIO 和基于 HTTP 的 SSE 支持的核心启动器
+* `spring-ai-starter-mcp-client-webflux` - 基于 WebFlux 的 SSE 传输实现
 
-=== link:mcp-server-boot-starter-docs.html[Server Starters]
-* `spring-ai-starter-mcp-server` - Core server with STDIO transport support
-* `spring-ai-starter-mcp-server-webmvc` - Spring MVC-based SSE transport implementation
-* `spring-ai-starter-mcp-server-webflux` - WebFlux-based SSE transport implementation
+=== link:mcp-server-boot-starter-docs.html[服务器启动器]
+* `spring-ai-starter-mcp-server` - 具有 STDIO 传输支持的核心服务器
+* `spring-ai-starter-mcp-server-webmvc` - 基于 Spring MVC 的 SSE 传输实现
+* `spring-ai-starter-mcp-server-webflux` - 基于 WebFlux 的 SSE 传输实现
 
-== Additional Resources
+== 其他资源
 
-* link:mcp-client-boot-starter-docs.html[MCP Client Boot Starters Documentation]
-* link:mcp-server-boot-starter-docs.html[MCP Server Boot Starters Documentation]
-* link:mcp-helpers.html[MCP Utilities Documentation]
-* link:https://modelcontextprotocol.github.io/specification/[Model Context Protocol Specification]
+* link:mcp-client-boot-starter-docs.html[MCP 客户端启动器文档]
+* link:mcp-server-boot-starter-docs.html[MCP 服务器启动器文档]
+* link:mcp-helpers.html[MCP 工具类文档]
+* link:https://modelcontextprotocol.github.io/specification/[模型上下文协议规范]

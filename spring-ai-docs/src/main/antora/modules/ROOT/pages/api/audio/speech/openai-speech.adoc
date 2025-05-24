@@ -1,28 +1,28 @@
-= OpenAI Text-to-Speech (TTS)
+= OpenAI 文本转语音（TTS）
 
-== Introduction
+== 简介
 
-The Audio API provides a speech endpoint based on OpenAI's TTS (text-to-speech) model, enabling users to:
+Audio API 提供了基于 OpenAI TTS（文本转语音）模型的语音端点，使用户能够：
 
-- Narrate a written blog post.
-- Produce spoken audio in multiple languages.
-- Give real-time audio output using streaming.
+- 朗读书面博客文章。
+- 以多种语言生成语音音频。
+- 通过流式传输实现实时音频输出。
 
-== Prerequisites
+== 前置条件
 
-. Create an OpenAI account and obtain an API key. You can sign up at the https://platform.openai.com/signup[OpenAI signup page] and generate an API key on the https://platform.openai.com/account/api-keys[API Keys page].
-. Add the `spring-ai-openai` dependency to your project's build file. For more information, refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section.
+. 创建 OpenAI 账号并获取 API 密钥。你可以在 https://platform.openai.com/signup[OpenAI 注册页面] 注册账号，并在 https://platform.openai.com/account/api-keys[API 密钥页面] 生成 API 密钥。
+. 在项目构建文件中添加 `spring-ai-openai` 依赖。更多信息请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和 starter 模块的 artifact 名称发生了重大变化。
+详情请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明]。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the OpenAI Text-to-Speech Client.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 OpenAI 文本转语音客户端提供了 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 文件中添加如下依赖：
 
 [source,xml]
 ----
@@ -32,7 +32,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或在 Gradle `build.gradle` 文件中：
 
 [source,groovy]
 ----
@@ -41,68 +41,68 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+TIP: 依赖管理请参考 xref:getting-started.adoc#dependency-management[Dependency Management] 部分。
 
-== Speech Properties
+== 语音属性
 
-=== Connection Properties
+=== 连接属性
 
-The prefix `spring.ai.openai` is used as the property prefix that lets you connect to OpenAI.
+前缀 `spring.ai.openai` 用于连接 OpenAI。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-| spring.ai.openai.base-url   | The URL to connect to |  https://api.openai.com
-| spring.ai.openai.api-key    | The API Key           |  -
-| spring.ai.openai.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.project-id      | Optionally, you can specify which project is used for an API request. |  -
+| 属性 | 描述 | 默认值
+| spring.ai.openai.base-url   | 连接的 URL |  https://api.openai.com
+| spring.ai.openai.api-key    | API 密钥   |  -
+| spring.ai.openai.organization-id | 可选，指定 API 请求使用的组织 |  -
+| spring.ai.openai.project-id      | 可选，指定 API 请求使用的项目 |  -
 |====
 
-TIP: For users that belong to multiple organizations (or are accessing their projects through their legacy user API key), optionally, you can specify which organization and project is used for an API request. 
-Usage from these API requests will count as usage for the specified organization and project.
+TIP: 对于属于多个组织的用户（或通过旧版用户 API 密钥访问项目），可选地指定 API 请求使用的组织和项目。
+这些 API 请求的用量将计入指定的组织和项目。
 
-=== Configuration Properties
+=== 配置属性
 
 [NOTE]
 ====
-Enabling and disabling of the audio speech auto-configurations are now configured via top level properties with the prefix `spring.ai.model.audio.speech`.
+音频语音自动配置的启用和禁用现在通过顶级属性 `spring.ai.model.audio.speech` 配置。
 
-To enable, spring.ai.model.audio.speech=openai (It is enabled by default)
+启用：spring.ai.model.audio.speech=openai（默认已启用）
 
-To disable, spring.ai.model.audio.speech=none (or any value which doesn't match openai)
+禁用：spring.ai.model.audio.speech=none（或任何不匹配 openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改允许配置多个模型。
 ====
 
-The prefix `spring.ai.openai.audio.speech` is used as the property prefix that lets you configure the OpenAI Text-to-Speech client.
+前缀 `spring.ai.openai.audio.speech` 用于配置 OpenAI 文本转语音客户端。
 
 [cols="3,5,2"]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.model.audio.speech   | Enable Audio Speech Model |  openai
-| spring.ai.openai.audio.speech.base-url   | The URL to connect to |  https://api.openai.com
-| spring.ai.openai.audio.speech.api-key    | The API Key           |  -
-| spring.ai.openai.audio.speech.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.audio.speech.project-id      | Optionally, you can specify which project is used for an API request. |  -
-| spring.ai.openai.audio.speech.options.model  | ID of the model to use for generating the audio. For OpenAI's TTS API, use one of the available models: tts-1 or tts-1-hd. |  tts-1
-| spring.ai.openai.audio.speech.options.voice | The voice to use for synthesis. For OpenAI's TTS API, One of the available voices for the chosen model: alloy, echo, fable, onyx, nova, and shimmer. | alloy
-| spring.ai.openai.audio.speech.options.response-format | The format of the audio output. Supported formats are mp3, opus, aac, flac, wav, and pcm. | mp3
-| spring.ai.openai.audio.speech.options.speed | The speed of the voice synthesis. The acceptable range is from 0.25 (slowest) to 4.0 (fastest). | 1.0
+| spring.ai.model.audio.speech   | 启用音频语音模型 |  openai
+| spring.ai.openai.audio.speech.base-url   | 连接的 URL |  https://api.openai.com
+| spring.ai.openai.audio.speech.api-key    | API 密钥   |  -
+| spring.ai.openai.audio.speech.organization-id | 可选，指定 API 请求使用的组织 |  -
+| spring.ai.openai.audio.speech.project-id      | 可选，指定 API 请求使用的项目 |  -
+| spring.ai.openai.audio.speech.options.model  | 用于生成音频的模型 ID。对于 OpenAI TTS API，请使用 tts-1 或 tts-1-hd。 |  tts-1
+| spring.ai.openai.audio.speech.options.voice | 合成所用的声音。可选 alloy、echo、fable、onyx、nova、shimmer。 | alloy
+| spring.ai.openai.audio.speech.options.response-format | 音频输出格式。支持 mp3、opus、aac、flac、wav、pcm。 | mp3
+| spring.ai.openai.audio.speech.options.speed | 语音合成速度，范围 0.25（最慢）到 4.0（最快）。 | 1.0
 |====
 
-NOTE: You can override the common `spring.ai.openai.base-url`, `spring.ai.openai.api-key`, `spring.ai.openai.organization-id` and `spring.ai.openai.project-id` properties.
-The `spring.ai.openai.audio.speech.base-url`, `spring.ai.openai.audio.speech.api-key`, `spring.ai.openai.audio.speech.organization-id` and `spring.ai.openai.audio.speech.project-id` properties if set take precedence over the common properties.
-This is useful if you want to use different OpenAI accounts for different models and different model endpoints.
+NOTE: 你可以覆盖通用的 `spring.ai.openai.base-url`、`spring.ai.openai.api-key`、`spring.ai.openai.organization-id` 和 `spring.ai.openai.project-id` 属性。
+如果设置了 `spring.ai.openai.audio.speech.base-url`、`spring.ai.openai.audio.speech.api-key`、`spring.ai.openai.audio.speech.organization-id` 和 `spring.ai.openai.audio.speech.project-id`，则优先生效。
+这对于为不同模型和端点使用不同 OpenAI 账号很有用。
 
-TIP: All properties prefixed with `spring.ai.openai.image.options` can be overridden at runtime.
+TIP: 所有以 `spring.ai.openai.image.options` 为前缀的属性都可以在运行时覆盖。
 
-== Runtime Options [[speech-options]]
+== 运行时选项 [[speech-options]]
 
-The `OpenAiAudioSpeechOptions` class provides the options to use when making a text-to-speech request.
-On start-up, the options specified by `spring.ai.openai.audio.speech` are used but you can override these at runtime.
+`OpenAiAudioSpeechOptions` 类提供了进行文本转语音请求时可用的选项。
+启动时使用 `spring.ai.openai.audio.speech` 指定的选项，但你可以在运行时覆盖。
 
-For example:
+例如：
 
 [source,java]
 ----
@@ -117,9 +117,9 @@ SpeechPrompt speechPrompt = new SpeechPrompt("Hello, this is a text-to-speech ex
 SpeechResponse response = openAiAudioSpeechModel.call(speechPrompt);
 ----
 
-== Manual Configuration
+== 手动配置
 
-Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
+在项目的 Maven `pom.xml` 文件中添加 `spring-ai-openai` 依赖：
 
 [source,xml]
 ----
@@ -129,7 +129,7 @@ Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或在 Gradle `build.gradle` 文件中：
 
 [source,groovy]
 ----
@@ -138,9 +138,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+TIP: 依赖管理请参考 xref:getting-started.adoc#dependency-management[Dependency Management] 部分。
 
-Next, create an `OpenAiAudioSpeechModel`:
+接下来，创建 `OpenAiAudioSpeechModel`：
 
 [source,java]
 ----
@@ -159,15 +159,15 @@ var speechOptions = OpenAiAudioSpeechOptions.builder()
 var speechPrompt = new SpeechPrompt("Hello, this is a text-to-speech example.", speechOptions);
 SpeechResponse response = openAiAudioSpeechModel.call(speechPrompt);
 
-// Accessing metadata (rate limit info)
+// 获取元数据（速率限制信息）
 OpenAiAudioSpeechResponseMetadata metadata = response.getMetadata();
 
 byte[] responseAsBytes = response.getResult().getOutput();
 ----
 
-== Streaming Real-time Audio
+== 实时音频流
 
-The Speech API provides support for real-time audio streaming using chunk transfer encoding. This means that the audio is able to be played before the full file has been generated and made accessible.
+Speech API 支持通过分块传输编码实现实时音频流。这意味着音频可以在完整文件生成并可访问之前播放。
 
 [source,java]
 ----
@@ -189,6 +189,6 @@ SpeechPrompt speechPrompt = new SpeechPrompt("Today is a wonderful day to build 
 Flux<SpeechResponse> responseStream = openAiAudioSpeechModel.stream(speechPrompt);
 ----
 
-== Example Code
+== 示例代码
 
-* The link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/test/java/org/springframework/ai/openai/audio/speech/OpenAiSpeechModelIT.java[OpenAiSpeechModelIT.java] test provides some general examples of how to use the library.
+* link:https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/test/java/org/springframework/ai/openai/audio/speech/OpenAiSpeechModelIT.java[OpenAiSpeechModelIT.java] 测试提供了如何使用该库的一般示例。

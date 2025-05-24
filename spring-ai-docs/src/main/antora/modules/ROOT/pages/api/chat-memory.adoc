@@ -1,20 +1,20 @@
 [[ChatMemory]]
-= Chat Memory
+= 聊天内存
 
-Large language models (LLMs) are stateless, meaning they do not retain information about previous interactions. This can be a limitation when you want to maintain context or state across multiple interactions. To address this, Spring AI provides chat memory features that allow you to store and retrieve information across multiple interactions with the LLM.
+大型语言模型（LLMs）是无状态的，这意味着它们不保留有关先前交互的信息。当您想要在多个交互中维护上下文或状态时，这可能是一个限制。为了解决这个问题，Spring AI 提供了聊天内存功能，允许您存储和检索与 LLM 的多个交互中的信息。
 
-The `ChatMemory` abstraction allows you to implement various types of memory to support different use cases. The underlying storage of the messages is handled by the `ChatMemoryRepository`, whose sole responsibility is to store and retrieve messages. It's up to the `ChatMemory` implementation to decide which messages to keep and when to remove them. Examples of strategies could include keeping the last N messages, keeping messages for a certain time period, or keeping messages up to a certain token limit.
+`ChatMemory` 抽象允许您实现各种类型的内存来支持不同的用例。消息的底层存储由 `ChatMemoryRepository` 处理，其唯一职责是存储和检索消息。由 `ChatMemory` 实现决定保留哪些消息以及何时删除它们。策略示例可能包括保留最后 N 条消息、保留特定时间段的消息或保留达到特定令牌限制的消息。
 
-Before choosing a memory type, it's essential to understand the difference between chat memory and chat history.
+在选择内存类型之前，了解聊天内存和聊天历史之间的区别很重要。
 
-* *Chat Memory*. The information that a large-language model retains and uses to maintain contextual awareness throughout a conversation.
-* *Chat History*. The entire conversation history, including all messages exchanged between the user and the model.
+* *聊天内存*。大型语言模型保留并用于在整个对话中保持上下文感知的信息。
+* *聊天历史*。整个对话历史，包括用户和模型之间交换的所有消息。
 
-The `ChatMemory` abstraction is designed to manage the _chat memory_. It allows you to store and retrieve messages that are relevant to the current conversation context. However, it is not the best fit for storing the _chat history_. If you need to maintain a complete record of all the messages exchanged, you should consider using a different approach, such as relying on Spring Data for efficient storage and retrieval of the complete chat history.
+`ChatMemory` 抽象旨在管理_聊天内存_。它允许您存储和检索与当前对话上下文相关的消息。但是，它不适合存储_聊天历史_。如果您需要维护所有交换消息的完整记录，您应该考虑使用不同的方法，例如依赖 Spring Data 来高效存储和检索完整的聊天历史。
 
-== Quick Start
+== 快速开始
 
-Spring AI auto-configures a `ChatMemory` bean that you can use directly in your application. By default, it uses an in-memory repository to store messages (`InMemoryChatMemoryRepository`) and a `MessageWindowChatMemory` implementation to manage the conversation history. If a different repository is already configured (e.g., Cassandra, JDBC, or Neo4j), Spring AI will use that instead.
+Spring AI 自动配置一个 `ChatMemory` bean，您可以直接在应用程序中使用它。默认情况下，它使用内存存储库来存储消息（`InMemoryChatMemoryRepository`）和 `MessageWindowChatMemory` 实现来管理对话历史。如果已经配置了不同的存储库（例如 Cassandra、JDBC 或 Neo4j），Spring AI 将使用该存储库。
 
 [source,java]
 ----
@@ -22,15 +22,15 @@ Spring AI auto-configures a `ChatMemory` bean that you can use directly in your 
 ChatMemory chatMemory;
 ----
 
-The following sections will describe further the different memory types and repositories available in Spring AI.
+以下部分将详细描述 Spring AI 中可用的不同内存类型和存储库。
 
-== Memory Types
+== 内存类型
 
-The `ChatMemory` abstraction allows you to implement various types of memory to suit different use cases. The choice of memory type can significantly impact the performance and behavior of your application. This section describes the built-in memory types provided by Spring AI and their characteristics.
+`ChatMemory` 抽象允许您实现各种类型的内存以适应不同的用例。内存类型的选择会显著影响应用程序的性能和行为。本节描述了 Spring AI 提供的内置内存类型及其特性。
 
-=== Message Window Chat Memory
+=== 消息窗口聊天内存
 
-`MessageWindowChatMemory` maintains a window of messages up to a specified maximum size. When the number of messages exceeds the maximum, older messages are removed while preserving system messages. The default window size is 20 messages.
+`MessageWindowChatMemory` 维护一个最大指定大小的消息窗口。当消息数量超过最大值时，会删除较旧的消息，同时保留系统消息。默认窗口大小为 20 条消息。
 
 [source,java]
 ----
@@ -39,17 +39,17 @@ MessageWindowChatMemory memory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-This is the default message type used by Spring AI to auto-configure a `ChatMemory` bean.
+这是 Spring AI 用于自动配置 `ChatMemory` bean 的默认消息类型。
 
-== Memory Storage
+== 内存存储
 
-Spring AI offers the `ChatMemoryRepository` abstraction for storing chat memory. This section describes the built-in repositories provided by Spring AI and how to use them, but you can also implement your own repository if needed.
+Spring AI 提供 `ChatMemoryRepository` 抽象用于存储聊天内存。本节描述了 Spring AI 提供的内置存储库以及如何使用它们，但您也可以根据需要实现自己的存储库。
 
-=== In-Memory Repository
+=== 内存存储库
 
-`InMemoryChatMemoryRepository` stores messages in memory using a `ConcurrentHashMap`.
+`InMemoryChatMemoryRepository` 使用 `ConcurrentHashMap` 在内存中存储消息。
 
-By default, if no other repository is already configured, Spring AI auto-configures a `ChatMemoryRepository` bean of type `InMemoryChatMemoryRepository` that you can use directly in your application.
+默认情况下，如果没有配置其他存储库，Spring AI 会自动配置一个类型为 `InMemoryChatMemoryRepository` 的 `ChatMemoryRepository` bean，您可以直接在应用程序中使用它。
 
 [source,java]
 ----
@@ -57,7 +57,7 @@ By default, if no other repository is already configured, Spring AI auto-configu
 ChatMemoryRepository chatMemoryRepository;
 ----
 
-If you'd rather create the `InMemoryChatMemoryRepository` manually, you can do so as follows:
+如果您想手动创建 `InMemoryChatMemoryRepository`，可以这样做：
 
 [source,java]
 ----
@@ -66,9 +66,9 @@ ChatMemoryRepository repository = new InMemoryChatMemoryRepository();
 
 === JdbcChatMemoryRepository
 
-`JdbcChatMemoryRepository` is a built-in implementation that uses JDBC to store messages in a relational database. It supports multiple databases out-of-the-box and is suitable for applications that require persistent storage of chat memory.
+`JdbcChatMemoryRepository` 是一个内置实现，使用 JDBC 在关系数据库中存储消息。它开箱即用地支持多个数据库，适合需要持久存储聊天内存的应用程序。
 
-First, add the following dependency to your project:
+首先，将以下依赖项添加到您的项目中：
 
 [tabs]
 ======
@@ -92,7 +92,7 @@ dependencies {
 ----
 ======
 
-Spring AI provides auto-configuration for the `JdbcChatMemoryRepository`, that you can use directly in your application.
+Spring AI 为 `JdbcChatMemoryRepository` 提供自动配置，您可以直接在应用程序中使用它。
 
 [source,java]
 ----
@@ -105,7 +105,7 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-If you'd rather create the `JdbcChatMemoryRepository` manually, you can do so by providing a `JdbcTemplate` instance and a `JdbcChatMemoryRepositoryDialect`:
+如果您想手动创建 `JdbcChatMemoryRepository`，可以通过提供 `JdbcTemplate` 实例和 `JdbcChatMemoryRepositoryDialect` 来实现：
 
 [source,java]
 ----
@@ -120,50 +120,50 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-==== Supported Databases and Dialect Abstraction
+==== 支持的数据库和方言抽象
 
-Spring AI supports multiple relational databases via a dialect abstraction. The following databases are supported out-of-the-box:
+Spring AI 通过方言抽象支持多个关系数据库。以下数据库开箱即用地支持：
 
 - PostgreSQL
 - MySQL / MariaDB
 - SQL Server
 - HSQLDB
 
-The correct dialect can be auto-detected from the JDBC URL when using `JdbcChatMemoryRepositoryDialect.from(DataSource)`. You can extend support for other databases by implementing the `JdbcChatMemoryRepositoryDialect` interface.
+当使用 `JdbcChatMemoryRepositoryDialect.from(DataSource)` 时，可以从 JDBC URL 自动检测正确的方言。您可以通过实现 `JdbcChatMemoryRepositoryDialect` 接口来扩展对其他数据库的支持。
 
-==== Configuration Properties
+==== 配置属性
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
-| `spring.ai.chat.memory.repository.jdbc.initialize-schema` | Controls when to initialize the schema. Values: `embedded` (default), `always`, `never`. | `embedded`
-| `spring.ai.chat.memory.repository.jdbc.schema` | Location of the schema script to use for initialization. Supports `classpath:` URLs and platform placeholders. | `classpath:org/springframework/ai/chat/memory/repository/jdbc/schema-@@platform@@.sql`
-| `spring.ai.chat.memory.repository.jdbc.platform` | Platform to use in initialization scripts if the @@platform@@ placeholder is used. | _auto-detected_
+|属性 | 描述 | 默认值
+| `spring.ai.chat.memory.repository.jdbc.initialize-schema` | 控制何时初始化架构。值：`embedded`（默认）、`always`、`never`。 | `embedded`
+| `spring.ai.chat.memory.repository.jdbc.schema` | 用于初始化的架构脚本的位置。支持 `classpath:` URL 和平台占位符。 | `classpath:org/springframework/ai/chat/memory/repository/jdbc/schema-@@platform@@.sql`
+| `spring.ai.chat.memory.repository.jdbc.platform` | 如果在初始化脚本中使用了 @@platform@@ 占位符，则使用的平台。 | _自动检测_
 |===
 
-==== Schema Initialization
+==== 架构初始化
 
-The auto-configuration will automatically create the `SPRING_AI_CHAT_MEMORY` table on startup, using a vendor-specific SQL script for your database. By default, schema initialization runs only for embedded databases (H2, HSQL, Derby, etc.).
+自动配置将在启动时自动创建 `SPRING_AI_CHAT_MEMORY` 表，使用特定于供应商的 SQL 脚本。默认情况下，架构初始化仅针对嵌入式数据库（H2、HSQL、Derby 等）运行。
 
-You can control schema initialization using the `spring.ai.chat.memory.repository.jdbc.initialize-schema` property:
+您可以使用 `spring.ai.chat.memory.repository.jdbc.initialize-schema` 属性控制架构初始化：
 
 [source,properties]
 ----
-spring.ai.chat.memory.repository.jdbc.initialize-schema=embedded # Only for embedded DBs (default)
-spring.ai.chat.memory.repository.jdbc.initialize-schema=always   # Always initialize
-spring.ai.chat.memory.repository.jdbc.initialize-schema=never    # Never initialize (useful with Flyway/Liquibase)
+spring.ai.chat.memory.repository.jdbc.initialize-schema=embedded # 仅用于嵌入式数据库（默认）
+spring.ai.chat.memory.repository.jdbc.initialize-schema=always   # 始终初始化
+spring.ai.chat.memory.repository.jdbc.initialize-schema=never    # 从不初始化（与 Flyway/Liquibase 一起使用时很有用）
 ----
 
-To override the schema script location, use:
+要覆盖架构脚本位置，请使用：
 
 [source,properties]
 ----
 spring.ai.chat.memory.repository.jdbc.schema=classpath:/custom/path/schema-mysql.sql
 ----
 
-==== Extending Dialects
+==== 扩展方言
 
-To add support for a new database, implement the `JdbcChatMemoryRepositoryDialect` interface and provide SQL for selecting, inserting, and deleting messages. You can then pass your custom dialect to the repository builder.
+要添加对新数据库的支持，请实现 `JdbcChatMemoryRepositoryDialect` 接口并提供用于选择、插入和删除消息的 SQL。然后，您可以将自定义方言传递给存储库构建器。
 
 [source,java]
 ----
@@ -176,11 +176,11 @@ ChatMemoryRepository chatMemoryRepository = JdbcChatMemoryRepository.builder()
 
 === CassandraChatMemoryRepository
 
-`CassandraChatMemoryRepository` uses Apache Cassandra to store messages.  It is suitable for applications that require persistent storage of chat memory, especially for availability, durability, scale, and when taking advantage of time-to-live (TTL) feature.
+`CassandraChatMemoryRepository` 使用 Apache Cassandra 存储消息。它适合需要持久存储聊天内存的应用程序，特别是在可用性、持久性、扩展性方面，以及利用生存时间（TTL）功能时。
 
-`CassandraChatMemoryRepository` has a time-series schema, keeping record of all past chat windows, valuable for governance and auditing.  Setting time-to-live to some value, for example three years, is recommended.
+`CassandraChatMemoryRepository` 具有时间序列架构，保留所有过去的聊天窗口记录，对治理和审计很有价值。建议将生存时间设置为某个值，例如三年。
 
-To use `CassandraChatMemoryRepository` first, add the dependency to your project:
+要使用 `CassandraChatMemoryRepository`，首先将依赖项添加到您的项目中：
 
 [tabs]
 ======
@@ -204,7 +204,7 @@ dependencies {
 ----
 ======
 
-Spring AI provides auto-configuration for the `CassandraChatMemoryRepository` that you can use directly in your application.
+Spring AI 为 `CassandraChatMemoryRepository` 提供自动配置，您可以直接在应用程序中使用它。
 
 [source,java]
 ----
@@ -217,7 +217,7 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-If you'd rather create the `CassandraChatMemoryRepository` manually, you can do so by providing a `CassandraChatMemoryRepositoryConfig` instance:
+如果您想手动创建 `CassandraChatMemoryRepository`，可以通过提供 `CassandraChatMemoryRepositoryConfig` 实例来实现：
 
 [source,java]
 ----
@@ -230,32 +230,32 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-==== Configuration Properties
+==== 配置属性
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
-| `spring.cassandra.contactPoints` | Host(s) to initiate cluster discovery | `127.0.0.1`
-| `spring.cassandra.port` | Cassandra native protocol port to connect to | `9042`
-| `spring.cassandra.localDatacenter` | Cassandra datacenter to connect to | `datacenter1`
-| `spring.ai.chat.memory.cassandra.time-to-live` | Time to live (TTL) for messages written in Cassandra |
-| `spring.ai.chat.memory.cassandra.keyspace` | Cassandra keyspace | `springframework`
-| `spring.ai.chat.memory.cassandra.messages-column` | Cassandra column name for messages | `springframework`
-| `spring.ai.chat.memory.cassandra.table` | Cassandra table | `ai_chat_memory`
-| `spring.ai.chat.memory.cassandra.initialize-schema` | Whether to initialize the schema on startup. | `true`
+|属性 | 描述 | 默认值
+| `spring.cassandra.contactPoints` | 用于启动集群发现的主机 | `127.0.0.1`
+| `spring.cassandra.port` | 用于连接的 Cassandra 原生协议端口 | `9042`
+| `spring.cassandra.localDatacenter` | 要连接的 Cassandra 数据中心 | `datacenter1`
+| `spring.ai.chat.memory.cassandra.time-to-live` | 在 Cassandra 中写入的消息的生存时间（TTL） |
+| `spring.ai.chat.memory.cassandra.keyspace` | Cassandra 键空间 | `springframework`
+| `spring.ai.chat.memory.cassandra.messages-column` | Cassandra 消息列名 | `springframework`
+| `spring.ai.chat.memory.cassandra.table` | Cassandra 表 | `ai_chat_memory`
+| `spring.ai.chat.memory.cassandra.initialize-schema` | 是否在启动时初始化架构。 | `true`
 |===
 
-==== Schema Initialization
+==== 架构初始化
 
-The auto-configuration will automatically create the `ai_chat_memory` table.
+自动配置将自动创建 `ai_chat_memory` 表。
 
-You can disable the schema initialization by setting the property `spring.ai.chat.memory.repository.cassandra.initialize-schema` to `false`.
+您可以通过将属性 `spring.ai.chat.memory.repository.cassandra.initialize-schema` 设置为 `false` 来禁用架构初始化。
 
 === Neo4j ChatMemoryRepository
 
-`Neo4jChatMemoryRepository` is a built-in implementation that uses Neo4j to store chat messages as nodes and relationships in a property graph database. It is suitable for applications that want to leverage Neo4j's graph capabilities for chat memory persistence.
+`Neo4jChatMemoryRepository` 是一个内置实现，使用 Neo4j 将聊天消息作为节点和关系存储在属性图数据库中。它适合想要利用 Neo4j 的图功能进行聊天内存持久化的应用程序。
 
-First, add the following dependency to your project:
+首先，将以下依赖项添加到您的项目中：
 
 [tabs]
 ======
@@ -279,7 +279,7 @@ dependencies {
 ----
 ======
 
-Spring AI provides auto-configuration for the `Neo4jChatMemoryRepository`, which you can use directly in your application.
+Spring AI 为 `Neo4jChatMemoryRepository` 提供自动配置，您可以直接在应用程序中使用它。
 
 [source,java]
 ----
@@ -292,7 +292,7 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-If you'd rather create the `Neo4jChatMemoryRepository` manually, you can do so by providing a Neo4j `Driver` instance:
+如果您想手动创建 `Neo4jChatMemoryRepository`，可以通过提供 Neo4j `Driver` 实例来实现：
 
 [source,java]
 ----
@@ -306,36 +306,36 @@ ChatMemory chatMemory = MessageWindowChatMemory.builder()
     .build();
 ----
 
-==== Configuration Properties
+==== 配置属性
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
-| `spring.ai.chat.memory.repository.neo4j.sessionLabel` | The label for the nodes that store conversation sessions | `Session`
-| `spring.ai.chat.memory.repository.neo4j.messageLabel` | The label for the nodes that store messages | `Message`
-| `spring.ai.chat.memory.repository.neo4j.toolCallLabel` | The label for nodes that store tool calls (e.g. in Assistant Messages) | `ToolCall`
-| `spring.ai.chat.memory.repository.neo4j.metadataLabel` | The label for nodes that store message metadata | `Metadata`
-| `spring.ai.chat.memory.repository.neo4j.toolResponseLabel` | The label for the nodes that store tool responses | `ToolResponse`
-| `spring.ai.chat.memory.repository.neo4j.mediaLabel` | The label for the nodes that store media associated with a message | `Media`
+|属性 | 描述 | 默认值
+| `spring.ai.chat.memory.repository.neo4j.sessionLabel` | 存储对话会话的节点的标签 | `Session`
+| `spring.ai.chat.memory.repository.neo4j.messageLabel` | 存储消息的节点的标签 | `Message`
+| `spring.ai.chat.memory.repository.neo4j.toolCallLabel` | 存储工具调用的节点的标签（例如在助手消息中） | `ToolCall`
+| `spring.ai.chat.memory.repository.neo4j.metadataLabel` | 存储消息元数据的节点的标签 | `Metadata`
+| `spring.ai.chat.memory.repository.neo4j.toolResponseLabel` | 存储工具响应的节点的标签 | `ToolResponse`
+| `spring.ai.chat.memory.repository.neo4j.mediaLabel` | 存储与消息关联的媒体的节点的标签 | `Media`
 |===
 
-==== Index Initialization
+==== 索引初始化
 
-The Neo4j repository will automatically ensure that indexes are created for conversation IDs and message indices to optimize performance. If you use custom labels, indexes will be created for those labels as well. No schema initialization is required, but you should ensure your Neo4j instance is accessible to your application.
+Neo4j 存储库将自动确保为会话 ID 和消息索引创建索引，以优化性能。如果您使用自定义标签，也将为这些标签创建索引。不需要架构初始化，但您应该确保您的 Neo4j 实例可以被您的应用程序访问。
 
-== Memory in Chat Client
+== 聊天客户端中的内存
 
-When using the ChatClient API, you can provide a `ChatMemory` implementation to maintain conversation context across multiple interactions.
+使用 ChatClient API 时，您可以提供 `ChatMemory` 实现来维护多个交互之间的对话上下文。
 
-Spring AI provides a few built-in Advisors that you can use to configure the memory behavior of the `ChatClient`, based on your needs.
+Spring AI 提供了几个内置的 Advisors，您可以使用它们来根据您的需求配置 `ChatClient` 的内存行为。
 
-WARNING: Currently, the intermediate messages exchanged with a large-language model when performing tool calls are not stored in the memory. This is a limitation of the current implementation and will be addressed in future releases. If you need to store these messages, refer to the instructions for the xref:api/tools.adoc#_user_controlled_tool_execution[User Controlled Tool Execution].
+警告：目前，在执行工具调用时与大型语言模型交换的中间消息不会存储在内存中。这是当前实现的限制，将在未来的版本中解决。如果您需要存储这些消息，请参阅 xref:api/tools.adoc#_user_controlled_tool_execution[用户控制的工具执行] 的说明。
 
-* `MessageChatMemoryAdvisor`. This advisor manages the conversation memory using the provided `ChatMemory` implementation. On each interaction, it retrieves the conversation history from the memory and includes it in the prompt as a collection of messages.
-* `PromptChatMemoryAdvisor`. This advisor manages the conversation memory using the provided `ChatMemory` implementation. On each interaction, it retrieves the conversation history from the memory and appends it to the system prompt as plain text.
-* `VectorStoreChatMemoryAdvisor`. This advisor manages the conversation memory using the provided `VectorStore` implementation. On each interaction, it retrieves the conversation history from the vector store and appends it to the system message as plain text.
+* `MessageChatMemoryAdvisor`。此 advisor 使用提供的 `ChatMemory` 实现管理对话内存。在每次交互时，它从内存中检索对话历史并将其作为消息集合包含在提示中。
+* `PromptChatMemoryAdvisor`。此 advisor 使用提供的 `ChatMemory` 实现管理对话内存。在每次交互时，它从内存中检索对话历史并将其作为纯文本附加到系统提示中。
+* `VectorStoreChatMemoryAdvisor`。此 advisor 使用提供的 `VectorStore` 实现管理对话内存。在每次交互时，它从向量存储中检索对话历史并将其作为纯文本附加到系统消息中。
 
-For example, if you want to use `MessageWindowChatMemory` with the `MessageChatMemoryAdvisor`, you can configure it as follows:
+例如，如果您想将 `MessageWindowChatMemory` 与 `MessageChatMemoryAdvisor` 一起使用，可以这样配置：
 
 [source,java]
 ----
@@ -346,7 +346,7 @@ ChatClient chatClient = ChatClient.builder(chatModel)
     .build();
 ----
 
-When performing a call to the `ChatClient`, the memory will be automatically managed by the `MessageChatMemoryAdvisor`. The conversation history will be retrieved from the memory based on the specified conversation ID:
+当对 `ChatClient` 执行调用时，内存将由 `MessageChatMemoryAdvisor` 自动管理。对话历史将根据指定的会话 ID 从内存中检索：
 
 [source,java]
 ----
@@ -361,51 +361,51 @@ chatClient.prompt()
 
 === PromptChatMemoryAdvisor
 
-==== Custom Template
+==== 自定义模板
 
-The `PromptChatMemoryAdvisor` uses a default template to augment the system message with the retrieved conversation memory. You can customize this behavior by providing your own `PromptTemplate` object via the `.promptTemplate()` builder method.
+`PromptChatMemoryAdvisor` 使用默认模板来增强系统消息与检索到的对话内存。您可以通过 `.promptTemplate()` 构建器方法提供自己的 `PromptTemplate` 对象来自定义此行为。
 
-NOTE: The `PromptTemplate` provided here customizes how the advisor merges retrieved memory with the system message. This is distinct from configuring a `TemplateRenderer` on the `ChatClient` itself (using `.templateRenderer()`), which affects the rendering of the initial user/system prompt content *before* the advisor runs. See xref:api/chatclient.adoc#_prompt_templates[ChatClient Prompt Templates] for more details on client-level template rendering.
+注意：这里提供的 `PromptTemplate` 自定义 advisor 如何将检索到的内存与系统消息合并。这与在 `ChatClient` 本身上配置 `TemplateRenderer`（使用 `.templateRenderer()`）不同，后者影响 advisor 运行之前初始用户/系统提示内容的渲染。有关客户端级模板渲染的更多详细信息，请参阅 xref:api/chatclient.adoc#_prompt_templates[ChatClient 提示模板]。
 
-The custom `PromptTemplate` can use any `TemplateRenderer` implementation (by default, it uses `StPromptTemplate` based on the https://www.stringtemplate.org/[StringTemplate] engine). The important requirement is that the template must contain the following two placeholders:
+自定义 `PromptTemplate` 可以使用任何 `TemplateRenderer` 实现（默认情况下，它使用基于 https://www.stringtemplate.org/[StringTemplate] 引擎的 `StPromptTemplate`）。重要要求是模板必须包含以下两个占位符：
 
-* an `instructions` placeholder to receive the original system message.
-* a `memory` placeholder to receive the retrieved conversation memory.
+* 一个 `instructions` 占位符，用于接收原始系统消息。
+* 一个 `memory` 占位符，用于接收检索到的对话内存。
 
 === VectorStoreChatMemoryAdvisor
 
-==== Custom Template
+==== 自定义模板
 
-The `VectorStoreChatMemoryAdvisor` uses a default template to augment the system message with the retrieved conversation memory. You can customize this behavior by providing your own `PromptTemplate` object via the `.promptTemplate()` builder method.
+`VectorStoreChatMemoryAdvisor` 使用默认模板来增强系统消息与检索到的对话内存。您可以通过 `.promptTemplate()` 构建器方法提供自己的 `PromptTemplate` 对象来自定义此行为。
 
-NOTE: The `PromptTemplate` provided here customizes how the advisor merges retrieved memory with the system message. This is distinct from configuring a `TemplateRenderer` on the `ChatClient` itself (using `.templateRenderer()`), which affects the rendering of the initial user/system prompt content *before* the advisor runs. See xref:api/chatclient.adoc#_prompt_templates[ChatClient Prompt Templates] for more details on client-level template rendering.
+注意：这里提供的 `PromptTemplate` 自定义 advisor 如何将检索到的内存与系统消息合并。这与在 `ChatClient` 本身上配置 `TemplateRenderer`（使用 `.templateRenderer()`）不同，后者影响 advisor 运行之前初始用户/系统提示内容的渲染。有关客户端级模板渲染的更多详细信息，请参阅 xref:api/chatclient.adoc#_prompt_templates[ChatClient 提示模板]。
 
-The custom `PromptTemplate` can use any `TemplateRenderer` implementation (by default, it uses `StPromptTemplate` based on the https://www.stringtemplate.org/[StringTemplate] engine). The important requirement is that the template must contain the following two placeholders:
+自定义 `PromptTemplate` 可以使用任何 `TemplateRenderer` 实现（默认情况下，它使用基于 https://www.stringtemplate.org/[StringTemplate] 引擎的 `StPromptTemplate`）。重要要求是模板必须包含以下两个占位符：
 
-* an `instructions` placeholder to receive the original system message.
-* a `long_term_memory` placeholder to receive the retrieved conversation memory.
+* 一个 `instructions` 占位符，用于接收原始系统消息。
+* 一个 `long_term_memory` 占位符，用于接收检索到的对话内存。
 
-== Memory in Chat Model
+== 聊天模型中的内存
 
-If you're working directly with a `ChatModel` instead of a `ChatClient`, you can manage the memory explicitly:
+如果您直接使用 `ChatModel` 而不是 `ChatClient`，您可以显式管理内存：
 
 [source,java]
 ----
-// Create a memory instance
+// 创建内存实例
 ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
 String conversationId = "007";
 
-// First interaction
+// 第一次交互
 UserMessage userMessage1 = new UserMessage("My name is James Bond");
 chatMemory.add(conversationId, userMessage1);
 ChatResponse response1 = chatModel.call(new Prompt(chatMemory.get(conversationId)));
 chatMemory.add(conversationId, response1.getResult().getOutput());
 
-// Second interaction
+// 第二次交互
 UserMessage userMessage2 = new UserMessage("What is my name?");
 chatMemory.add(conversationId, userMessage2);
 ChatResponse response2 = chatModel.call(new Prompt(chatMemory.get(conversationId)));
 chatMemory.add(conversationId, response2.getResult().getOutput());
 
-// The response will contain "James Bond"
+// 响应将包含 "James Bond"
 ----

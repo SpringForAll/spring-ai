@@ -1,19 +1,19 @@
-= Transformers (ONNX) Embeddings
+= Transformers (ONNX) 嵌入模型
 
-The `TransformersEmbeddingModel` is an `EmbeddingModel` implementation that locally computes https://www.sbert.net/examples/applications/computing-embeddings/README.html#sentence-embeddings-with-transformers[sentence embeddings] using a selected https://www.sbert.net/[sentence transformer].
+`TransformersEmbeddingModel` 是一个 `EmbeddingModel` 实现，它使用选定的 https://www.sbert.net/[sentence transformer] 在本地计算 https://www.sbert.net/examples/applications/computing-embeddings/README.html#sentence-embeddings-with-transformers[句子嵌入]。
 
-You can use any link:https://huggingface.co/spaces/mteb/leaderboard[HuggingFace Embedding model].
+你可以使用任何 link:https://huggingface.co/spaces/mteb/leaderboard[HuggingFace 嵌入模型]。
 
-It uses https://www.sbert.net/docs/pretrained_models.html[pre-trained] transformer models, serialized into the https://onnx.ai/[Open Neural Network Exchange (ONNX)] format.
+它使用 https://www.sbert.net/docs/pretrained_models.html[预训练] 的 transformer 模型，这些模型被序列化为 https://onnx.ai/[开放神经网络交换(ONNX)] 格式。
 
-The https://djl.ai/[Deep Java Library] and the Microsoft https://onnxruntime.ai/docs/get-started/with-java.html[ONNX Java Runtime] libraries are applied to run the ONNX models and compute the embeddings in Java.
+使用 https://djl.ai/[Deep Java Library] 和微软的 https://onnxruntime.ai/docs/get-started/with-java.html[ONNX Java Runtime] 库来运行 ONNX 模型并在 Java 中计算嵌入。
 
-== Prerequisites
+== 前提条件
 
-To run things in Java, we need to *serialize the Tokenizer and the Transformer Model* into `ONNX` format.
+要在 Java 中运行，我们需要将 *Tokenizer 和 Transformer 模型序列化*为 `ONNX` 格式。
 
-Serialize with optimum-cli - One, quick, way to achieve this, is to use the https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model#exporting-a-model-to-onnx-using-the-cli[optimum-cli] command line tool.
-The following snippet prepares a python virtual environment, installs the required packages and serializes (e.g. exports) the specified model using `optimum-cli` :
+使用 optimum-cli 序列化 - 实现这一目标的一个快速方法是使用 https://huggingface.co/docs/optimum/exporters/onnx/usage_guides/export_a_model#exporting-a-model-to-onnx-using-the-cli[optimum-cli] 命令行工具。
+以下代码片段准备了一个 Python 虚拟环境，安装所需的包，并使用 `optimum-cli` 序列化（例如导出）指定的模型：
 
 [source,bash]
 ----
@@ -24,20 +24,20 @@ source ./venv/bin/activate
 (venv) optimum-cli export onnx --model sentence-transformers/all-MiniLM-L6-v2 onnx-output-folder
 ----
 
-The snippet exports the https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2[sentence-transformers/all-MiniLM-L6-v2] transformer into the `onnx-output-folder` folder. The latter includes the `tokenizer.json` and `model.onnx` files used by the embedding model.
+该代码片段将 https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2[sentence-transformers/all-MiniLM-L6-v2] transformer 导出到 `onnx-output-folder` 文件夹。后者包含嵌入模型使用的 `tokenizer.json` 和 `model.onnx` 文件。
 
-In place of the all-MiniLM-L6-v2 you can pick any huggingface transformer identifier or provide direct file path.
+你可以选择任何 huggingface transformer 标识符或提供直接文件路径来替代 all-MiniLM-L6-v2。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the ONNX Transformer Embedding Model.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 ONNX Transformer 嵌入模型提供了 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -47,7 +47,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -56,55 +56,54 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add these repositories to your build system.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到你的构建文件中。
+请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将这些仓库添加到你的构建系统中。
 
-To configure it, use the `spring.ai.embedding.transformer.*` properties.
+要配置它，请使用 `spring.ai.embedding.transformer.*` 属性。
 
-For example, add this to your _application.properties_ file to configure the client with the https://huggingface.co/intfloat/e5-small-v2[intfloat/e5-small-v2] text embedding model:
+例如，将此添加到你的 _application.properties_ 文件中，以使用 https://huggingface.co/intfloat/e5-small-v2[intfloat/e5-small-v2] 文本嵌入模型配置客户端：
 
 ----
 spring.ai.embedding.transformer.onnx.modelUri=https://huggingface.co/intfloat/e5-small-v2/resolve/main/model.onnx
 spring.ai.embedding.transformer.tokenizer.uri=https://huggingface.co/intfloat/e5-small-v2/raw/main/tokenizer.json
 ----
 
-The complete list of supported properties are:
+支持的完整属性列表如下：
 
-=== Embedding Properties
+=== 嵌入属性
 
 [NOTE]
 ====
-Enabling and disabling of the embedding auto-configurations are now configured via top level properties with the prefix `spring.ai.model.embedding`.
+嵌入自动配置的启用和禁用现在通过前缀为 `spring.ai.model.embedding` 的顶级属性进行配置。
 
-To enable, spring.ai.model.embedding=transformers (It is enabled by default)
+要启用，spring.ai.model.embedding=transformers（默认启用）
 
-To disable, spring.ai.model.embedding=none (or any value which doesn't match transformers)
+要禁用，spring.ai.model.embedding=none（或任何不匹配 transformers 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
 [cols="3*"", stripes=even]
 |===
-| Property    | Description | Default
+| 属性    | 描述 | 默认值
 
-| spring.ai.embedding.transformer.enabled (Removed and no longer valid) | Enable the Transformer Embedding model. | true
-| spring.ai.model.embedding | Enable the Transformer Embedding model. | transformers
-| spring.ai.embedding.transformer.tokenizer.uri  | URI of a pre-trained HuggingFaceTokenizer created by the ONNX engine (e.g. tokenizer.json).   | onnx/all-MiniLM-L6-v2/tokenizer.json
-| spring.ai.embedding.transformer.tokenizer.options  | HuggingFaceTokenizer options such as '`addSpecialTokens`', '`modelMaxLength`', '`truncation`', '`padding`', '`maxLength`', '`stride`', '`padToMultipleOf`'. Leave empty to fallback to the defaults. | empty
-| spring.ai.embedding.transformer.cache.enabled  | Enable remote Resource caching.  | true
-| spring.ai.embedding.transformer.cache.directory  | Directory path to cache remote resources, such as the ONNX models   | ${java.io.tmpdir}/spring-ai-onnx-model
-| spring.ai.embedding.transformer.onnx.modelUri  | Existing, pre-trained ONNX model.  | onnx/all-MiniLM-L6-v2/model.onnx
-| spring.ai.embedding.transformer.onnx.modelOutputName | The ONNX model's output node name, which we'll use for embedding calculation.  | last_hidden_state
-| spring.ai.embedding.transformer.onnx.gpuDeviceId  |  The GPU device ID to execute on. Only applicable if >= 0. Ignored otherwise.(Requires additional onnxruntime_gpu dependency) |  -1
-| spring.ai.embedding.transformer.metadataMode  |  Specifies what parts of the Documents content and metadata will be used for computing the embeddings.  |  NONE
+| spring.ai.embedding.transformer.enabled（已移除且不再有效） | 启用 Transformer 嵌入模型。 | true
+| spring.ai.model.embedding | 启用 Transformer 嵌入模型。 | transformers
+| spring.ai.embedding.transformer.tokenizer.uri  | 由 ONNX 引擎创建的预训练 HuggingFaceTokenizer 的 URI（例如 tokenizer.json）。   | onnx/all-MiniLM-L6-v2/tokenizer.json
+| spring.ai.embedding.transformer.tokenizer.options  | HuggingFaceTokenizer 选项，如 '`addSpecialTokens`'、'`modelMaxLength`'、'`truncation`'、'`padding`'、'`maxLength`'、'`stride`'、'`padToMultipleOf`'。留空则使用默认值。 | empty
+| spring.ai.embedding.transformer.cache.enabled  | 启用远程资源缓存。  | true
+| spring.ai.embedding.transformer.cache.directory  | 缓存远程资源的目录路径，如 ONNX 模型   | ${java.io.tmpdir}/spring-ai-onnx-model
+| spring.ai.embedding.transformer.onnx.modelUri  | 现有的预训练 ONNX 模型。  | onnx/all-MiniLM-L6-v2/model.onnx
+| spring.ai.embedding.transformer.onnx.modelOutputName | ONNX 模型的输出节点名称，我们将使用它来计算嵌入。  | last_hidden_state
+| spring.ai.embedding.transformer.onnx.gpuDeviceId  |  要执行的 GPU 设备 ID。仅当 >= 0 时适用。否则忽略。（需要额外的 onnxruntime_gpu 依赖） |  -1
+| spring.ai.embedding.transformer.metadataMode  |  指定文档内容和元数据的哪些部分将用于计算嵌入。  |  NONE
 |===
 
-
-=== Errors and special cases
+=== 错误和特殊情况
 
 [NOTE]
 ====
-If you see an error like `Caused by: ai.onnxruntime.OrtException: Supplied array is ragged,..`, you need to also enable the tokenizer padding in `application.properties` as follows:
+如果你看到类似 `Caused by: ai.onnxruntime.OrtException: Supplied array is ragged,..` 的错误，你需要在 `application.properties` 中启用 tokenizer 填充，如下所示：
 
 ----
 spring.ai.embedding.transformer.tokenizer.options.padding=true
@@ -113,9 +112,9 @@ spring.ai.embedding.transformer.tokenizer.options.padding=true
 
 [NOTE]
 ====
-If you get an error like `The generative output names don't contain expected: last_hidden_state. Consider one of the available model outputs: token_embeddings, ....`, you need to set the model output name to a correct value per your models.
-Consider the names listed in the error message.
-For example:
+如果你收到类似 `The generative output names don't contain expected: last_hidden_state. Consider one of the available model outputs: token_embeddings, ....` 的错误，你需要将模型输出名称设置为根据你的模型正确的值。
+考虑错误消息中列出的名称。
+例如：
 
 ----
 spring.ai.embedding.transformer.onnx.modelOutputName=token_embeddings
@@ -124,31 +123,31 @@ spring.ai.embedding.transformer.onnx.modelOutputName=token_embeddings
 
 [NOTE]
 ====
-If you get an error like `ai.onnxruntime.OrtException: Error code - ORT_FAIL - message: Deserialize tensor onnx::MatMul_10319 failed.GetFileLength for ./model.onnx_data failed:Invalid fd was supplied: -1`, 
-that means that you model is larger than 2GB and is serialized in two files: `model.onnx` and `model.onnx_data`. 
+如果你收到类似 `ai.onnxruntime.OrtException: Error code - ORT_FAIL - message: Deserialize tensor onnx::MatMul_10319 failed.GetFileLength for ./model.onnx_data failed:Invalid fd was supplied: -1` 的错误，
+这意味着你的模型大于 2GB，并且被序列化为两个文件：`model.onnx` 和 `model.onnx_data`。
 
-The `model.onnx_data` is called link:https://onnx.ai/onnx/repo-docs/ExternalData.html#external-data[External Data] and is expected to be under the same directory of the `model.onnx`.
+`model.onnx_data` 被称为 link:https://onnx.ai/onnx/repo-docs/ExternalData.html#external-data[外部数据]，预计位于 `model.onnx` 的同一目录下。
 
-Currently the only workaround is to copy the large `model.onnx_data` in the folder you run your Boot application.
+目前唯一的解决方法是将大型 `model.onnx_data` 复制到你运行 Boot 应用程序的文件夹中。
 ====
 
 [NOTE]
 ====
-If you get an error like `ai.onnxruntime.OrtException: Error code - ORT_EP_FAIL - message: Failed to find CUDA shared provider`,
-that means that you are using the GPU parameters `spring.ai.embedding.transformer.onnx.gpuDeviceId` , but the onnxruntime_gpu dependency are missing.
+如果你收到类似 `ai.onnxruntime.OrtException: Error code - ORT_EP_FAIL - message: Failed to find CUDA shared provider` 的错误，
+这意味着你正在使用 GPU 参数 `spring.ai.embedding.transformer.onnx.gpuDeviceId`，但缺少 onnxruntime_gpu 依赖。
 ----
 <dependency>
     <groupId>com.microsoft.onnxruntime</groupId>
     <artifactId>onnxruntime_gpu</artifactId>
 </dependency>
 ----
-Please select the appropriate onnxruntime_gpu version based on the CUDA version(link:https://onnxruntime.ai/docs/get-started/with-java.html[ONNX Java Runtime]).
+请根据 CUDA 版本选择适当的 onnxruntime_gpu 版本(link:https://onnxruntime.ai/docs/get-started/with-java.html[ONNX Java Runtime])。
 ====
 
-== Manual Configuration
+== 手动配置
 
-If you are not using Spring Boot, you can manually configure the Onnx Transformers Embedding Model.
-For this add the `spring-ai-transformers` dependency to your project's Maven `pom.xml` file:
+如果你不使用 Spring Boot，你可以手动配置 Onnx Transformers 嵌入模型。
+为此，将 `spring-ai-transformers` 依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source,xml]
 ----
@@ -158,37 +157,37 @@ For this add the `spring-ai-transformers` dependency to your project's Maven `po
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到你的构建文件中。
 
-then create a new `TransformersEmbeddingModel` instance and use the `setTokenizerResource(tokenizerJsonUri)` and `setModelResource(modelOnnxUri)` methods to set the URIs  of the exported `tokenizer.json` and `model.onnx` files. (`classpath:`, `file:` or `https:` URI schemas are supported).
+然后创建一个新的 `TransformersEmbeddingModel` 实例，并使用 `setTokenizerResource(tokenizerJsonUri)` 和 `setModelResource(modelOnnxUri)` 方法来设置导出的 `tokenizer.json` 和 `model.onnx` 文件的 URI。（支持 `classpath:`、`file:` 或 `https:` URI 模式）。
 
-If the model is not explicitly set, `TransformersEmbeddingModel` defaults to https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2[sentence-transformers/all-MiniLM-L6-v2]:
+如果未明确设置模型，`TransformersEmbeddingModel` 默认使用 https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2[sentence-transformers/all-MiniLM-L6-v2]：
 
 [cols="2*"]
 |===
-| Dimensions  | 384
-| Avg. performance | 58.80
-| Speed    | 14200 sentences/sec
-| Size    | 80MB
+| 维度  | 384
+| 平均性能 | 58.80
+| 速度    | 14200 句子/秒
+| 大小    | 80MB
 |===
 
-The following snippet illustrates how to use the `TransformersEmbeddingModel` manually:
+以下代码片段说明了如何手动使用 `TransformersEmbeddingModel`：
 
 [source,java]
 ----
 TransformersEmbeddingModel embeddingModel = new TransformersEmbeddingModel();
 
-// (optional) defaults to classpath:/onnx/all-MiniLM-L6-v2/tokenizer.json
+// （可选）默认为 classpath:/onnx/all-MiniLM-L6-v2/tokenizer.json
 embeddingModel.setTokenizerResource("classpath:/onnx/all-MiniLM-L6-v2/tokenizer.json");
 
-// (optional) defaults to classpath:/onnx/all-MiniLM-L6-v2/model.onnx
+// （可选）默认为 classpath:/onnx/all-MiniLM-L6-v2/model.onnx
 embeddingModel.setModelResource("classpath:/onnx/all-MiniLM-L6-v2/model.onnx");
 
-// (optional) defaults to ${java.io.tmpdir}/spring-ai-onnx-model
-// Only the http/https resources are cached by default.
+// （可选）默认为 ${java.io.tmpdir}/spring-ai-onnx-model
+// 默认情况下只缓存 http/https 资源。
 embeddingModel.setResourceCacheDirectory("/tmp/onnx-zoo");
 
-// (optional) Set the tokenizer padding if you see an errors like:
+// （可选）如果你看到类似以下错误，请设置 tokenizer 填充：
 // "ai.onnxruntime.OrtException: Supplied array is ragged, ..."
 embeddingModel.setTokenizerOptions(Map.of("padding", "true"));
 
@@ -198,15 +197,15 @@ List<List<Double>> embeddings = this.embeddingModel.embed(List.of("Hello world",
 
 ----
 
-NOTE: If you create an instance of `TransformersEmbeddingModel` manually, you must call the `afterPropertiesSet()` method after setting the properties and before using the client.
+注意：如果你手动创建 `TransformersEmbeddingModel` 实例，你必须在设置属性后并在使用客户端之前调用 `afterPropertiesSet()` 方法。
 
-The first `embed()` call downloads the large ONNX model and caches it on the local file system.
-Therefore, the first call might take longer than usual.
-Use the `#setResourceCacheDirectory(<path>)` method to set the local folder where the ONNX models as stored.
-The default cache folder is `${java.io.tmpdir}/spring-ai-onnx-model`.
+第一次 `embed()` 调用会下载大型 ONNX 模型并将其缓存在本地文件系统中。
+因此，第一次调用可能比平时花费更长的时间。
+使用 `#setResourceCacheDirectory(<path>)` 方法设置存储 ONNX 模型的本地文件夹。
+默认缓存文件夹是 `${java.io.tmpdir}/spring-ai-onnx-model`。
 
-It is more convenient (and preferred) to create the TransformersEmbeddingModel as a `Bean`.
-Then you don't have to call the `afterPropertiesSet()` manually.
+将 TransformersEmbeddingModel 创建为 `Bean` 会更方便（也更推荐）。
+这样你就不必手动调用 `afterPropertiesSet()`。
 
 [source,java]
 ----

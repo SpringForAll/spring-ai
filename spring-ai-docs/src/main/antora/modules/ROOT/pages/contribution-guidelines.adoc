@@ -1,47 +1,36 @@
 [[contribution-guidelines]]
-= Contribution Guidelines
+= 贡献指南
 
-== Code Formatting and Javadoc
+== 代码格式化与 Javadoc
 
-Before submitting a PR, please run the following commands to ensure proper formatting and Javadoc processing
+在提交 PR 之前，请运行以下命令以确保代码格式正确并生成 Javadoc：
 
 ```
 ./mvnw spring-javaformat:apply javadoc:javadoc -Pjavadoc
 ```
 
-The `-Pjavadoc` is a profile that enables Javadoc processing so as to avoid a long build time when developing.
+`-Pjavadoc` 是一个用于启用 Javadoc 处理的配置文件，这样在开发时可以避免较长的构建时间。
 
-== Contributing a New AI Model Implementation
+== 新 AI 模型实现的贡献流程
 
-This section outlines the steps for contributing a new AI model implementation.
-AI models vary significantly, with diverse inputs and outputs -- from chat models that
-translate text input into text output, to text-to-image models that generate images
-from text descriptions.
-Complex models may even handle multiple types of input and output, such as combining text,
-images, and videos to produce mixed media output.
+本节概述了贡献新 AI 模型实现的步骤。
+AI 模型差异很大，输入和输出多种多样——从将文本输入转为文本输出的聊天模型，到根据文本描述生成图像的文本转图像模型。
+复杂的模型甚至可能同时处理多种输入和输出类型，例如结合文本、图片和视频生成混合媒体输出。
 
-To contribute a new model, adhere to the following steps:
+要贡献新模型，请遵循以下步骤：
 
-. *Create a Low-Level Client API Class*: If no existing Java client suits the AI model,
-you'll need to develop a low-level client API class. This often involves utilizing the
-`RestClient` class from the Spring Framework, similar to the `OpenAiApi` class.
+. *创建底层客户端 API 类*：如果没有现有的 Java 客户端适用于该 AI 模型，则需要开发一个底层客户端 API 类。通常涉及使用 Spring Framework 的 `RestClient` 类，类似于 `OpenAiApi` 类。
 
-. *Create a Model implementation*
-Ensure your client conforms to the link:https://docs.spring.io/spring-ai/reference/api/generic-model.html[Generic Model API].
-Use existing request and response classes if your model's inputs and outputs are supported.
-If not, create new classes for the Generic Model API and establish a new Java package.
-When logging Personally Identifiable Information (PII), mark it with https://github.com/spring-projects/spring-ai/tree/main/spring-ai-core/src/main/java/org/springframework/ai/util/LoggingMarkers.java[`PII_MARKER`] Slf4j marker.
+. *创建模型实现*
+确保你的客户端符合 link:https://docs.spring.io/spring-ai/reference/api/generic-model.html[通用模型 API]。
+如果模型的输入和输出已被支持，请使用现有的请求和响应类。
+如果不支持，则为通用模型 API 创建新的类，并建立新的 Java 包。
+在记录个人身份信息（PII）时，请使用 https://github.com/spring-projects/spring-ai/tree/main/spring-ai-core/src/main/java/org/springframework/ai/util/LoggingMarkers.java[`PII_MARKER`] Slf4j 标记进行标记。
 
-. *Implement Auto-Configuration and a Spring Boot Starter*: This step involves creating the
-necessary auto-configuration and Spring Boot Starter to easily instantiate the new model with
-Spring Boot applications.
+. *实现自动配置和 Spring Boot Starter*：此步骤包括创建必要的自动配置和 Spring Boot Starter，以便在 Spring Boot 应用中轻松实例化新模型。
 
-. *Write Tests*: All new classes should be accompanied by comprehensive tests.
-Existing tests can serve as a useful reference for structuring and implementing your tests.
+. *编写测试*：所有新类都应配备全面的测试。现有测试可以作为结构和实现的有用参考。
 
-. *Document Your Contribution*: Ensure your documentation follows the existing format,
-For an example of the suggested structure and formatting, refer to the
-link:https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html[Open AI Chat documentation].
+. *完善文档*：确保你的文档遵循现有格式。有关建议结构和格式的示例，请参阅 link:https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html[Open AI Chat 文档]。
 
-By following these guidelines, we can greatly expand the framework's range of supported models
-while following a common implementation and documentation pattern.
+通过遵循这些指南，我们可以在遵循统一实现和文档模式的同时，大幅扩展框架支持的模型范围。

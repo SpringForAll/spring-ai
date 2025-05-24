@@ -1,23 +1,23 @@
-* xref:index.adoc[Overview]
-** xref:concepts.adoc[AI Concepts]
-* xref:getting-started.adoc[Getting Started]
+* xref:index.adoc[概述]
+** xref:concepts.adoc[AI 概念]
+* xref:getting-started.adoc[开始使用]
 
-* Reference
+* 参考文档
 ** xref:api/chatclient.adoc[]
-*** xref:api/advisors.adoc[Advisors]
+*** xref:api/advisors.adoc[Advisors API]
 
 ** xref:api/prompt.adoc[]
-** xref:api/structured-output-converter.adoc[Structured Output]
-** xref:api/multimodality.adoc[Multimodality]
-** xref:api/index.adoc[Models]
+** xref:api/structured-output-converter.adoc[结构化输出]
+** xref:api/multimodality.adoc[多模态]
+** xref:api/index.adoc[模型]
 
-*** xref:api/chatmodel.adoc[Chat Models]
-**** xref:api/chat/comparison.adoc[Chat Models Comparison]
+*** xref:api/chatmodel.adoc[聊天模型]
+**** xref:api/chat/comparison.adoc[聊天模型对比]
 **** xref:api/chat/bedrock-converse.adoc[Amazon Bedrock Converse]
 **** xref:api/chat/anthropic-chat.adoc[Anthropic 3]
 **** xref:api/chat/azure-openai-chat.adoc[Azure OpenAI]
 **** xref:api/chat/deepseek-chat.adoc[DeepSeek]
-**** xref:api/chat/dmr-chat.adoc[Docker Model Runner]
+**** xref:api/chat/dmr-chat.adoc[Docker 模型运行器]
 **** xref:api/chat/google-vertexai.adoc[Google VertexAI]
 ***** xref:api/chat/vertexai-gemini-chat.adoc[VertexAI Gemini]
 **** xref:api/chat/groq-chat.adoc[Groq]
@@ -28,13 +28,13 @@
 **** xref:api/chat/nvidia-chat.adoc[NVIDIA]
 **** xref:api/chat/ollama-chat.adoc[Ollama]
 **** xref:api/chat/perplexity-chat.adoc[Perplexity AI]
-**** OCI Generative AI
+**** OCI 生成式 AI
 ***** xref:api/chat/oci-genai/cohere-chat.adoc[Cohere]
 **** xref:api/chat/openai-chat.adoc[OpenAI]
 **** xref:api/chat/qianfan-chat.adoc[QianFan]
 **** xref:api/chat/zhipuai-chat.adoc[ZhiPu AI]
 
-*** xref:api/embeddings.adoc[Embedding Models]
+*** xref:api/embeddings.adoc[嵌入模型]
 **** xref:api/bedrock.adoc[Amazon Bedrock]
 ***** xref:api/embeddings/bedrock-cohere-embedding.adoc[Cohere]
 ***** xref:api/embeddings/bedrock-titan-embedding.adoc[Titan]
@@ -48,42 +48,42 @@
 **** xref:api/embeddings/postgresml-embeddings.adoc[PostgresML]
 **** xref:api/embeddings/qianfan-embeddings.adoc[QianFan]
 **** VertexAI
-***** xref:api/embeddings/vertexai-embeddings-text.adoc[Text Embedding]
-***** xref:api/embeddings/vertexai-embeddings-multimodal.adoc[Multimodal Embedding]
+***** xref:api/embeddings/vertexai-embeddings-text.adoc[文本嵌入]
+***** xref:api/embeddings/vertexai-embeddings-multimodal.adoc[多模态嵌入]
 **** xref:api/embeddings/zhipuai-embeddings.adoc[ZhiPu AI]
 
-*** xref:api/imageclient.adoc[Image Models]
+*** xref:api/imageclient.adoc[图像模型]
 **** xref:api/image/azure-openai-image.adoc[Azure OpenAI]
 **** xref:api/image/openai-image.adoc[OpenAI]
 **** xref:api/image/stabilityai-image.adoc[Stability]
 **** xref:api/image/zhipuai-image.adoc[ZhiPuAI]
 **** xref:api/image/qianfan-image.adoc[QianFan]
 
-*** xref:api/audio[Audio Models]
+*** xref:api/audio[音频模型]
 **** xref:api/audio/transcriptions.adoc[]
 ***** xref:api/audio/transcriptions/azure-openai-transcriptions.adoc[Azure OpenAI]
 ***** xref:api/audio/transcriptions/openai-transcriptions.adoc[OpenAI]
 **** xref:api/audio/speech.adoc[]
 ***** xref:api/audio/speech/openai-speech.adoc[OpenAI]
 
-*** xref:api/moderation[Moderation Models]
+*** xref:api/moderation[内容审核模型]
 **** xref:api/moderation/openai-moderation.adoc[OpenAI]
 **** xref:api/moderation/mistral-ai-moderation.adoc[Mistral AI]
 // ** xref:api/generic-model.adoc[]
 
-** xref:api/chat-memory.adoc[Chat Memory]
+** xref:api/chat-memory.adoc[聊天记忆]
 
-** xref:api/tools.adoc[Tool Calling]
+** xref:api/tools.adoc[工具调用]
 
-** xref:api/mcp/mcp-overview.adoc[Model Context Protocol (MCP)]
-*** xref:api/mcp/mcp-client-boot-starter-docs.adoc[MCP Client Boot Starters]
-*** xref:api/mcp/mcp-server-boot-starter-docs.adoc[MCP Server Boot Starters]
-*** xref:api/mcp/mcp-helpers.adoc[MCP Utilities]
+** xref:api/mcp/mcp-overview.adoc[模型上下文协议 (MCP)]
+*** xref:api/mcp/mcp-client-boot-starter-docs.adoc[MCP 客户端启动器]
+*** xref:api/mcp/mcp-server-boot-starter-docs.adoc[MCP 服务器启动器]
+*** xref:api/mcp/mcp-helpers.adoc[MCP 工具]
 
-** xref:api/retrieval-augmented-generation.adoc[Retrieval Augmented Generation (RAG)]
+** xref:api/retrieval-augmented-generation.adoc[检索增强生成 (RAG)]
 *** xref:api/etl-pipeline.adoc[]
 
-** xref:api/testing.adoc[Model Evaluation]
+** xref:api/testing.adoc[模型评估]
 
 ** xref:api/vectordbs.adoc[]
 *** xref:api/vectordbs/azure.adoc[]
@@ -109,18 +109,18 @@
 
 ** xref:observability/index.adoc[]
 
-** xref:api/docker-compose.adoc[Development-time Services]
+** xref:api/docker-compose.adoc[开发时服务]
 
-** Testing
+** 测试
 *** xref:api/testcontainers.adoc[Testcontainers]
 
-* Guides
+* 指南
 ** https://github.com/spring-ai-community/awesome-spring-ai[Awesome Spring AI]
 ** xref:api/chat/prompt-engineering-patterns.adoc[]
-** xref:api/effective-agents.adoc[Building Effective Agents]
-** xref:api/cloud-bindings.adoc[Deploying to the Cloud]
+** xref:api/effective-agents.adoc[构建有效的智能体]
+** xref:api/cloud-bindings.adoc[部署到云端]
 
-// * xref:contribution-guidelines.adoc[Contribution Guidelines]
+// * xref:contribution-guidelines.adoc[贡献指南]
 
 * xref:upgrade-notes.adoc[]
-** xref:api/tools-migration.adoc[Migrating FunctionCallback to ToolCallback API]
+** xref:api/tools-migration.adoc[从 FunctionCallback 迁移到 ToolCallback API]

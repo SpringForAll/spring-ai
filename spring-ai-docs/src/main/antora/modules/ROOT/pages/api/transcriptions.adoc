@@ -1,5 +1,5 @@
 [[Transcription]]
-= Transcription Model API
+= 语音转文字模型 API
 
-Spring AI provides support for OpenAI's Transcription Model API.
-When additional providers for Transcription are implemented, a common `AudioTranscriptionModel` interface will be extracted.
+Spring AI 提供了对 OpenAI 语音转文字模型 API 的支持。
+当实现其他语音转文字提供商时，将提取一个通用的 `AudioTranscriptionModel` 接口。

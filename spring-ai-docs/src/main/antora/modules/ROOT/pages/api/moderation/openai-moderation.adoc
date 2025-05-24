@@ -1,26 +1,25 @@
-= Moderation
+= 内容审核
 
-== Introduction
+== 简介
 
-Spring AI supports OpenAI's Moderation model, which allows you to detect potentially harmful or sensitive content in text.
-Follow this https://platform.openai.com/docs/guides/moderation[guide] to for more information on OpenAI's moderation model.
+Spring AI 支持 OpenAI 的审核模型，该模型允许您检测文本中潜在的有害或敏感内容。
+访问此 https://platform.openai.com/docs/guides/moderation[指南] 获取有关 OpenAI 审核模型的更多信息。
 
-== Prerequisites
+== 前提条件
 
-. Create an OpenAI account and obtain an API key. You can sign up at the https://platform.openai.com/signup[OpenAI signup page] and generate an API key on the https://platform.openai.com/account/api-keys[API Keys page].
-. Add the `spring-ai-openai` dependency to your project's build file. For more information, refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section.
+. 创建 OpenAI 账户并获取 API 密钥。您可以在 https://platform.openai.com/signup[OpenAI 注册页面] 注册，并在 https://platform.openai.com/account/api-keys[API 密钥页面] 生成 API 密钥。
+. 将 `spring-ai-openai` 依赖添加到项目的构建文件中。更多信息，请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分。
 
-
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和启动器模块的构件名称发生了重大变化。
+请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 获取更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the OpenAI Moderation Model.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 OpenAI 审核模型提供了 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 文件中添加以下依赖：
 
 [source,xml]
 ----
@@ -30,7 +29,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或在 Gradle `build.gradle` 构建文件中添加：
 
 [source,groovy]
 ----
@@ -39,60 +38,60 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-== Moderation Properties
+== 审核属性
 
-=== Connection Properties
-The prefix spring.ai.openai is used as the property prefix that lets you connect to OpenAI.
+=== 连接属性
+前缀 spring.ai.openai 用作连接到 OpenAI 的属性前缀。
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-| spring.ai.openai.base-url   | The URL to connect to |  https://api.openai.com
-| spring.ai.openai.api-key    | The API Key           |  -
-| spring.ai.openai.organization-id | Optionally you can specify which organization is used for an API request. |  -
-| spring.ai.openai.project-id      | Optionally, you can specify which project is used for an API request. |  -
+| 属性 | 描述 | 默认值
+| spring.ai.openai.base-url   | 连接 URL |  https://api.openai.com
+| spring.ai.openai.api-key    | API 密钥 |  -
+| spring.ai.openai.organization-id | 可选，您可以指定用于 API 请求的组织 |  -
+| spring.ai.openai.project-id      | 可选，您可以指定用于 API 请求的项目 |  -
 |====
 
-TIP: For users that belong to multiple organizations (or are accessing their projects through their legacy user API key), optionally, you can specify which organization and project is used for an API request.
-Usage from these API requests will count as usage for the specified organization and project.
+提示：对于属于多个组织的用户（或通过其旧版用户 API 密钥访问其项目的用户），您可以选择指定用于 API 请求的组织和项目。
+这些 API 请求的使用量将计入指定组织和项目的使用量。
 
-=== Configuration Properties
+=== 配置属性
 
 [NOTE]
 ====
-Enabling and disabling of the embedding auto-configurations are now configured via top level properties with the prefix `spring.ai.model.moderation`.
+嵌入自动配置的启用和禁用现在通过前缀为 `spring.ai.model.moderation` 的顶级属性进行配置。
 
-To enable, spring.ai.model.moderation=openai (It is enabled by default)
+要启用，spring.ai.model.moderation=openai（默认启用）
 
-To disable, spring.ai.model.moderation=none (or any value which doesn't match openai)
+要禁用，spring.ai.model.moderation=none（或任何不匹配 openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix spring.ai.openai.moderation is used as the property prefix for configuring the OpenAI moderation model.
+前缀 spring.ai.openai.moderation 用作配置 OpenAI 审核模型的属性前缀。
 [cols="3,5,2"]
 |====
-| Property | Description | Default
-| spring.ai.model.moderation   | Enable Moderation model |  openai
-| spring.ai.openai.moderation.base-url   | The URL to connect to |  https://api.openai.com
-| spring.ai.openai.moderation.api-key    | The API Key           |  -
-| spring.ai.openai.moderation.organization-id | Optionally you can specify which organization is used for an API request. |  -
-| spring.ai.openai.moderation.project-id      | Optionally, you can specify which project is used for an API request. |  -
-| spring.ai.openai.moderation.options.model  | ID of the model to use for moderation. | text-moderation-latest
+| 属性 | 描述 | 默认值
+| spring.ai.model.moderation   | 启用审核模型 |  openai
+| spring.ai.openai.moderation.base-url   | 连接 URL |  https://api.openai.com
+| spring.ai.openai.moderation.api-key    | API 密钥 |  -
+| spring.ai.openai.moderation.organization-id | 可选，您可以指定用于 API 请求的组织 |  -
+| spring.ai.openai.moderation.project-id      | 可选，您可以指定用于 API 请求的项目 |  -
+| spring.ai.openai.moderation.options.model  | 用于审核的模型 ID | text-moderation-latest
 |====
 
-NOTE: You can override the common `spring.ai.openai.base-url`, `spring.ai.openai.api-key`, `spring.ai.openai.organization-id` and `spring.ai.openai.project-id` properties.
-The `spring.ai.openai.moderation.base-url`, `spring.ai.openai.moderation.api-key`, `spring.ai.openai.moderation.organization-id` and `spring.ai.openai.moderation.project-id` properties, if set, take precedence over the common properties.
-This is useful if you want to use different OpenAI accounts for different models and different model endpoints.
+注意：您可以覆盖通用的 `spring.ai.openai.base-url`、`spring.ai.openai.api-key`、`spring.ai.openai.organization-id` 和 `spring.ai.openai.project-id` 属性。
+如果设置了 `spring.ai.openai.moderation.base-url`、`spring.ai.openai.moderation.api-key`、`spring.ai.openai.moderation.organization-id` 和 `spring.ai.openai.moderation.project-id` 属性，它们将优先于通用属性。
+这对于想要为不同模型和不同模型端点使用不同 OpenAI 账户的情况很有用。
 
-TIP: All properties prefixed with `spring.ai.openai.moderation.options` can be overridden at runtime.
+提示：所有以 `spring.ai.openai.moderation.options` 为前缀的属性都可以在运行时被覆盖。
 
-== Runtime Options
-The OpenAiModerationOptions class provides the options to use when making a moderation request.
-On start-up, the options specified by spring.ai.openai.moderation are used, but you can override these at runtime.
+== 运行时选项
+OpenAiModerationOptions 类提供了在进行审核请求时要使用的选项。
+在启动时，使用由 spring.ai.openai.moderation 指定的选项，但您可以在运行时覆盖这些选项。
 
-For example:
+例如：
 
 [source,java]
 ----
@@ -100,57 +99,57 @@ OpenAiModerationOptions moderationOptions = OpenAiModerationOptions.builder()
     .model("text-moderation-latest")
     .build();
 
-ModerationPrompt moderationPrompt = new ModerationPrompt("Text to be moderated", this.moderationOptions);
+ModerationPrompt moderationPrompt = new ModerationPrompt("需要审核的文本", this.moderationOptions);
 ModerationResponse response = openAiModerationModel.call(this.moderationPrompt);
 
-// Access the moderation results
+// 访问审核结果
 Moderation moderation = moderationResponse.getResult().getOutput();
 
-// Print general information
-System.out.println("Moderation ID: " + moderation.getId());
-System.out.println("Model used: " + moderation.getModel());
+// 打印一般信息
+System.out.println("审核 ID: " + moderation.getId());
+System.out.println("使用的模型: " + moderation.getModel());
 
-// Access the moderation results (there's usually only one, but it's a list)
+// 访问审核结果（通常只有一个，但它是列表）
 for (ModerationResult result : moderation.getResults()) {
-    System.out.println("\nModeration Result:");
-    System.out.println("Flagged: " + result.isFlagged());
+    System.out.println("\n审核结果:");
+    System.out.println("是否标记: " + result.isFlagged());
 
-    // Access categories
+    // 访问类别
     Categories categories = this.result.getCategories();
-    System.out.println("\nCategories:");
-    System.out.println("Sexual: " + categories.isSexual());
-    System.out.println("Hate: " + categories.isHate());
-    System.out.println("Harassment: " + categories.isHarassment());
-    System.out.println("Self-Harm: " + categories.isSelfHarm());
-    System.out.println("Sexual/Minors: " + categories.isSexualMinors());
-    System.out.println("Hate/Threatening: " + categories.isHateThreatening());
-    System.out.println("Violence/Graphic: " + categories.isViolenceGraphic());
-    System.out.println("Self-Harm/Intent: " + categories.isSelfHarmIntent());
-    System.out.println("Self-Harm/Instructions: " + categories.isSelfHarmInstructions());
-    System.out.println("Harassment/Threatening: " + categories.isHarassmentThreatening());
-    System.out.println("Violence: " + categories.isViolence());
+    System.out.println("\n类别:");
+    System.out.println("性相关: " + categories.isSexual());
+    System.out.println("仇恨: " + categories.isHate());
+    System.out.println("骚扰: " + categories.isHarassment());
+    System.out.println("自残: " + categories.isSelfHarm());
+    System.out.println("未成年人性相关: " + categories.isSexualMinors());
+    System.out.println("仇恨威胁: " + categories.isHateThreatening());
+    System.out.println("暴力图像: " + categories.isViolenceGraphic());
+    System.out.println("自残意图: " + categories.isSelfHarmIntent());
+    System.out.println("自残指导: " + categories.isSelfHarmInstructions());
+    System.out.println("骚扰威胁: " + categories.isHarassmentThreatening());
+    System.out.println("暴力: " + categories.isViolence());
 
-    // Access category scores
+    // 访问类别分数
     CategoryScores scores = this.result.getCategoryScores();
-    System.out.println("\nCategory Scores:");
-    System.out.println("Sexual: " + scores.getSexual());
-    System.out.println("Hate: " + scores.getHate());
-    System.out.println("Harassment: " + scores.getHarassment());
-    System.out.println("Self-Harm: " + scores.getSelfHarm());
-    System.out.println("Sexual/Minors: " + scores.getSexualMinors());
-    System.out.println("Hate/Threatening: " + scores.getHateThreatening());
-    System.out.println("Violence/Graphic: " + scores.getViolenceGraphic());
-    System.out.println("Self-Harm/Intent: " + scores.getSelfHarmIntent());
-    System.out.println("Self-Harm/Instructions: " + scores.getSelfHarmInstructions());
-    System.out.println("Harassment/Threatening: " + scores.getHarassmentThreatening());
-    System.out.println("Violence: " + scores.getViolence());
+    System.out.println("\n类别分数:");
+    System.out.println("性相关: " + scores.getSexual());
+    System.out.println("仇恨: " + scores.getHate());
+    System.out.println("骚扰: " + scores.getHarassment());
+    System.out.println("自残: " + scores.getSelfHarm());
+    System.out.println("未成年人性相关: " + scores.getSexualMinors());
+    System.out.println("仇恨威胁: " + scores.getHateThreatening());
+    System.out.println("暴力图像: " + scores.getViolenceGraphic());
+    System.out.println("自残意图: " + scores.getSelfHarmIntent());
+    System.out.println("自残指导: " + scores.getSelfHarmInstructions());
+    System.out.println("骚扰威胁: " + scores.getHarassmentThreatening());
+    System.out.println("暴力: " + scores.getViolence());
 }
 
 ----
 
-== Manual Configuration
+== 手动配置
 
-Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
+在项目的 Maven `pom.xml` 文件中添加 `spring-ai-openai` 依赖：
 
 [source,xml]
 ----
@@ -160,7 +159,7 @@ Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file:
+或在 Gradle `build.gradle` 构建文件中添加：
 
 [source,groovy]
 ----
@@ -169,9 +168,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Next, create an OpenAiModerationModel:
+接下来，创建 OpenAiModerationModel：
 
 [source,java]
 ----
@@ -183,9 +182,9 @@ OpenAiModerationOptions moderationOptions = OpenAiModerationOptions.builder()
     .model("text-moderation-latest")
     .build();
 
-ModerationPrompt moderationPrompt = new ModerationPrompt("Text to be moderated", this.moderationOptions);
+ModerationPrompt moderationPrompt = new ModerationPrompt("需要审核的文本", this.moderationOptions);
 ModerationResponse response = this.openAiModerationModel.call(this.moderationPrompt);
 ----
 
-== Example Code
-The `OpenAiModerationModelIT` test provides some general examples of how to use the library. You can refer to this test for more detailed usage examples.
+== 示例代码
+`OpenAiModerationModelIT` 测试提供了一些关于如何使用该库的通用示例。您可以参考此测试获取更详细的使用示例。

@@ -1,19 +1,19 @@
-= VertexAI Gemini Chat
+= VertexAI Gemini 聊天
 
-The https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/overview[Vertex AI Gemini API] allows developers to build generative AI applications using the Gemini model.
-The Vertex AI Gemini API supports multimodal prompts as input and output text or code.
-A multimodal model is a model that is capable of processing information from multiple modalities, including images, videos, and text. For example, you can send the model a photo of a plate of cookies and ask it to give you a recipe for those cookies.
+https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/overview[Vertex AI Gemini API] 允许开发者使用 Gemini 模型构建生成式 AI 应用程序。
+Vertex AI Gemini API 支持多模态提示作为输入，并输出文本或代码。
+多模态模型是一种能够处理来自多种模态信息的模型，包括图像、视频和文本。例如，您可以向模型发送一张饼干的照片，并要求它为您提供这些饼干的配方。
 
-Gemini is a family of generative AI models developed by Google DeepMind that is designed for multimodal use cases. The Gemini API gives you access to the link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-0-flash[Gemini 2.0 Flash] and link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-0-flash-lite[Gemini 2.0 Flash-Lite].
-For specifications of the Vertex AI Gemini API models, see link:https://cloud.google.com/vertex-ai/generative-ai/docs/models#gemini-models[Model information].
+Gemini 是由 Google DeepMind 开发的生成式 AI 模型系列，专为多模态用例设计。Gemini API 让您可以访问 link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-0-flash[Gemini 2.0 Flash] 和 link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-0-flash-lite[Gemini 2.0 Flash-Lite]。
+有关 Vertex AI Gemini API 模型的规格，请参见 link:https://cloud.google.com/vertex-ai/generative-ai/docs/models#gemini-models[模型信息]。
 
-link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference[Gemini API Reference]
+link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference[Gemini API 参考]
 
-== Prerequisites
+== 前提条件
 
-- Install the link:https://cloud.google.com/sdk/docs/install[gcloud] CLI, appropriate for you OS.
-- Authenticate by running the following command.
-Replace `PROJECT_ID` with your Google Cloud project ID and `ACCOUNT` with your Google Cloud username.
+- 安装适合您操作系统的 link:https://cloud.google.com/sdk/docs/install[gcloud] CLI。
+- 通过运行以下命令进行身份验证。
+将 `PROJECT_ID` 替换为您的 Google Cloud 项目 ID，将 `ACCOUNT` 替换为您的 Google Cloud 用户名。
 
 [source]
 ----
@@ -21,16 +21,16 @@ gcloud config set project <PROJECT_ID> &&
 gcloud auth application-default login <ACCOUNT>
 ----
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the VertexAI Gemini Chat Client.
-To enable it add the following dependency to your project's Maven `pom.xml` or Gradle `build.gradle` build files:
+Spring AI 为 VertexAI Gemini 聊天客户端提供 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 或 Gradle `build.gradle` 构建文件中添加以下依赖：
 
 [tabs]
 ======
@@ -54,68 +54,68 @@ dependencies {
 ----
 ======
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-=== Chat Properties
+=== 聊天属性
 
 [NOTE]
 ====
-Enabling and disabling of the chat auto-configurations are now configured via top level properties with the prefix `spring.ai.model.chat`.
+聊天自动配置的启用和禁用现在通过前缀为 `spring.ai.model.chat` 的顶级属性进行配置。
 
-To enable, spring.ai.model.chat=vertexai (It is enabled by default)
+要启用，spring.ai.model.chat=vertexai（默认启用）
 
-To disable, spring.ai.model.chat=none (or any value which doesn't match vertexai)
+要禁用，spring.ai.model.chat=none（或任何不匹配 vertexai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.vertex.ai.gemini` is used as the property prefix that lets you connect to VertexAI.
+前缀 `spring.ai.vertex.ai.gemini` 用作连接到 VertexAI 的属性前缀。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.model.chat   | Enable Chat Model client |  vertexai
-| spring.ai.vertex.ai.gemini.project-id   | Google Cloud Platform project ID |  -
-| spring.ai.vertex.ai.gemini.location    | Region           |  -
-| spring.ai.vertex.ai.gemini.credentials-uri    | URI to Vertex AI Gemini credentials. When provided it is used to create an a `GoogleCredentials` instance to authenticate the `VertexAI`. |  -
-| spring.ai.vertex.ai.gemini.api-endpoint | Vertex AI Gemini API endpoint. |  -
+| spring.ai.model.chat   | 启用聊天模型客户端 |  vertexai
+| spring.ai.vertex.ai.gemini.project-id   | Google Cloud Platform 项目 ID |  -
+| spring.ai.vertex.ai.gemini.location    | 区域           |  -
+| spring.ai.vertex.ai.gemini.credentials-uri    | Vertex AI Gemini 凭据的 URI。提供时，它用于创建 `GoogleCredentials` 实例以对 `VertexAI` 进行身份验证。 |  -
+| spring.ai.vertex.ai.gemini.api-endpoint | Vertex AI Gemini API 端点。 |  -
 | spring.ai.vertex.ai.gemini.scopes |  |  -
-| spring.ai.vertex.ai.gemini.transport | API transport. GRPC or REST. |  GRPC
+| spring.ai.vertex.ai.gemini.transport | API 传输。GRPC 或 REST。 |  GRPC
 |====
 
-The prefix `spring.ai.vertex.ai.gemini.chat` is the property prefix that lets you configure the chat model implementation for VertexAI Gemini Chat.
+前缀 `spring.ai.vertex.ai.gemini.chat` 是用于配置 VertexAI Gemini 聊天实现的属性前缀。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.vertex.ai.gemini.chat.options.model | Supported https://cloud.google.com/vertex-ai/generative-ai/docs/models#gemini-models[Vertex AI Gemini Chat model] to use include the `gemini-2.0-flash`, `gemini-2.0-flash-lite` and the new `gemini-2.5-pro-preview-03-25`, `gemini-2.5-flash-preview-04-17` models. | gemini-2.0-flash
-| spring.ai.vertex.ai.gemini.chat.options.response-mime-type | Output response mimetype of the generated candidate text. |  `text/plain`: (default) Text output or `application/json`: JSON response.
-| spring.ai.vertex.ai.gemini.chat.options.google-search-retrieval | Use Google search Grounding feature | `true` or `false`, default `false`.
-| spring.ai.vertex.ai.gemini.chat.options.temperature | Controls the randomness of the output. Values can range over [0.0,1.0], inclusive. A value closer to 1.0 will produce responses that are more varied, while a value closer to 0.0 will typically result in less surprising responses from the generative. This value specifies default to be used by the backend while making the call to the generative. | 0.7
-| spring.ai.vertex.ai.gemini.chat.options.top-k | The maximum number of tokens to consider when sampling. The generative uses combined Top-k and nucleus sampling. Top-k sampling considers the set of topK most probable tokens. | -
-| spring.ai.vertex.ai.gemini.chat.options.top-p | The maximum cumulative probability of tokens to consider when sampling. The generative uses combined Top-k and nucleus sampling. Nucleus sampling considers the smallest set of tokens whose probability sum is at least topP.  | -
-| spring.ai.vertex.ai.gemini.chat.options.candidate-count | The number of generated response messages to return. This value must be between [1, 8], inclusive. Defaults to 1. | 1
-| spring.ai.vertex.ai.gemini.chat.options.max-output-tokens | The maximum number of tokens to generate. | -
-| spring.ai.vertex.ai.gemini.chat.options.tool-names | List of tools, identified by their names, to enable for function calling in a single prompt request. Tools with those names must exist in the ToolCallback registry. | -
-| (**deprecated** by `tool-names`) spring.ai.vertex.ai.gemini.chat.options.functions | List of functions, identified by their names, to enable for function calling in a single prompt request. Functions with those names must exist in the functionCallbacks registry. | -
-| spring.ai.vertex.ai.gemini.chat.options.internal-tool-execution-enabled | If true, the tool execution should be performed, otherwise the response from the model is returned back to the user. Default is null, but if it's null, `ToolCallingChatOptions.DEFAULT_TOOL_EXECUTION_ENABLED` which is true will take into account | -
-| (**deprecated** by `internal-tool-execution-enabled`) spring.ai.vertex.ai.gemini.chat.options.proxy-tool-calls | If true, the Spring AI will not handle the function calls internally, but will proxy them to the client. Then is the client's responsibility to handle the function calls, dispatch them to the appropriate function, and return the results. If false (the default), the Spring AI will handle the function calls internally. Applicable only for chat models with function calling support | false
-| spring.ai.vertex.ai.gemini.chat.options.safety-settings | List of safety settings to control safety filters, as defined by https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-filters[Vertex AI Safety Filters]. Each safety setting can have a method, threshold, and category. | -
+| spring.ai.vertex.ai.gemini.chat.options.model | 支持的 https://cloud.google.com/vertex-ai/generative-ai/docs/models#gemini-models[Vertex AI Gemini 聊天模型] 包括 `gemini-2.0-flash`、`gemini-2.0-flash-lite` 和新的 `gemini-2.5-pro-preview-03-25`、`gemini-2.5-flash-preview-04-17` 模型。 | gemini-2.0-flash
+| spring.ai.vertex.ai.gemini.chat.options.response-mime-type | 生成候选文本的输出响应 MIME 类型。 |  `text/plain`：（默认）文本输出或 `application/json`：JSON 响应。
+| spring.ai.vertex.ai.gemini.chat.options.google-search-retrieval | 使用 Google 搜索基础功能 | `true` 或 `false`，默认 `false`。
+| spring.ai.vertex.ai.gemini.chat.options.temperature | 控制输出的随机性。值范围可以是 [0.0,1.0]，包含边界。接近 1.0 的值将产生更多样化的响应，而接近 0.0 的值通常会导致生成器的响应不那么令人惊讶。此值指定后端在调用生成器时使用的默认值。 | 0.7
+| spring.ai.vertex.ai.gemini.chat.options.top-k | 采样时考虑的最大标记数。生成器使用组合的 Top-k 和核采样。Top-k 采样考虑 topK 个最可能的标记集。 | -
+| spring.ai.vertex.ai.gemini.chat.options.top-p | 采样时考虑的最大累积标记概率。生成器使用组合的 Top-k 和核采样。核采样考虑概率总和至少为 topP 的最小标记集。  | -
+| spring.ai.vertex.ai.gemini.chat.options.candidate-count | 要返回的生成响应消息数。此值必须在 [1, 8] 范围内，包含边界。默认为 1。 | 1
+| spring.ai.vertex.ai.gemini.chat.options.max-output-tokens | 要生成的最大标记数。 | -
+| spring.ai.vertex.ai.gemini.chat.options.tool-names | 工具名称列表，用于在单个提示请求中启用函数调用。具有这些名称的工具必须存在于 ToolCallback 注册表中。 | -
+| （已被 `tool-names` 弃用）spring.ai.vertex.ai.gemini.chat.options.functions | 函数名称列表，用于在单个提示请求中启用函数调用。具有这些名称的函数必须存在于 functionCallbacks 注册表中。 | -
+| spring.ai.vertex.ai.gemini.chat.options.internal-tool-execution-enabled | 如果为 true，则应执行工具执行，否则将模型响应返回给用户。默认为 null，但如果为 null，将考虑 `ToolCallingChatOptions.DEFAULT_TOOL_EXECUTION_ENABLED`（为 true） | -
+| （已被 `internal-tool-execution-enabled` 弃用）spring.ai.vertex.ai.gemini.chat.options.proxy-tool-calls | 如果为 true，Spring AI 将不会在内部处理函数调用，而是将它们代理给客户端。然后由客户端负责处理函数调用，将它们分派到适当的函数，并返回结果。如果为 false（默认值），Spring AI 将在内部处理函数调用。仅适用于支持函数调用的聊天模型 | false
+| spring.ai.vertex.ai.gemini.chat.options.safety-settings | 安全设置列表，用于控制安全过滤器，如 https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-filters[Vertex AI 安全过滤器] 所定义。每个安全设置可以有一个方法、阈值和类别。 | -
 
 |====
 
-TIP: All properties prefixed with `spring.ai.vertex.ai.gemini.chat.options` can be overridden at runtime by adding a request specific <<chat-options>> to the `Prompt` call.
+提示：所有以 `spring.ai.vertex.ai.gemini.chat.options` 为前缀的属性都可以通过在 `Prompt` 调用中添加请求特定的 <<chat-options>> 在运行时被覆盖。
 
-== Runtime options [[chat-options]]
+== 运行时选项 [[chat-options]]
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/main/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatOptions.java[VertexAiGeminiChatOptions.java] provides model configurations, such as the temperature, the topK, etc.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/main/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatOptions.java[VertexAiGeminiChatOptions.java] 提供模型配置，如温度、topK 等。
 
-On start-up, the default options can be configured with the `VertexAiGeminiChatModel(api, options)` constructor or the `spring.ai.vertex.ai.chat.options.*` properties.
+在启动时，默认选项可以通过 `VertexAiGeminiChatModel(api, options)` 构造函数或 `spring.ai.vertex.ai.chat.options.*` 属性进行配置。
 
-At runtime, you can override the default options by adding new, request specific, options to the `Prompt` call.
-For example, to override the default temperature for a specific request:
+在运行时，您可以通过在 `Prompt` 调用中添加新的、请求特定的选项来覆盖默认选项。
+例如，要覆盖特定请求的默认温度：
 
 [source,java]
 ----
@@ -128,13 +128,13 @@ ChatResponse response = chatModel.call(
     ));
 ----
 
-TIP: In addition to the model specific `VertexAiGeminiChatOptions` you can use a portable https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/prompt/ChatOptions.java[ChatOptions] instance, created with the
-https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/prompt/DefaultChatOptionsBuilder.java[ChatOptionsBuilder#builder()].
+提示：除了模型特定的 `VertexAiGeminiChatOptions` 外，您还可以使用可移植的 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/prompt/ChatOptions.java[ChatOptions] 实例，使用
+https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/chat/prompt/DefaultChatOptionsBuilder.java[ChatOptionsBuilder#builder()] 创建。
 
-== Tool Calling
+== 工具调用
 
-The Vertex AI Gemini model supports tool calling (in Google Gemini context, it's called `function calling`) capabilities, allowing models to use tools during conversations.
-Here's an example of how to define and use `@Tool`-based tools:
+Vertex AI Gemini 模型支持工具调用（在 Google Gemini 上下文中，称为 `function calling`）功能，允许模型在对话过程中使用工具。
+以下是定义和使用基于 `@Tool` 的工具的示例：
 
 [source,java]
 ----
@@ -154,7 +154,7 @@ String response = ChatClient.create(this.chatModel)
         .content();
 ----
 
-You can use the java.util.function beans as tools as well:
+您也可以使用 java.util.function bean 作为工具：
 
 [source,java]
 ----
@@ -172,22 +172,20 @@ String response = ChatClient.create(this.chatModel)
         .content();
 ----
 
-Find more in xref:api/tools.adoc[Tools] documentation.
+更多信息请参阅 xref:api/tools.adoc[工具] 文档。
 
+== 多模态
 
-== Multimodal
+多模态性指的是模型同时理解和处理来自各种（输入）源信息的能力，包括 `文本`、`pdf`、`图像`、`音频` 和其他数据格式。
 
-Multimodality refers to a model's ability to simultaneously understand and process information from various (input) sources, including `text`, `pdf`, `images`, `audio`, and other data formats.
+=== 图像、音频、视频
+Google 的 Gemini AI 模型通过理解和集成文本、代码、音频、图像和视频来支持这种能力。
+有关更多详细信息，请参阅博客文章 https://blog.google/technology/ai/google-gemini-ai/#introducing-gemini[Introducing Gemini]。
 
-=== Image, Audio, Video
-Google's Gemini AI models support this capability by comprehending and integrating text, code, audio, images, and video.
-For more details, refer to the blog post https://blog.google/technology/ai/google-gemini-ai/#introducing-gemini[Introducing Gemini].
+Spring AI 的 `Message` 接口通过引入 Media 类型来支持多模态 AI 模型。
+此类型包含消息中媒体附件的数据和信息，使用 Spring 的 `org.springframework.util.MimeType` 和 `java.lang.Object` 作为原始媒体数据。
 
-Spring AI's `Message` interface supports multimodal AI models by introducing the Media type.
-This type contains data and information about media attachments in messages, using Spring's `org.springframework.util.MimeType` and a `java.lang.Object` for the raw media data.
-
-Below is a simple code example extracted from https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/test/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatModelIT.java[VertexAiGeminiChatModelIT#multiModalityTest()], demonstrating the combination of user text with an image.
-
+以下是摘自 https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/test/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatModelIT.java[VertexAiGeminiChatModelIT#multiModalityTest()] 的简单代码示例，演示了用户文本与图像的组合。
 
 [source,java]
 ----
@@ -201,8 +199,8 @@ ChatResponse response = chatModel.call(new Prompt(List.of(this.userMessage)));
 
 === PDF
 
-Latest Vertex Gemini provides support for PDF input types..
-Use the `application/pdf` media type to attach a PDF file to the message:
+最新的 Vertex Gemini 提供对 PDF 输入类型的支持。
+使用 `application/pdf` 媒体类型将 PDF 文件附加到消息：
 
 [source,java]
 ----
@@ -215,12 +213,11 @@ var userMessage = new UserMessage(
 var response = this.chatModel.call(new Prompt(List.of(userMessage)));
 ----
 
+== 示例控制器
 
-== Sample Controller
+https://start.spring.io/[创建] 一个新的 Spring Boot 项目，并在您的 pom（或 gradle）依赖项中添加 `spring-ai-starter-model-vertex-ai-gemini`。
 
-https://start.spring.io/[Create] a new Spring Boot project and add the `spring-ai-starter-model-vertex-ai-gemini` to your pom (or gradle) dependencies.
-
-Add a `application.properties` file, under the `src/main/resources` directory, to enable and configure the VertexAi chat model:
+在 `src/main/resources` 目录下添加 `application.properties` 文件，以启用和配置 VertexAi 聊天模型：
 
 [source,application.properties]
 ----
@@ -230,20 +227,19 @@ spring.ai.vertex.ai.gemini.chat.options.model=gemini-2.0-flash
 spring.ai.vertex.ai.gemini.chat.options.temperature=0.5
 ----
 
-TIP: Replace the `project-id` with your Google Cloud Project ID and `location` is Google Cloud Region
-like `us-central1`, `europe-west1`, etc...
+提示：将 `project-id` 替换为您的 Google Cloud 项目 ID，`location` 是 Google Cloud 区域
+如 `us-central1`、`europe-west1` 等...
 
 [NOTE]
 ====
-Each model has its own set of supported regions, you can find the list of supported regions in the model page.
+每个模型都有其自己支持的区域集，您可以在模型页面中找到支持的区域列表。
 
-For example, model=`gemini-2.5-flash` is currently available in `us-central1` region only, you must set location=`us-central1`,
-following the model page link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash[Gemini 2.5 Flash - Supported Regions].
+例如，model=`gemini-2.5-flash` 目前仅在 `us-central1` 区域可用，您必须设置 location=`us-central1`，
+遵循模型页面 link:https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash[Gemini 2.5 Flash - 支持的区域]。
 ====
 
-
-This will create a `VertexAiGeminiChatModel` implementation that you can inject into your class.
-Here is an example of a simple `@Controller` class that uses the chat model for text generations.
+这将创建一个 `VertexAiGeminiChatModel` 实现，您可以将其注入到您的类中。
+以下是一个使用聊天模型进行文本生成的简单 `@Controller` 类示例。
 
 [source,java]
 ----
@@ -270,11 +266,11 @@ public class ChatController {
 }
 ----
 
-== Manual Configuration
+== 手动配置
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/main/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatModel.java[VertexAiGeminiChatModel] implements the `ChatModel` and uses the `VertexAI` to connect to the Vertex AI Gemini service.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-gemini/src/main/java/org/springframework/ai/vertexai/gemini/VertexAiGeminiChatModel.java[VertexAiGeminiChatModel] 实现了 `ChatModel` 并使用 `VertexAI` 连接到 Vertex AI Gemini 服务。
 
-Add the `spring-ai-vertex-ai-gemini` dependency to your project's Maven `pom.xml` file:
+在项目的 Maven `pom.xml` 文件中添加 `spring-ai-vertex-ai-gemini` 依赖：
 
 [source, xml]
 ----
@@ -284,7 +280,7 @@ Add the `spring-ai-vertex-ai-gemini` dependency to your project's Maven `pom.xml
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -293,9 +289,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Next, create a `VertexAiGeminiChatModel` and use it for text generations:
+接下来，创建 `VertexAiGeminiChatModel` 并使用它进行文本生成：
 
 [source,java]
 ----
@@ -311,11 +307,11 @@ ChatResponse response = this.chatModel.call(
     new Prompt("Generate the names of 5 famous pirates."));
 ----
 
-The `VertexAiGeminiChatOptions` provides the configuration information for the chat requests.
-The `VertexAiGeminiChatOptions.Builder` is fluent options builder.
+`VertexAiGeminiChatOptions` 提供聊天请求的配置信息。
+`VertexAiGeminiChatOptions.Builder` 是流畅的选项构建器。
 
-== Low-level Java Client [[low-level-api]]
+== 低级 Java 客户端 [[low-level-api]]
 
-Following class diagram illustrates the Vertex AI Gemini native Java API:
+以下类图说明了 Vertex AI Gemini 原生 Java API：
 
 image::vertex-ai-gemini-native-api.jpg[w=800,align="center"]

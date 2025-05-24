@@ -1,31 +1,30 @@
 [[getting-started]]
-= Getting Started
+= 快速开始
 
-This section offers jumping off points for how to get started using Spring AI.
+本节为如何开始使用 Spring AI 提供了入门指引。
 
-You should follow the steps in each of the following sections according to your needs.
+请根据自身需求，依次参考以下各小节的步骤。
 
-NOTE: Spring AI supports Spring Boot 3.4.x.  When Spring Boot 3.5.x is released, we will support that as well.
+注意：Spring AI 支持 Spring Boot 3.4.x。当 Spring Boot 3.5.x 发布后，我们也会提供支持。
 
 [[spring-initializr]]
 == Spring Initializr
 
-Head on over to https://start.spring.io/[start.spring.io] and select the AI Models and Vector Stores that you want to use in your new applications.
+请访问 https://start.spring.io/[start.spring.io]，选择你希望在新应用中使用的 AI 模型和向量存储。
 
 [[artifact-repositories]]
-== Artifact Repositories
+== 构件仓库
 
-=== Milestones - Use Maven Central
+=== 里程碑版本 - 使用 Maven Central
 
-As of 1.0.0-M6, releases are available in Maven Central.
-No changes to your build file are required.
+自 1.0.0-M6 起，发布版本已可在 Maven Central 获取。
+无需对你的构建文件做任何更改。
 
+=== 快照版本 - 添加快照仓库
 
-=== Snapshots - Add Snapshot Repositories
+如需使用快照版（以及 1.0.0-M6 之前的里程碑版），需在构建文件中添加如下快照仓库。
 
-To use the Snapshot (and pre 1.0.0-M6 milestone) versions, you need to add the following snapshot repositories in your build file.
-
-Add the following repository definitions to your Maven or Gradle build file:
+将以下仓库定义添加到你的 Maven 或 Gradle 构建文件：
 
 [tabs]
 ======
@@ -72,7 +71,7 @@ repositories {
 ----
 ======
 
-**NOTE:** When using Maven with Spring AI snapshots, pay attention to your Maven mirror configuration. If you have configured a mirror in your `settings.xml` like this:
+**注意：** 使用 Maven 配置 Spring AI 快照仓库时，请注意你的 Maven 镜像配置。如果你在 `settings.xml` 中配置了如下镜像：
 
 [source,xml]
 ----
@@ -83,7 +82,7 @@ repositories {
 </mirror>
 ----
 
-The wildcard `*` will redirect all repository requests to your mirror, preventing access to Spring snapshot repositories. To fix this, modify the `mirrorOf` configuration to exclude Spring repositories:
+通配符 `*` 会将所有仓库请求重定向到你的镜像，导致无法访问 Spring 快照仓库。为解决此问题，请将 `mirrorOf` 配置修改为排除 Spring 仓库：
 
 [source,xml]
 ----
@@ -94,17 +93,16 @@ The wildcard `*` will redirect all repository requests to your mirror, preventin
 </mirror>
 ----
 
-This configuration allows Maven to access Spring snapshot repositories directly while still using your mirror for other dependencies.
-
+此配置允许 Maven 直接访问 Spring 快照仓库，同时其他依赖仍通过你的镜像获取。
 
 [[dependency-management]]
-== Dependency Management
+== 依赖管理
 
-The Spring AI Bill of Materials (BOM) declares the recommended versions of all the dependencies used by a given release of Spring AI.
-This is a BOM-only version and it just contains dependency management and no plugin declarations or direct references to Spring or Spring Boot.
-You can use the Spring Boot parent POM, or use the BOM from Spring Boot (`spring-boot-dependencies`) to manage Spring Boot versions.
+Spring AI 物料清单（BOM）声明了当前版本 Spring AI 所用全部依赖的推荐版本。
+该 BOM 仅用于依赖管理，不包含插件声明，也不直接引用 Spring 或 Spring Boot。
+你可以使用 Spring Boot 父 POM，或通过 Spring Boot 的 BOM（`spring-boot-dependencies`）来管理 Spring Boot 版本。
 
-Add the BOM to your project:
+将 BOM 添加到你的项目中：
 
 [tabs]
 ======
@@ -131,26 +129,26 @@ Gradle::
 ----
 dependencies {
   implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
-  // Replace the following with the starter dependencies of specific modules you wish to use
+  // 替换为你需要使用的具体模块的 starter 依赖
   implementation 'org.springframework.ai:spring-ai-openai'
 }
 ----
 +
-Gradle users can also use the Spring AI BOM by leveraging Gradle (5.0+) native support for declaring dependency constraints using a Maven BOM. This is implemented by adding a 'platform' dependency handler method to the dependencies section of your Gradle build script.
+Gradle 用户也可通过 Gradle（5.0+）原生支持的 Maven BOM 依赖约束方式使用 Spring AI BOM。只需在 Gradle 构建脚本的 dependencies 部分添加 'platform' 依赖处理方法即可。
 ======
 
 [[add-dependencies]]
-== Add dependencies for specific components
+== 为特定组件添加依赖
 
-Each of the following sections in the documentation shows which dependencies you need to add to your project build system.
+文档后续各节会说明你需要为项目构建系统添加哪些依赖。
 
-* xref:api/chatmodel.adoc[Chat Models]
-* xref:api/embeddings.adoc[Embeddings Models]
-* xref:api/imageclient.adoc[Image Generation Models]
-* xref:api/audio/transcriptions.adoc[Transcription Models]
-* xref:api/audio/speech.adoc[Text-To-Speech (TTS) Models]
-* xref:api/vectordbs.adoc[Vector Databases]
+* xref:api/chatmodel.adoc[聊天模型]
+* xref:api/embeddings.adoc[嵌入模型]
+* xref:api/imageclient.adoc[图像生成模型]
+* xref:api/audio/transcriptions.adoc[语音转文本模型]
+* xref:api/audio/speech.adoc[文本转语音（TTS）模型]
+* xref:api/vectordbs.adoc[向量数据库]
 
-== Spring AI samples
+== Spring AI 示例
 
-Please refer to https://github.com/danvega/awesome-spring-ai[this page] for more resources and samples related to Spring AI.
+更多 Spring AI 相关资源与示例，请参考 https://github.com/danvega/awesome-spring-ai[此页面]。

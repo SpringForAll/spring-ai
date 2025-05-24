@@ -1,20 +1,20 @@
 [[AiMetadata]]
-= AI metadata
+= AI 元数据
 
-Use of an AI, such as OpenAI's ChatGPT, consumes resources and generates metrics returned by the AI provider based on the usage and requests made to the AI through the API.
-Consumption is typically in the form of requests made or tokens used in a given timeframe, such as monthly, that AI providers use to measure this consumption and reset limits.
-Your rate limits are directly determined by your plan when you signed up with your AI provider. For instance, you can review details on OpenAI's https://platform.openai.com/docs/guides/rate-limits?context=tier-free[rate limits] and https://openai.com/pricing#language-models[plans] by following the links.
+使用 AI（如 OpenAI 的 ChatGPT）会消耗资源并生成基于使用情况和通过 API 向 AI 发出的请求的指标，这些指标由 AI 提供商返回。
+消耗通常以在给定时间段（如每月）内发出的请求或使用的令牌形式出现，AI 提供商使用这些来衡量消耗并重置限制。
+您的速率限制直接由您注册 AI 提供商时选择的计划决定。例如，您可以通过以下链接查看 OpenAI 的 https://platform.openai.com/docs/guides/rate-limits?context=tier-free[速率限制] 和 https://openai.com/pricing#language-models[计划] 的详细信息。
 
-To help garner insight into your AI (model) consumption and general usage, Spring AI provides an API to introspect the metadata that is returned by AI providers in their APIs.
+为了帮助深入了解您的 AI（模型）消耗和一般使用情况，Spring AI 提供了一个 API 来检查 AI 提供商在其 API 中返回的元数据。
 
-Spring AI defines 3 primary interfaces to examine these metrics: `GenerationMetadata`, `RateLimit` and `Usage`. All of these interface can be accessed programmatically from the `ChatResponse` returned and initiated by an AI request.
+Spring AI 定义了 3 个主要接口来检查这些指标：`GenerationMetadata`、`RateLimit` 和 `Usage`。所有这些接口都可以从 AI 请求发起并返回的 `ChatResponse` 中以编程方式访问。
 
 [[AiMetadata-GenerationMetadata]]
-== `GenerationMetadata` interface
+== `GenerationMetadata` 接口
 
-The `GenerationMetadata` interface is defined as:
+`GenerationMetadata` 接口定义如下：
 
-.GenerationMetadata interface
+.GenerationMetadata 接口
 [source,java]
 ----
 interface GenerationMetadata {
@@ -30,9 +30,9 @@ interface GenerationMetadata {
 }
 ----
 
-An instance of `GenerationMetadata` is automatically created by Spring AI when an AI request is made through the AI provider's API and an AI response is returned. You can get access to the AI provider metadata from the `ChatResponse` using:
+当通过 AI 提供商的 API 发出 AI 请求并返回 AI 响应时，Spring AI 会自动创建 `GenerationMetadata` 的实例。您可以使用以下方式从 `ChatResponse` 访问 AI 提供商元数据：
 
-.Get access to `GenerationMetadata` from `ChatResponse`
+.从 `ChatResponse` 获取 `GenerationMetadata` 的访问权限
 [source,java]
 ----
 @Service
@@ -44,29 +44,28 @@ class MyService {
 
         ChatResponse response = chatModel.call(prompt);
 
-        // Process the chat response
+        // 处理聊天响应
 
         GenerationMetadata metadata = response.getMetadata();
 
-        // Inspect the AI metadata returned in the chat response of the AI providers API
+        // 检查 AI 提供商 API 返回的聊天响应中的 AI 元数据
 
         Long totalTokensUsedInAiPromptAndResponse = metadata.getUsage().getTotalTokens();
 
-        // Act on this information somehow
+        // 以某种方式处理这些信息
 	}
 }
 ----
 
-You might imagine that you can rate limit your own Spring applications using AI, or restrict `Prompt` sizes, which affect your token usage, in an automated, intelligent and realtime manner.
-
-Minimally, you can simply gather these metrics to monitor and report on your consumption.
+您可以想象，您可以使用 AI 来限制自己的 Spring 应用程序的速率，或者以自动化、智能和实时的方式限制影响令牌使用的 `Prompt` 大小。
+至少，您可以简单地收集这些指标来监控和报告您的消耗情况。
 
 [[AiMetadata-RateLimit]]
 == RateLimit
 
-The `RateLimit` interface provides access to actual information returned by an AI provider on your API usage when making AI requests.
+`RateLimit` 接口提供对 AI 提供商在发出 AI 请求时返回的关于您的 API 使用情况的实际信息的访问。
 
-.`RateLimit` interface
+.`RateLimit` 接口
 [source,java]
 ----
 interface RateLimit {
@@ -86,27 +85,27 @@ interface RateLimit {
 }
 ----
 
-`requestsLimit` and `requestsRemaining` let you know how many AI requests, based on the AI provider plan you chose when you signed up, that you can make in total along with your remaining balance within the given timeframe. `requestsReset` returns a `Duration` of time before the timeframe expires and your limits reset based on your chosen plan.
+`requestsLimit` 和 `requestsRemaining` 让您知道基于您在注册时选择的 AI 提供商计划，您可以在给定时间段内发出的 AI 请求总数以及您的剩余余额。`requestsReset` 返回一个 `Duration`，表示在时间段到期和您的限制根据您选择的计划重置之前的时间。
 
-The methods for `tokensLimit`, `tokensRemaining` and `tokensReset` are similar to the methods for requests, but focus on token limits, balance and resets instead.
+`tokensLimit`、`tokensRemaining` 和 `tokensReset` 的方法与请求的方法类似，但专注于令牌限制、余额和重置。
 
-The `RateLimit` instance can be acquired from the `GenerationMetadata`, like so:
+可以从 `GenerationMetadata` 获取 `RateLimit` 实例，如下所示：
 
-.Get access to `RateLimit` from `GenerationMetadata`
+.从 `GenerationMetadata` 获取 `RateLimit` 的访问权限
 [source,java]
 ----
 RateLimit rateLimit = generationMetadata.getRateLimit();
 
 Long tokensRemaining = this.rateLimit.getTokensRemaining();
 
-// do something interesting with the RateLimit metadata
+// 对 RateLimit 元数据做一些有趣的事情
 ----
 
-For AI providers like OpenAI, the rate limit metadata is returned in https://platform.openai.com/docs/guides/rate-limits/rate-limits-in-headers[HTTP headers] from their (REST) API accessible through HTTP clients, like OkHttp.
+对于像 OpenAI 这样的 AI 提供商，速率限制元数据是在其（REST）API 的 https://platform.openai.com/docs/guides/rate-limits/rate-limits-in-headers[HTTP 头] 中返回的，可以通过 HTTP 客户端（如 OkHttp）访问。
 
-Because this can be potentially a costly operation, the collection of rate limit AI metadata must be explicitly enabled. You can enable this collection with a Spring AI property in Spring Boot application.properties; for example:
+因为这可能是一个成本较高的操作，所以必须显式启用速率限制 AI 元数据的收集。您可以在 Spring Boot application.properties 中使用 Spring AI 属性启用此收集；例如：
 
-.Enable API rate limit collection from AI metadata
+.启用从 AI 元数据收集 API 速率限制
 [source,properties]
 ----
 # Spring Boot application.properties
@@ -116,9 +115,9 @@ spring.ai.openai.metadata.rate-limit-metrics-enabled=true
 [[AiMetadata-Usage]]
 == Usage
 
-As shown <<AiMetadata-GenerationMetadata,above>>, `Usage` data can be obtained from the `GenerationMetadata` object. The `Usage` interface is defined as:
+如 <<AiMetadata-GenerationMetadata,上面>> 所示，可以从 `GenerationMetadata` 对象获取 `Usage` 数据。`Usage` 接口定义如下：
 
-.`Usage` interface
+.`Usage` 接口
 [source,java]
 ----
 interface Usage {
@@ -134,6 +133,6 @@ interface Usage {
 }
 ----
 
-The method names are self-explanatory, but tells you the tokens that the AI required to process the `Prompt` and generate a response.
+方法名称是不言自明的，但告诉您 AI 处理 `Prompt` 和生成响应所需的令牌。
 
-`totalTokens` is the sum of `promptTokens` and `generationTokens`. Spring AI computes this by default, but the information is returned in the AI response from OpenAI.
+`totalTokens` 是 `promptTokens` 和 `generationTokens` 的总和。Spring AI 默认计算这个值，但信息是从 OpenAI 的 AI 响应中返回的。

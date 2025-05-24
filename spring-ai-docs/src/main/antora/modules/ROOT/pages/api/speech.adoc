@@ -1,5 +1,5 @@
 [[Speech]]
-= Speech Model API
+= 语音模型 API
 
-Spring AI provides support for OpenAI's Text-To-Speech (TTS) API.
-When additional providers for Speech are implemented, a common `SpeechModel`  and `StreamingSpeechModel` interface will be extracted.
+Spring AI 提供了对 OpenAI 的文本转语音 (TTS) API 的支持。
+当实现其他语音提供商时，将提取通用的 `SpeechModel` 和 `StreamingSpeechModel` 接口。

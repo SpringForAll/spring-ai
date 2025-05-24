@@ -1,59 +1,59 @@
-= ETL Pipeline
+= ETL 管道
 
-The Extract, Transform, and Load (ETL) framework serves as the backbone of data processing within the Retrieval Augmented Generation (RAG) use case.
+提取、转换和加载(ETL)框架作为检索增强生成(RAG)用例中数据处理的支柱。
 
-The ETL pipeline orchestrates the flow from raw data sources to a structured vector store, ensuring data is in the optimal format for retrieval by the AI model.
+ETL管道编排从原始数据源到结构化向量存储的流程，确保数据以AI模型检索的最佳格式存在。
 
-The RAG use case is text to augment the capabilities of generative models by retrieving relevant information from a body of data to enhance the quality and relevance of the generated output.
+RAG用例通过从数据体中检索相关信息来增强生成模型的能力，从而提高生成输出的质量和相关性。
 
-== API Overview
+== API概述
 
-The ETL pipelines creates, transforms and stores `Document` instances.
+ETL管道创建、转换和存储`Document`实例。
 
 image::spring-ai-document1-api.jpg[Spring AI Message API, width=400, align="center"]
 
-The `Document` class contains text, metadata and optionally additional media types like images, audio and video.
+`Document`类包含文本、元数据以及可选的额外媒体类型，如图像、音频和视频。
 
-There are three main components of the ETL pipeline,
+ETL管道有三个主要组件：
 
-* `DocumentReader` that implements `Supplier<List<Document>>`
-* `DocumentTransformer` that implements `Function<List<Document>, List<Document>>`
-* `DocumentWriter` that implements `Consumer<List<Document>>`
+* `DocumentReader` - 实现`Supplier<List<Document>>`
+* `DocumentTransformer` - 实现`Function<List<Document>, List<Document>>`
+* `DocumentWriter` - 实现`Consumer<List<Document>>`
 
-The `Document` class content is created from PDFs, text files and other document types with the help of `DocumentReader`.
+`Document`类的内容是通过`DocumentReader`的帮助从PDF、文本文件和其他文档类型创建的。
 
-To construct a simple ETL pipeline, you can chain together an instance of each type.
+要构建一个简单的ETL管道，您可以将这三种类型的实例链接在一起。
 
 image::etl-pipeline.jpg[align="center"]
 
-Let's say we have the following instances of those three ETL types
+假设我们有以下ETL类型的实例：
 
-* `PagePdfDocumentReader` an implementation of `DocumentReader`
-* `TokenTextSplitter` an implementation of `DocumentTransformer`
-* `VectorStore` an implementation of `DocumentWriter`
+* `PagePdfDocumentReader` - `DocumentReader`的实现
+* `TokenTextSplitter` - `DocumentTransformer`的实现
+* `VectorStore` - `DocumentWriter`的实现
 
-To perform the basic loading of data into a Vector Database for use with the Retrieval Augmented Generation pattern, use the following code in Java function style syntax.
+要执行将数据加载到向量数据库的基本操作以用于检索增强生成模式，请使用以下Java函数式语法代码：
 
 [source,java]
 ----
 vectorStore.accept(tokenTextSplitter.apply(pdfReader.get()));
 ----
 
-Alternatively, you can use method names that are more naturally expressive for the domain
+或者，您可以使用更自然地表达领域的方法名：
 
 [source,java]
 ----
 vectorStore.write(tokenTextSplitter.split(pdfReader.read()));
 ----
 
-== ETL Interfaces
+== ETL接口
 
-The ETL pipeline is composed of the following interfaces and implementations.
-Detailed ETL class diagram is shown in the <<etl-class-diagram>> section.
+ETL管道由以下接口和实现组成。
+详细的ETL类图在<<etl-class-diagram>>部分中显示。
 
 === DocumentReader
 
-Provides a source of documents from diverse origins.
+提供来自不同来源的文档源。
 [source,java]
 ----
 public interface DocumentReader extends Supplier<List<Document>> {
@@ -64,10 +64,9 @@ public interface DocumentReader extends Supplier<List<Document>> {
 }
 ----
 
-
 === DocumentTransformer
 
-Transforms a batch of documents as part of the processing workflow.
+转换一批文档作为处理工作流的一部分。
 
 [source,java]
 ----
@@ -79,10 +78,9 @@ public interface DocumentTransformer extends Function<List<Document>, List<Docum
 }
 ----
 
-
 === DocumentWriter
 
-Manages the final stage of the ETL process, preparing documents for storage.
+管理ETL过程的最后阶段，准备文档进行存储。
 
 ```java
 public interface DocumentWriter extends Consumer<List<Document>> {
@@ -93,11 +91,10 @@ public interface DocumentWriter extends Consumer<List<Document>> {
 }
 ```
 
-
 [[etl-class-diagram]]
-=== ETL Class Diagram
+=== ETL类图
 
-The following class diagram illustrates the ETL interfaces and implementations.
+以下类图说明了ETL接口和实现。
 
 // image::etl-class-diagram.jpg[align="center", width="800px"]
 image::etl-class-diagram.jpg[align="center"]
@@ -106,10 +103,9 @@ image::etl-class-diagram.jpg[align="center"]
 
 === JSON
 
-The `JsonReader` processes JSON documents, converting them into a list of `Document` objects.
+`JsonReader`处理JSON文档，将它们转换为`Document`对象列表。
 
-
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -129,62 +125,61 @@ class MyJsonReader {
 }
 ----
 
-==== Constructor Options
+==== 构造函数选项
 
-The `JsonReader` provides several constructor options:
+`JsonReader`提供了几个构造函数选项：
 
 1. `JsonReader(Resource resource)`
 2. `JsonReader(Resource resource, String... jsonKeysToUse)`
 3. `JsonReader(Resource resource, JsonMetadataGenerator jsonMetadataGenerator, String... jsonKeysToUse)`
 
-==== Parameters
+==== 参数
 
-* `resource`: A Spring `Resource` object pointing to the JSON file.
-* `jsonKeysToUse`: An array of keys from the JSON that should be used as the text content in the resulting `Document` objects.
-* `jsonMetadataGenerator`: An optional `JsonMetadataGenerator` to create metadata for each `Document`.
+* `resource`: 指向JSON文件的Spring `Resource`对象。
+* `jsonKeysToUse`: 从JSON中应该用作结果`Document`对象中文本内容的键数组。
+* `jsonMetadataGenerator`: 用于为每个`Document`创建元数据的可选`JsonMetadataGenerator`。
 
-==== Behavior
+==== 行为
 
-The `JsonReader` processes JSON content as follows:
+`JsonReader`按以下方式处理JSON内容：
 
-* It can handle both JSON arrays and single JSON objects.
-* For each JSON object (either in an array or a single object):
-** It extracts the content based on the specified `jsonKeysToUse`.
-** If no keys are specified, it uses the entire JSON object as content.
-** It generates metadata using the provided `JsonMetadataGenerator` (or an empty one if not provided).
-** It creates a `Document` object with the extracted content and metadata.
+* 它可以处理JSON数组和单个JSON对象。
+* 对于每个JSON对象（在数组中或单个对象中）：
+** 它根据指定的`jsonKeysToUse`提取内容。
+** 如果未指定键，则使用整个JSON对象作为内容。
+** 它使用提供的`JsonMetadataGenerator`（如果未提供则使用空生成器）生成元数据。
+** 它创建一个包含提取内容和元数据的`Document`对象。
 
+==== 使用JSON指针
 
-==== Using JSON Pointers
+`JsonReader`现在支持使用JSON指针检索JSON文档的特定部分。此功能允许您轻松地从复杂的JSON结构中提取嵌套数据。
 
-The `JsonReader` now supports retrieving specific parts of a JSON document using JSON Pointers. This feature allows you to easily extract nested data from complex JSON structures.
-
-===== The `get(String pointer)` method
+===== `get(String pointer)`方法
 
 [source,java]
 ----
 public List<Document> get(String pointer)
 ----
 
-This method allows you to use a JSON Pointer to retrieve a specific part of the JSON document.
+此方法允许您使用JSON指针检索JSON文档的特定部分。
 
-====== Parameters
+====== 参数
 
-* `pointer`: A JSON Pointer string (as defined in RFC 6901) to locate the desired element within the JSON structure.
+* `pointer`: 用于在JSON结构中定位所需元素的JSON指针字符串（如RFC 6901中定义）。
 
-====== Return Value
+====== 返回值
 
-* Returns a `List<Document>` containing the documents parsed from the JSON element located by the pointer.
+* 返回一个`List<Document>`，包含从指针定位的JSON元素解析出的文档。
 
-====== Behavior
+====== 行为
 
-* The method uses the provided JSON Pointer to navigate to a specific location in the JSON structure.
-* If the pointer is valid and points to an existing element:
-** For a JSON object: it returns a list with a single Document.
-** For a JSON array: it returns a list of Documents, one for each element in the array.
-* If the pointer is invalid or points to a non-existent element, it throws an `IllegalArgumentException`.
+* 该方法使用提供的JSON指针导航到JSON结构中的特定位置。
+* 如果指针有效并指向现有元素：
+** 对于JSON对象：返回包含单个Document的列表。
+** 对于JSON数组：返回Document列表，数组中的每个元素一个。
+* 如果指针无效或指向不存在的元素，则抛出`IllegalArgumentException`。
 
-====== Example
+====== 示例
 
 [source,java]
 ----
@@ -192,7 +187,7 @@ JsonReader jsonReader = new JsonReader(resource, "description");
 List<Document> documents = this.jsonReader.get("/store/books/0");
 ----
 
-==== Example JSON Structure
+==== 示例JSON结构
 
 [source,json]
 ----
@@ -210,20 +205,19 @@ List<Document> documents = this.jsonReader.get("/store/books/0");
 ]
 ----
 
-In this example, if the `JsonReader` is configured with `"description"` as the `jsonKeysToUse`, it will create `Document` objects where the content is the value of the "description" field for each bike in the array.
+在此示例中，如果`JsonReader`配置为使用`"description"`作为`jsonKeysToUse`，它将创建`Document`对象，其中内容是数组中每辆自行车的"description"字段的值。
 
-==== Notes
+==== 注意事项
 
-* The `JsonReader` uses Jackson for JSON parsing.
-* It can handle large JSON files efficiently by using streaming for arrays.
-* If multiple keys are specified in `jsonKeysToUse`, the content will be a concatenation of the values for those keys.
-* The reader is flexible and can be adapted to various JSON structures by customizing the `jsonKeysToUse` and `JsonMetadataGenerator`.
+* `JsonReader`使用Jackson进行JSON解析。
+* 它可以通过使用流式处理来高效处理大型JSON文件。
+* 如果在`jsonKeysToUse`中指定了多个键，内容将是这些键值的连接。
+* 通过自定义`jsonKeysToUse`和`JsonMetadataGenerator`，读取器可以适应各种JSON结构。
 
+=== 文本
+`TextReader`处理纯文本文档，将它们转换为`Document`对象列表。
 
-=== Text
-The `TextReader` processes plain text documents, converting them into a list of `Document` objects.
-
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -245,39 +239,38 @@ class MyTextReader {
 }
 ----
 
-==== Constructor Options
+==== 构造函数选项
 
-The `TextReader` provides two constructor options:
+`TextReader`提供了两个构造函数选项：
 
 1. `TextReader(String resourceUrl)`
 2. `TextReader(Resource resource)`
 
-==== Parameters
+==== 参数
 
-* `resourceUrl`: A string representing the URL of the resource to be read.
-* `resource`: A Spring `Resource` object pointing to the text file.
+* `resourceUrl`: 表示要读取的资源URL的字符串。
+* `resource`: 指向文本文件的Spring `Resource`对象。
 
-==== Configuration
+==== 配置
 
-* `setCharset(Charset charset)`: Sets the character set used for reading the text file. Default is UTF-8.
-* `getCustomMetadata()`: Returns a mutable map where you can add custom metadata for the documents.
+* `setCharset(Charset charset)`: 设置用于读取文本文件的字符集。默认为UTF-8。
+* `getCustomMetadata()`: 返回一个可变映射，您可以在其中添加文档的自定义元数据。
 
-==== Behavior
+==== 行为
 
-The `TextReader` processes text content as follows:
+`TextReader`按以下方式处理文本内容：
 
-* It reads the entire content of the text file into a single `Document` object.
-* The content of the file becomes the content of the `Document`.
-* Metadata is automatically added to the `Document`:
-** `charset`: The character set used to read the file (default: "UTF-8").
-** `source`: The filename of the source text file.
-* Any custom metadata added via `getCustomMetadata()` is included in the `Document`.
+* 它将文本文件的整个内容读入单个`Document`对象。
+* 文件的内容成为`Document`的内容。
+* 元数据自动添加到`Document`：
+** `charset`: 用于读取文件的字符集（默认："UTF-8"）。
+** `source`: 源文本文件的文件名。
+* 通过`getCustomMetadata()`添加的任何自定义元数据都包含在`Document`中。
 
+==== 注意事项
 
-==== Notes
-
-* The `TextReader` reads the entire file content into memory, so it may not be suitable for very large files.
-* If you need to split the text into smaller chunks, you can use a text splitter like `TokenTextSplitter` after reading the document:
+* `TextReader`将整个文件内容读入内存，因此可能不适合非常大的文件。
+* 如果您需要将文本分割成更小的块，可以在读取文档后使用文本分割器，如`TokenTextSplitter`：
 
 [source,java]
 ----
@@ -285,15 +278,14 @@ List<Document> documents = textReader.get();
 List<Document> splitDocuments = new TokenTextSplitter().apply(this.documents);
 ----
 
-* The reader uses Spring's `Resource` abstraction, allowing it to read from various sources (classpath, file system, URL, etc.).
-* Custom metadata can be added to all documents created by the reader using the `getCustomMetadata()` method.
-
+* 读取器使用Spring的`Resource`抽象，允许从各种源（类路径、文件系统、URL等）读取。
+* 可以使用`getCustomMetadata()`方法向读取器创建的所有文档添加自定义元数据。
 
 === HTML (JSoup)
 
-The `JsoupDocumentReader` processes HTML documents, converting them into a list of `Document` objects using the JSoup library.
+`JsoupDocumentReader`使用JSoup库处理HTML文档，将它们转换为`Document`对象列表。
 
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -308,11 +300,11 @@ class MyHtmlReader {
 
     List<Document> loadHtml() {
         JsoupDocumentReaderConfig config = JsoupDocumentReaderConfig.builder()
-            .selector("article p") // Extract paragraphs within <article> tags
-            .charset("ISO-8859-1")  // Use ISO-8859-1 encoding
-            .includeLinkUrls(true) // Include link URLs in metadata
-            .metadataTags(List.of("author", "date")) // Extract author and date meta tags
-            .additionalMetadata("source", "my-page.html") // Add custom metadata
+            .selector("article p") // 提取<article>标签内的段落
+            .charset("ISO-8859-1")  // 使用ISO-8859-1编码
+            .includeLinkUrls(true) // 在元数据中包含链接URL
+            .metadataTags(List.of("author", "date")) // 提取作者和日期元标签
+            .additionalMetadata("source", "my-page.html") // 添加自定义元数据
             .build();
 
         JsoupDocumentReader reader = new JsoupDocumentReader(this.resource, config);
@@ -321,18 +313,18 @@ class MyHtmlReader {
 }
 ----
 
-The `JsoupDocumentReaderConfig` allows you to customize the behavior of the `JsoupDocumentReader`:
+`JsoupDocumentReaderConfig`允许您自定义`JsoupDocumentReader`的行为：
 
-*   `charset`:  Specifies the character encoding of the HTML document (defaults to "UTF-8").
-*   `selector`:  A JSoup CSS selector to specify which elements to extract text from (defaults to "body").
-*   `separator`:  The string used to join text from multiple selected elements (defaults to "\n").
-*   `allElements`:  If `true`, extracts all text from the `<body>` element, ignoring the `selector` (defaults to `false`).
-*   `groupByElement`: If `true`, creates a separate `Document` for each element matched by the `selector` (defaults to `false`).
-*   `includeLinkUrls`:  If `true`, extracts absolute link URLs and adds them to the metadata (defaults to `false`).
-*   `metadataTags`:  A list of `<meta>` tag names to extract content from (defaults to `["description", "keywords"]`).
-*   `additionalMetadata`:  Allows you to add custom metadata to all created `Document` objects.
+*   `charset`: 指定HTML文档的字符编码（默认为"UTF-8"）。
+*   `selector`: 一个JSoup CSS选择器，用于指定要提取文本的元素（默认为"body"）。
+*   `separator`: 用于连接多个选定元素的文本的字符串（默认为"\n"）。
+*   `allElements`: 如果为`true`，则提取`<body>`元素中的所有文本，忽略`selector`（默认为`false`）。
+*   `groupByElement`: 如果为`true`，则为`selector`匹配的每个元素创建单独的`Document`（默认为`false`）。
+*   `includeLinkUrls`: 如果为`true`，则提取绝对链接URL并将它们添加到元数据中（默认为`false`）。
+*   `metadataTags`: 要从中提取内容的`<meta>`标签名称列表（默认为`["description", "keywords"]`）。
+*   `additionalMetadata`: 允许您向所有创建的`Document`对象添加自定义元数据。
 
-==== Sample Document: my-page.html
+==== 示例文档：my-page.html
 
 [source,html]
 ----
@@ -370,25 +362,24 @@ The `JsoupDocumentReaderConfig` allows you to customize the behavior of the `Jso
 </html>
 ----
 
-Behavior:
+行为：
 
-The `JsoupDocumentReader` processes the HTML content and creates `Document` objects based on the configuration:
+`JsoupDocumentReader`处理HTML内容并根据配置创建`Document`对象：
 
-*   The `selector` determines which elements are used for text extraction.
-*   If `allElements` is `true`, all text within the `<body>` is extracted into a single `Document`.
-*   If `groupByElement` is `true`, each element matching the `selector` creates a separate `Document`.
-*   If neither `allElements` nor `groupByElement` is `true`, text from all elements matching the `selector` is joined using the `separator`.
-*   The document title, content from specified `<meta>` tags, and (optionally) link URLs are added to the `Document` metadata.
-*   The base URI, for resolving relative links, will be extracted from URL resources.
+*   `selector`确定用于文本提取的元素。
+*   如果`allElements`为`true`，则从`<body>`中提取所有文本到单个`Document`中。
+*   如果`groupByElement`为`true`，则为`selector`匹配的每个元素创建单独的`Document`。
+*   如果`allElements`和`groupByElement`都不为`true`，则使用`separator`连接`selector`匹配的所有元素的文本。
+*   文档标题、指定`<meta>`标签的内容以及（可选）链接URL被添加到`Document`元数据中。
+*   基本URI（用于解析相对链接）将从URL资源中提取。
 
-The reader preserves the text content of the selected elements, but removes any HTML tags within them.
-
+读取器保留选定元素的文本内容，但删除其中的任何HTML标签。
 
 === Markdown
 
-The `MarkdownDocumentReader` processes Markdown documents, converting them into a list of `Document` objects.
+`MarkdownDocumentReader`处理Markdown文档，将它们转换为`Document`对象列表。
 
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -415,14 +406,14 @@ class MyMarkdownReader {
 }
 ----
 
-The `MarkdownDocumentReaderConfig` allows you to customize the behavior of the MarkdownDocumentReader:
+`MarkdownDocumentReaderConfig`允许您自定义MarkdownDocumentReader的行为：
 
-* `horizontalRuleCreateDocument`: When set to `true`, horizontal rules in the Markdown will create new `Document` objects.
-* `includeCodeBlock`: When set to `true`, code blocks will be included in the same `Document` as the surrounding text. When `false`, code blocks create separate `Document` objects.
-* `includeBlockquote`: When set to `true`, blockquotes will be included in the same `Document` as the surrounding text. When `false`, blockquotes create separate `Document` objects.
-* `additionalMetadata`: Allows you to add custom metadata to all created `Document` objects.
+* `horizontalRuleCreateDocument`: 当设置为`true`时，Markdown中的水平规则将创建新的`Document`对象。
+* `includeCodeBlock`: 当设置为`true`时，代码块将包含在与周围文本相同的`Document`中。当为`false`时，代码块创建单独的`Document`对象。
+* `includeBlockquote`: 当设置为`true`时，引用块将包含在与周围文本相同的`Document`中。当为`false`时，引用块创建单独的`Document`对象。
+* `additionalMetadata`: 允许您向所有创建的`Document`对象添加自定义元数据。
 
-==== Sample Document: code.md
+==== 示例文档：code.md
 
 [source,markdown]
 ----
@@ -453,21 +444,20 @@ Another possibility is to set block code without specific highlighting:
 ```
 ----
 
-Behavior: The MarkdownDocumentReader processes the Markdown content and creates Document objects based on the configuration:
+行为：MarkdownDocumentReader处理Markdown内容并根据配置创建Document对象：
 
-* Headers become metadata in the Document objects.
-* Paragraphs become the content of Document objects.
-* Code blocks can be separated into their own Document objects or included with surrounding text.
-* Blockquotes can be separated into their own Document objects or included with surrounding text.
-* Horizontal rules can be used to split the content into separate Document objects.
+* 标题成为Document对象中的元数据。
+* 段落成为Document对象的内容。
+* 代码块可以分离到它们自己的Document对象中，或包含在周围文本中。
+* 引用块可以分离到它们自己的Document对象中，或包含在周围文本中。
+* 水平规则可用于将内容分割成单独的Document对象。
 
-The reader preserves formatting like inline code, lists, and text styling within the content of the Document objects.
+读取器在Document对象的内容中保留格式，如内联代码、列表和文本样式。
 
+=== PDF页面
+`PagePdfDocumentReader`使用Apache PdfBox库解析PDF文档
 
-=== PDF Page
-The `PagePdfDocumentReader` uses Apache PdfBox library to parse PDF documents
-
-Add the dependency to your project using Maven or Gradle.
+使用Maven或Gradle将依赖项添加到您的项目中。
 
 [source, xml]
 ----
@@ -477,7 +467,7 @@ Add the dependency to your project using Maven or Gradle.
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -486,7 +476,7 @@ dependencies {
 }
 ----
 
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -511,12 +501,12 @@ public class MyPagePdfDocumentReader {
 
 ----
 
-=== PDF Paragraph
-The `ParagraphPdfDocumentReader` uses the PDF catalog (e.g. TOC) information to split the input PDF into text paragraphs and output a single `Document` per paragraph.
-NOTE: Not all PDF documents contain the PDF catalog.
+=== PDF段落
+`ParagraphPdfDocumentReader`使用PDF目录（例如TOC）信息将输入PDF分割成文本段落，并为每个段落输出一个`Document`。
+注意：并非所有PDF文档都包含PDF目录。
 
-==== Dependencies
-Add the dependency to your project using Maven or Gradle.
+==== 依赖项
+使用Maven或Gradle将依赖项添加到您的项目中。
 
 [source, xml]
 ----
@@ -526,7 +516,7 @@ Add the dependency to your project using Maven or Gradle.
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -536,7 +526,7 @@ dependencies {
 ----
 
 
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -561,9 +551,9 @@ public class MyPagePdfDocumentReader {
 
 
 === Tika (DOCX, PPTX, HTML...)
-The `TikaDocumentReader` uses Apache Tika to extract text from a variety of document formats, such as PDF, DOC/DOCX, PPT/PPTX, and HTML. For a comprehensive list of supported formats, refer to the  https://tika.apache.org/3.1.0/formats.html[Tika documentation].
+`TikaDocumentReader`使用Apache Tika从各种文档格式中提取文本，如PDF、DOC/DOCX、PPT/PPTX和HTML。有关支持的格式的完整列表，请参阅https://tika.apache.org/3.1.0/formats.html[Tika文档]。
 
-==== Dependencies
+==== 依赖项
 
 [source, xml]
 ----
@@ -573,7 +563,7 @@ The `TikaDocumentReader` uses Apache Tika to extract text from a variety of docu
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -582,7 +572,7 @@ dependencies {
 }
 ----
 
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -603,16 +593,15 @@ class MyTikaDocumentReader {
 }
 ----
 
-== Transformers
+== 转换器
 
 === TextSplitter
-The `TextSplitter` an abstract base class that helps divides documents to fit the AI model's context window.
-
+`TextSplitter`是一个抽象基类，帮助将文档分割以适应AI模型的上下文窗口。
 
 === TokenTextSplitter
-The `TokenTextSplitter` is an implementation of `TextSplitter` that splits text into chunks based on token count, using the CL100K_BASE encoding.
+`TokenTextSplitter`是`TextSplitter`的实现，它使用CL100K_BASE编码基于标记计数将文本分割成块。
 
-==== Usage
+==== 用法
 
 [source,java]
 ----
@@ -631,38 +620,37 @@ class MyTokenTextSplitter {
 }
 ----
 
-==== Constructor Options
+==== 构造函数选项
 
-The `TokenTextSplitter` provides two constructor options:
+`TokenTextSplitter`提供了两个构造函数选项：
 
-1. `TokenTextSplitter()`: Creates a splitter with default settings.
+1. `TokenTextSplitter()`: 创建具有默认设置的分割器。
 2. `TokenTextSplitter(int defaultChunkSize, int minChunkSizeChars, int minChunkLengthToEmbed, int maxNumChunks, boolean keepSeparator)`
 
+==== 参数
 
-==== Parameters
+* `defaultChunkSize`: 每个文本块的目标大小（以标记为单位）（默认：800）。
+* `minChunkSizeChars`: 每个文本块的最小大小（以字符为单位）（默认：350）。
+* `minChunkLengthToEmbed`: 要包含的块的最小长度（默认：5）。
+* `maxNumChunks`: 从文本生成的最大块数（默认：10000）。
+* `keepSeparator`: 是否在块中保留分隔符（如换行符）（默认：true）。
 
-* `defaultChunkSize`: The target size of each text chunk in tokens (default: 800).
-* `minChunkSizeChars`: The minimum size of each text chunk in characters (default: 350).
-* `minChunkLengthToEmbed`: The minimum length of a chunk to be included (default: 5).
-* `maxNumChunks`: The maximum number of chunks to generate from a text (default: 10000).
-* `keepSeparator`: Whether to keep separators (like newlines) in the chunks (default: true).
+==== 行为
 
-==== Behavior
+`TokenTextSplitter`按以下方式处理文本内容：
 
-The `TokenTextSplitter` processes text content as follows:
+1. 它使用CL100K_BASE编码将输入文本编码为标记。
+2. 它根据`defaultChunkSize`将编码文本分割成块。
+3. 对于每个块：
+a. 它将块解码回文本。
+b. 它尝试在`minChunkSizeChars`之后找到合适的分断点（句号、问号、感叹号或换行符）。
+c. 如果找到分断点，它在该点截断块。
+d. 它修剪块并根据`keepSeparator`设置可选地删除换行符。
+e. 如果结果块长于`minChunkLengthToEmbed`，则将其添加到输出中。
+4. 此过程继续，直到处理完所有标记或达到`maxNumChunks`。
+5. 如果剩余文本长于`minChunkLengthToEmbed`，则将其作为最终块添加。
 
-1. It encodes the input text into tokens using the CL100K_BASE encoding.
-2. It splits the encoded text into chunks based on the `defaultChunkSize`.
-3. For each chunk:
-a. It decodes the chunk back into text.
-b. It attempts to find a suitable break point (period, question mark, exclamation mark, or newline) after the `minChunkSizeChars`.
-c. If a break point is found, it truncates the chunk at that point.
-d. It trims the chunk and optionally removes newline characters based on the `keepSeparator` setting.
-e. If the resulting chunk is longer than `minChunkLengthToEmbed`, it's added to the output.
-4. This process continues until all tokens are processed or `maxNumChunks` is reached.
-5. Any remaining text is added as a final chunk if it's longer than `minChunkLengthToEmbed`.
-
-==== Example
+==== 示例
 
 [source,java]
 ----
@@ -680,22 +668,21 @@ for (Document doc : splitDocuments) {
 }
 ----
 
+==== 注意事项
 
-==== Notes
-
-* The `TokenTextSplitter` uses the CL100K_BASE encoding from the `jtokkit` library, which is compatible with newer OpenAI models.
-* The splitter attempts to create semantically meaningful chunks by breaking at sentence boundaries where possible.
-* Metadata from the original documents is preserved and copied to all chunks derived from that document.
-* The content formatter (if set) from the original document is also copied to the derived chunks if `copyContentFormatter` is set to `true` (default behavior).
-* This splitter is particularly useful for preparing text for large language models that have token limits, ensuring that each chunk is within the model's processing capacity.
+* `TokenTextSplitter`使用来自`jtokkit`库的CL100K_BASE编码，它与较新的OpenAI模型兼容。
+* 分割器尝试通过在可能的情况下在句子边界处断开来创建语义上有意义的块。
+* 原始文档的元数据被保留并复制到从该文档派生的所有块中。
+* 如果`copyContentFormatter`设置为`true`（默认行为），原始文档的内容格式化程序（如果设置）也会复制到派生的块中。
+* 此分割器特别适用于为具有标记限制的大型语言模型准备文本，确保每个块都在模型的处理能力范围内。
 
 === ContentFormatTransformer
-Ensures uniform content formats across all documents.
+确保所有文档的内容格式统一。
 
 === KeywordMetadataEnricher
-The `KeywordMetadataEnricher` is a `DocumentTransformer` that uses a generative AI model to extract keywords from document content and add them as metadata.
+`KeywordMetadataEnricher`是一个`DocumentTransformer`，它使用生成式AI模型从文档内容中提取关键词并将它们添加为元数据。
 
-==== Usage
+==== 用法
 
 [source,java]
 ----
@@ -715,39 +702,38 @@ class MyKeywordEnricher {
 }
 ----
 
-==== Constructor
+==== 构造函数
 
-The `KeywordMetadataEnricher` constructor takes two parameters:
+`KeywordMetadataEnricher`构造函数接受两个参数：
 
-1. `ChatModel chatModel`: The AI model used for generating keywords.
-2. `int keywordCount`: The number of keywords to extract for each document.
+1. `ChatModel chatModel`: 用于生成关键词的AI模型。
+2. `int keywordCount`: 为每个文档提取的关键词数量。
 
-==== Behavior
+==== 行为
 
-The `KeywordMetadataEnricher` processes documents as follows:
+`KeywordMetadataEnricher`按以下方式处理文档：
 
-1. For each input document, it creates a prompt using the document's content.
-2. It sends this prompt to the provided `ChatModel` to generate keywords.
-3. The generated keywords are added to the document's metadata under the key "excerpt_keywords".
-4. The enriched documents are returned.
+1. 对于每个输入文档，它使用文档的内容创建提示。
+2. 它将此提示发送到提供的`ChatModel`以生成关键词。
+3. 生成的关键词被添加到文档的元数据中，键为"excerpt_keywords"。
+4. 返回富集后的文档。
 
+==== 自定义
 
-==== Customization
-
-The keyword extraction prompt can be customized by modifying the `KEYWORDS_TEMPLATE` constant in the class. The default template is:
+可以通过修改类中的`KEYWORDS_TEMPLATE`常量来自定义关键词提取提示。默认模板是：
 
 [source,java]
 ----
 \{context_str}. Give %s unique keywords for this document. Format as comma separated. Keywords:
 ----
 
-Where `+{context_str}+` is replaced with the document content, and `%s` is replaced with the specified keyword count.
+其中`+{context_str}+`被替换为文档内容，`%s`被替换为指定的关键词数量。
 
-==== Example
+==== 示例
 
 [source,java]
 ----
-ChatModel chatModel = // initialize your chat model
+ChatModel chatModel = // 初始化您的聊天模型
 KeywordMetadataEnricher enricher = new KeywordMetadataEnricher(chatModel, 5);
 
 Document doc = new Document("This is a document about artificial intelligence and its applications in modern technology.");
@@ -759,18 +745,18 @@ String keywords = (String) this.enrichedDoc.getMetadata().get("excerpt_keywords"
 System.out.println("Extracted keywords: " + keywords);
 ----
 
-==== Notes
+==== 注意事项
 
-* The `KeywordMetadataEnricher` requires a functioning `ChatModel` to generate keywords.
-* The keyword count must be 1 or greater.
-* The enricher adds the "excerpt_keywords" metadata field to each processed document.
-* The generated keywords are returned as a comma-separated string.
-* This enricher is particularly useful for improving document searchability and for generating tags or categories for documents.
+* `KeywordMetadataEnricher`需要一个正常工作的`ChatModel`来生成关键词。
+* 关键词数量必须为1或更大。
+* 富集器向每个处理的文档添加"excerpt_keywords"元数据字段。
+* 生成的关键词作为逗号分隔的字符串返回。
+* 此富集器特别适用于提高文档的可搜索性以及为文档生成标签或类别。
 
 === SummaryMetadataEnricher
-The `SummaryMetadataEnricher` is a `DocumentTransformer` that uses a generative AI model to create summaries for documents and add them as metadata. It can generate summaries for the current document, as well as adjacent documents (previous and next).
+`SummaryMetadataEnricher`是一个`DocumentTransformer`，它使用生成式AI模型为文档创建摘要并将它们添加为元数据。它可以为当前文档以及相邻文档（前一个和后一个）生成摘要。
 
-==== Usage
+==== 用法
 
 [source,java]
 ----
@@ -799,37 +785,35 @@ class MySummaryEnricher {
 }
 ----
 
+==== 构造函数
 
-==== Constructor
-
-The `SummaryMetadataEnricher` provides two constructors:
+`SummaryMetadataEnricher`提供了两个构造函数：
 
 1. `SummaryMetadataEnricher(ChatModel chatModel, List<SummaryType> summaryTypes)`
 2. `SummaryMetadataEnricher(ChatModel chatModel, List<SummaryType> summaryTypes, String summaryTemplate, MetadataMode metadataMode)`
 
-==== Parameters
+==== 参数
 
-* `chatModel`: The AI model used for generating summaries.
-* `summaryTypes`: A list of `SummaryType` enum values indicating which summaries to generate (PREVIOUS, CURRENT, NEXT).
-* `summaryTemplate`: A custom template for summary generation (optional).
-* `metadataMode`: Specifies how to handle document metadata when generating summaries (optional).
+* `chatModel`: 用于生成摘要的AI模型。
+* `summaryTypes`: 指示要生成哪些摘要的`SummaryType`枚举值列表（PREVIOUS, CURRENT, NEXT）。
+* `summaryTemplate`: 用于摘要生成的自定义模板（可选）。
+* `metadataMode`: 指定在生成摘要时如何处理文档元数据（可选）。
 
+==== 行为
 
-==== Behavior
+`SummaryMetadataEnricher`按以下方式处理文档：
 
-The `SummaryMetadataEnricher` processes documents as follows:
+1. 对于每个输入文档，它使用文档内容和指定的摘要模板创建提示。
+2. 它将此提示发送到提供的`ChatModel`以生成摘要。
+3. 根据指定的`summaryTypes`，它向每个文档添加以下元数据：
+* `section_summary`: 当前文档的摘要。
+* `prev_section_summary`: 前一个文档的摘要（如果可用且请求）。
+* `next_section_summary`: 下一个文档的摘要（如果可用且请求）。
+4. 返回富集后的文档。
 
-1. For each input document, it creates a prompt using the document's content and the specified summary template.
-2. It sends this prompt to the provided `ChatModel` to generate a summary.
-3. Depending on the specified `summaryTypes`, it adds the following metadata to each document:
-* `section_summary`: Summary of the current document.
-* `prev_section_summary`: Summary of the previous document (if available and requested).
-* `next_section_summary`: Summary of the next document (if available and requested).
-4. The enriched documents are returned.
+==== 自定义
 
-==== Customization
-
-The summary generation prompt can be customized by providing a custom `summaryTemplate`. The default template is:
+可以通过提供自定义`summaryTemplate`来自定义摘要生成提示。默认模板是：
 
 [source,java]
 ----
@@ -843,11 +827,11 @@ Summary:
 """
 ----
 
-==== Example
+==== 示例
 
 [source,java]
 ----
-ChatModel chatModel = // initialize your chat model
+ChatModel chatModel = // 初始化您的聊天模型
 SummaryMetadataEnricher enricher = new SummaryMetadataEnricher(chatModel,
     List.of(SummaryType.PREVIOUS, SummaryType.CURRENT, SummaryType.NEXT));
 
@@ -856,7 +840,7 @@ Document doc2 = new Document("Content of document 2");
 
 List<Document> enrichedDocs = enricher.apply(List.of(this.doc1, this.doc2));
 
-// Check the metadata of the enriched documents
+// 检查富集后文档的元数据
 for (Document doc : enrichedDocs) {
     System.out.println("Current summary: " + doc.getMetadata().get("section_summary"));
     System.out.println("Previous summary: " + doc.getMetadata().get("prev_section_summary"));
@@ -864,29 +848,28 @@ for (Document doc : enrichedDocs) {
 }
 ----
 
-The provided example demonstrates the expected behavior:
+提供的示例演示了预期行为：
 
-* For a list of two documents, both documents receive a `section_summary`.
-* The first document receives a `next_section_summary` but no `prev_section_summary`.
-* The second document receives a `prev_section_summary` but no `next_section_summary`.
-* The `section_summary` of the first document matches the `prev_section_summary` of the second document.
-* The `next_section_summary` of the first document matches the `section_summary` of the second document.
+* 对于两个文档的列表，两个文档都接收`section_summary`。
+* 第一个文档接收`next_section_summary`但没有`prev_section_summary`。
+* 第二个文档接收`prev_section_summary`但没有`next_section_summary`。
+* 第一个文档的`section_summary`与第二个文档的`prev_section_summary`匹配。
+* 第一个文档的`next_section_summary`与第二个文档的`section_summary`匹配。
 
-==== Notes
+==== 注意事项
 
-* The `SummaryMetadataEnricher` requires a functioning `ChatModel` to generate summaries.
-* The enricher can handle document lists of any size, properly handling edge cases for the first and last documents.
-* This enricher is particularly useful for creating context-aware summaries, allowing for better understanding of document relationships in a sequence.
-* The `MetadataMode` parameter allows control over how existing metadata is incorporated into the summary generation process.
+* `SummaryMetadataEnricher`需要一个正常工作的`ChatModel`来生成摘要。
+* 富集器可以处理任何大小的文档列表，正确处理第一个和最后一个文档的边缘情况。
+* 此富集器特别适用于创建上下文感知的摘要，允许更好地理解序列中文档的关系。
+* `MetadataMode`参数允许控制如何在摘要生成过程中合并现有元数据。
 
+== 写入器
 
-== Writers
+=== 文件
 
-=== File
+`FileDocumentWriter`是一个`DocumentWriter`实现，它将`Document`对象列表的内容写入文件。
 
-The `FileDocumentWriter` is a `DocumentWriter` implementation that writes the content of a list of `Document` objects into a file.
-
-==== Usage
+==== 用法
 
 [source,java]
 ----
@@ -900,71 +883,68 @@ class MyDocumentWriter {
 }
 ----
 
-==== Constructors
+==== 构造函数
 
-The `FileDocumentWriter` provides three constructors:
+`FileDocumentWriter`提供了三个构造函数：
 
 1. `FileDocumentWriter(String fileName)`
 2. `FileDocumentWriter(String fileName, boolean withDocumentMarkers)`
 3. `FileDocumentWriter(String fileName, boolean withDocumentMarkers, MetadataMode metadataMode, boolean append)`
 
-==== Parameters
+==== 参数
 
-* `fileName`: The name of the file to write the documents to.
-* `withDocumentMarkers`: Whether to include document markers in the output (default: false).
-* `metadataMode`: Specifies what document content to be written to the file (default: MetadataMode.NONE).
-* `append`: If true, data will be written to the end of the file rather than the beginning (default: false).
+* `fileName`: 要写入文档的文件名。
+* `withDocumentMarkers`: 是否在输出中包含文档标记（默认：false）。
+* `metadataMode`: 指定要写入文件的文档内容（默认：MetadataMode.NONE）。
+* `append`: 如果为true，数据将写入文件末尾而不是开头（默认：false）。
 
-==== Behavior
+==== 行为
 
-The `FileDocumentWriter` processes documents as follows:
+`FileDocumentWriter`按以下方式处理文档：
 
-1. It opens a FileWriter for the specified file name.
-2. For each document in the input list:
-a. If `withDocumentMarkers` is true, it writes a document marker including the document index and page numbers.
-b. It writes the formatted content of the document based on the specified `metadataMode`.
-3. The file is closed after all documents have been written.
+1. 它为指定的文件名打开一个FileWriter。
+2. 对于输入列表中的每个文档：
+a. 如果`withDocumentMarkers`为true，它写入包含文档索引和页码的文档标记。
+b. 它根据指定的`metadataMode`写入文档的格式化内容。
+3. 写入所有文档后关闭文件。
 
+==== 文档标记
 
-
-==== Document Markers
-
-When `withDocumentMarkers` is set to true, the writer includes markers for each document in the following format:
+当`withDocumentMarkers`设置为true时，写入器为每个文档包含以下格式的标记：
 
 [source]
 ----
 ### Doc: [index], pages:[start_page_number,end_page_number]
 ----
 
-==== Metadata Handling
+==== 元数据处理
 
-The writer uses two specific metadata keys:
+写入器使用两个特定的元数据键：
 
-* `page_number`: Represents the starting page number of the document.
-* `end_page_number`: Represents the ending page number of the document.
+* `page_number`: 表示文档的起始页码。
+* `end_page_number`: 表示文档的结束页码。
 
-These are used when writing document markers.
+这些在写入文档标记时使用。
 
-==== Example
+==== 示例
 
 [source,java]
 ----
-List<Document> documents = // initialize your documents
+List<Document> documents = // 初始化您的文档
 FileDocumentWriter writer = new FileDocumentWriter("output.txt", true, MetadataMode.ALL, true);
 writer.accept(documents);
 ----
 
-This will write all documents to "output.txt", including document markers, using all available metadata, and appending to the file if it already exists.
+这将把所有文档写入"output.txt"，包括文档标记，使用所有可用的元数据，如果文件已存在则追加到文件。
 
-==== Notes
+==== 注意事项
 
-* The writer uses `FileWriter`, so it writes text files with the default character encoding of the operating system.
-* If an error occurs during writing, a `RuntimeException` is thrown with the original exception as its cause.
-* The `metadataMode` parameter allows control over how existing metadata is incorporated into the written content.
-* This writer is particularly useful for debugging or creating human-readable outputs of document collections.
-
+* 写入器使用`FileWriter`，因此它使用操作系统的默认字符编码写入文本文件。
+* 如果在写入过程中发生错误，将抛出带有原始异常作为原因的`RuntimeException`。
+* `metadataMode`参数允许控制如何将现有元数据合并到写入的内容中。
+* 此写入器特别适用于调试或创建文档集合的人类可读输出。
 
 === VectorStore
 
-Provides integration with various vector stores.
-See xref:api/vectordbs.adoc[Vector DB Documentation] for a full listing.
+提供与各种向量存储的集成。
+有关完整列表，请参阅xref:api/vectordbs.adoc[向量数据库文档]。

@@ -1,23 +1,23 @@
 = Milvus
 
-link:https://milvus.io/[Milvus] is an open-source vector database that has garnered significant attention in the fields of data science and machine learning. One of its standout features lies in its robust support for vector indexing and querying. Milvus employs state-of-the-art, cutting-edge algorithms to accelerate the search process, making it exceptionally efficient at retrieving similar vectors, even when handling extensive datasets.
+link:https://milvus.io/[Milvus] 是一个开源向量数据库，在数据科学和机器学习领域获得了广泛关注。其突出特点之一在于其对向量索引和查询的强大支持。Milvus 采用最先进的算法来加速搜索过程，使其在处理大规模数据集时也能高效地检索相似向量。
 
-== Prerequisites
+== 前提条件
 
-* A running Milvus instance. The following options are available:
-** link:https://milvus.io/docs/install_standalone-docker.md[Milvus Standalone]: Docker, Operator, Helm,DEB/RPM, Docker Compose.
-** link:https://milvus.io/docs/install_cluster-milvusoperator.md[Milvus Cluster]: Operator, Helm.
-* If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `MilvusVectorStore`.
+* 运行中的 Milvus 实例。以下选项可用：
+** link:https://milvus.io/docs/install_standalone-docker.md[Milvus Standalone]：Docker、Operator、Helm、DEB/RPM、Docker Compose。
+** link:https://milvus.io/docs/install_cluster-milvusoperator.md[Milvus Cluster]：Operator、Helm。
+* 如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 配置 API 密钥，用于生成存储在 `MilvusVectorStore` 中的嵌入。
 
-== Dependencies
+== 依赖项
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Then add the Milvus VectorStore boot starter dependency to your project:
+然后在项目中添加 Milvus VectorStore boot starter 依赖：
 
 [source,xml]
 ----
@@ -27,7 +27,7 @@ Then add the Milvus VectorStore boot starter dependency to your project:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -36,23 +36,18 @@ dependencies {
 }
 ----
 
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
+请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+向量存储实现可以为您初始化所需的模式，但您必须通过在适当的构造函数中指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
 
+注意：这是一个破坏性更改！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-The vector store implementation can initialize the requisite schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+向量存储还需要一个 `EmbeddingModel` 实例来计算文档的嵌入。
+您可以选择一个可用的 xref:api/embeddings.adoc#available-implementations[EmbeddingModel 实现]。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
-
-
-
-The Vector Store, also requires an `EmbeddingModel` instance to calculate embeddings for the documents.
-You can pick one of the available xref:api/embeddings.adoc#available-implementations[EmbeddingModel Implementations].
-
-
-To connect to and configure the `MilvusVectorStore`, you need to provide access details for your instance.
-A simple configuration can either be provided via Spring Boot's `application.yml`
+要连接到 `MilvusVectorStore` 并进行配置，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [yml]
 ----
@@ -72,9 +67,9 @@ spring:
 				metricType: COSINE
 ----
 
-TIP: Check the list of xref:#milvus-properties[configuration parameters] to learn about the default values and configuration options.
+提示：查看 xref:#milvus-properties[配置参数] 列表，了解默认值和配置选项。
 
-Now you can Auto-wire the Milvus Vector Store in your application and use it
+现在您可以在应用程序中自动装配 Milvus 向量存储并使用它：
 
 [source,java]
 ----
@@ -87,17 +82,17 @@ List <Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to Milvus Vector Store
+// 将文档添加到 Milvus 向量存储
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
-=== Manual Configuration
+=== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the `MilvusVectorStore`.
-To add the following dependencies to your project:
+除了使用 Spring Boot 自动配置外，您还可以手动配置 `MilvusVectorStore`。
+为此，您需要在项目中添加以下依赖：
 
 [source,xml]
 ----
@@ -107,9 +102,9 @@ To add the following dependencies to your project:
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-To configure MilvusVectorStore in your application, you can use the following setup:
+要在应用程序中配置 MilvusVectorStore，您可以使用以下设置：
 
 [source,java]
 ----
@@ -134,11 +129,11 @@ To configure MilvusVectorStore in your application, you can use the following se
 	}
 ----
 
-== Metadata filtering
+== 元数据过滤
 
-You can leverage the generic, portable link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[metadata filters] with the Milvus store.
+您可以利用通用的、可移植的 link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[元数据过滤器] 与 Milvus 存储。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -150,7 +145,7 @@ vectorStore.similaritySearch(
     .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -165,11 +160,11 @@ vectorStore.similaritySearch(SearchRequest.builder()
         b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: These filter expressions are converted into the equivalent Milvus filters.
+注意：这些过滤器表达式会被转换为等效的 Milvus 过滤器。
 
-== Using MilvusSearchRequest
+== 使用 MilvusSearchRequest
 
-MilvusSearchRequest extends SearchRequest, allowing you to use Milvus-specific search parameters such as native expressions and search parameter JSON.
+MilvusSearchRequest 扩展了 SearchRequest，允许您使用 Milvus 特定的搜索参数，如原生表达式和搜索参数 JSON。
 
 [source,java]
 ----
@@ -177,22 +172,23 @@ MilvusSearchRequest request = MilvusSearchRequest.milvusBuilder()
     .query("sample query")
     .topK(5)
     .similarityThreshold(0.7)
-    .nativeExpression("metadata[\"age\"] > 30") // Overrides filterExpression if both are set
-    .filterExpression("age <= 30") // Ignored if nativeExpression is set
+    .nativeExpression("metadata[\"age\"] > 30") // 如果同时设置了 filterExpression，则覆盖它
+    .filterExpression("age <= 30") // 如果设置了 nativeExpression，则忽略
     .searchParamsJson("{\"nprobe\":128}")
     .build();
 List results = vectorStore.similaritySearch(request);
 ----
-This allows greater flexibility when using Milvus-specific search features.
 
-== Importance of `nativeExpression` and `searchParamsJson` in `MilvusSearchRequest`
+这允许在使用 Milvus 特定的搜索功能时具有更大的灵活性。
 
-These two parameters enhance Milvus search precision and ensure optimal query performance:
+== `nativeExpression` 和 `searchParamsJson` 在 `MilvusSearchRequest` 中的重要性
 
-*nativeExpression*: Enables additional filtering capabilities using Milvus' native filtering expressions.
-https://milvus.io/docs/boolean.md[Milvus Filtering]
+这两个参数增强了 Milvus 搜索的精确度并确保最佳查询性能：
 
-Example:
+*nativeExpression*：使用 Milvus 的原生过滤表达式启用额外的过滤功能。
+https://milvus.io/docs/boolean.md[Milvus 过滤]
+
+示例：
 [source,java]
 ----
 MilvusSearchRequest request = MilvusSearchRequest.milvusBuilder()
@@ -202,12 +198,12 @@ MilvusSearchRequest request = MilvusSearchRequest.milvusBuilder()
     .build();
 ----
 
-*searchParamsJson*: Essential for tuning search behavior when using IVF_FLAT, Milvus' default index.
-https://milvus.io/docs/index.md?tab=floating[Milvus Vector Index]
+*searchParamsJson*：在使用 IVF_FLAT（Milvus 的默认索引）时，对于调整搜索行为至关重要。
+https://milvus.io/docs/index.md?tab=floating[Milvus 向量索引]
 
-By default, `IVF_FLAT` requires `nprobe` to be set for accurate results. If not specified, `nprobe` defaults to `1`, which can lead to poor recall or even zero search results.
+默认情况下，`IVF_FLAT` 需要设置 `nprobe` 才能获得准确的结果。如果未指定，`nprobe` 默认为 `1`，这可能导致召回率低甚至零搜索结果。
 
-Example:
+示例：
 [source,java]
 ----
 MilvusSearchRequest request = MilvusSearchRequest.milvusBuilder()
@@ -217,80 +213,78 @@ MilvusSearchRequest request = MilvusSearchRequest.milvusBuilder()
     .build();
 ----
 
-Using `nativeExpression` ensures advanced filtering, while `searchParamsJson` prevents ineffective searches caused by a low default `nprobe` value.
+使用 `nativeExpression` 确保高级过滤，而 `searchParamsJson` 防止由于默认 `nprobe` 值低导致的无效搜索。
 
 [[milvus-properties]]
-== Milvus VectorStore properties
+== Milvus VectorStore 属性
 
-You can use the following properties in your Spring Boot configuration to customize the Milvus vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 Milvus 向量存储。
 
 [cols="4,5,1",stripes=even]
 |===
-|Property| Description | Default value
+|属性| 描述 | 默认值
 
-|spring.ai.vectorstore.milvus.database-name |  The name of the Milvus database to use.  | default
-|spring.ai.vectorstore.milvus.collection-name | Milvus collection name to store the vectors  | vector_store
-|spring.ai.vectorstore.milvus.initialize-schema | whether to initialize Milvus' backend | false
-|spring.ai.vectorstore.milvus.embedding-dimension | The dimension of the vectors to be stored in the Milvus collection.  | 1536
-|spring.ai.vectorstore.milvus.index-type | The type of the index to be created for the Milvus collection.  | IVF_FLAT
-|spring.ai.vectorstore.milvus.metric-type | The metric type to be used for the Milvus collection.  | COSINE
-|spring.ai.vectorstore.milvus.index-parameters | The index parameters to be used for the Milvus collection.  | {"nlist":1024}
-|spring.ai.vectorstore.milvus.id-field-name | The ID field name for the collection | doc_id
-|spring.ai.vectorstore.milvus.is-auto-id | Boolean flag to indicate if the auto-id is used for the ID field | false
-|spring.ai.vectorstore.milvus.content-field-name | The content field name for the collection | content
-|spring.ai.vectorstore.milvus.metadata-field-name | The metadata field name for the collection | metadata
-|spring.ai.vectorstore.milvus.embedding-field-name | The embedding field name for the collection | embedding
-|spring.ai.vectorstore.milvus.client.host |  The name or address of the host. | localhost
-|spring.ai.vectorstore.milvus.client.port |  The connection port. | 19530
-|spring.ai.vectorstore.milvus.client.uri |  The uri of Milvus instance | -
-|spring.ai.vectorstore.milvus.client.token	| Token serving as the key for identification and authentication purposes.  | -
-|spring.ai.vectorstore.milvus.client.connect-timeout-ms | Connection timeout value of client channel. The timeout value must be greater than zero . | 10000
-|spring.ai.vectorstore.milvus.client.keep-alive-time-ms | Keep-alive time value of client channel. The keep-alive value must be greater than zero.  | 55000
-|spring.ai.vectorstore.milvus.client.keep-alive-timeout-ms | The keep-alive timeout value of client channel. The timeout value must be greater than zero. | 20000
-|spring.ai.vectorstore.milvus.client.rpc-deadline-ms | Deadline for how long you are willing to wait for a reply from the server. With a deadline setting, the client will wait when encounter fast RPC fail caused by network fluctuations. The deadline value must be larger than or equal to zero. | 0
-|spring.ai.vectorstore.milvus.client.client-key-path |  The client.key path for tls two-way authentication, only takes effect when "secure" is true | -
-|spring.ai.vectorstore.milvus.client.client-pem-path |  The client.pem path for tls two-way authentication, only takes effect when "secure" is true | -
-|spring.ai.vectorstore.milvus.client.ca-pem-path | The ca.pem path for tls two-way authentication, only takes effect when "secure" is true  | -
-|spring.ai.vectorstore.milvus.client.server-pem-path | server.pem path for tls one-way authentication, only takes effect when "secure" is true.  | -
-|spring.ai.vectorstore.milvus.client.server-name |  Sets the target name override for SSL host name checking, only takes effect when "secure" is True. Note: this value is passed to grpc.ssl_target_name_override  | -
-|spring.ai.vectorstore.milvus.client.secure | Secure the authorization for this connection, set to True to enable TLS.  | false
-|spring.ai.vectorstore.milvus.client.idle-timeout-ms | Idle timeout value of client channel. The timeout value must be larger than zero.  | 24h
-|spring.ai.vectorstore.milvus.client.username | The username and password for this connection.  | root
-|spring.ai.vectorstore.milvus.client.password | The password for this connection.  | milvus
+|spring.ai.vectorstore.milvus.database-name | 要使用的 Milvus 数据库名称。 | default
+|spring.ai.vectorstore.milvus.collection-name | 存储向量的 Milvus 集合名称 | vector_store
+|spring.ai.vectorstore.milvus.initialize-schema | 是否初始化 Milvus 后端 | false
+|spring.ai.vectorstore.milvus.embedding-dimension | 要存储在 Milvus 集合中的向量维度。 | 1536
+|spring.ai.vectorstore.milvus.index-type | 要为 Milvus 集合创建的索引类型。 | IVF_FLAT
+|spring.ai.vectorstore.milvus.metric-type | 要用于 Milvus 集合的度量类型。 | COSINE
+|spring.ai.vectorstore.milvus.index-parameters | 要用于 Milvus 集合的索引参数。 | {"nlist":1024}
+|spring.ai.vectorstore.milvus.id-field-name | 集合的 ID 字段名称 | doc_id
+|spring.ai.vectorstore.milvus.is-auto-id | 指示 ID 字段是否使用自动 ID 的布尔标志 | false
+|spring.ai.vectorstore.milvus.content-field-name | 集合的内容字段名称 | content
+|spring.ai.vectorstore.milvus.metadata-field-name | 集合的元数据字段名称 | metadata
+|spring.ai.vectorstore.milvus.embedding-field-name | 集合的嵌入字段名称 | embedding
+|spring.ai.vectorstore.milvus.client.host | 主机名或地址。 | localhost
+|spring.ai.vectorstore.milvus.client.port | 连接端口。 | 19530
+|spring.ai.vectorstore.milvus.client.uri | Milvus 实例的 uri | -
+|spring.ai.vectorstore.milvus.client.token	| 用作识别和认证目的的令牌。 | -
+|spring.ai.vectorstore.milvus.client.connect-timeout-ms | 客户端通道的连接超时值。超时值必须大于零。 | 10000
+|spring.ai.vectorstore.milvus.client.keep-alive-time-ms | 客户端通道的保持活动时间值。保持活动值必须大于零。 | 55000
+|spring.ai.vectorstore.milvus.client.keep-alive-timeout-ms | 客户端通道的保持活动超时值。超时值必须大于零。 | 20000
+|spring.ai.vectorstore.milvus.client.rpc-deadline-ms | 您愿意等待服务器回复的最长时间。使用截止时间设置，客户端在遇到由网络波动导致的快速 RPC 失败时将等待。截止时间值必须大于或等于零。 | 0
+|spring.ai.vectorstore.milvus.client.client-key-path | tls 双向认证的 client.key 路径，仅在 "secure" 为 true 时生效 | -
+|spring.ai.vectorstore.milvus.client.client-pem-path | tls 双向认证的 client.pem 路径，仅在 "secure" 为 true 时生效 | -
+|spring.ai.vectorstore.milvus.client.ca-pem-path | tls 双向认证的 ca.pem 路径，仅在 "secure" 为 true 时生效 | -
+|spring.ai.vectorstore.milvus.client.server-pem-path | tls 单向认证的 server.pem 路径，仅在 "secure" 为 true 时生效。 | -
+|spring.ai.vectorstore.milvus.client.server-name | 设置 SSL 主机名检查的目标名称覆盖，仅在 "secure" 为 True 时生效。注意：此值传递给 grpc.ssl_target_name_override | -
+|spring.ai.vectorstore.milvus.client.secure | 为此连接启用安全授权，设置为 True 以启用 TLS。 | false
+|spring.ai.vectorstore.milvus.client.idle-timeout-ms | 客户端通道的空闲超时值。超时值必须大于零。 | 24h
+|spring.ai.vectorstore.milvus.client.username | 此连接的用户名和密码。 | root
+|spring.ai.vectorstore.milvus.client.password | 此连接的密码。 | milvus
 |===
 
+== 启动 Milvus 存储
 
-
-== Starting Milvus Store
-
-From within the `src/test/resources/` folder run:
+在 `src/test/resources/` 文件夹中运行：
 
 [source,bash]
 ----
 docker-compose up
 ----
 
-To clean the environment:
+清理环境：
 
 [source,bash]
 ----
 docker-compose down; rm -Rf ./volumes
 ----
 
-Then connect to the vector store on link:http://localhost:19530[http://localhost:19530] or for management link:http://localhost:9001[http://localhost:9001] (user: `minioadmin`, pass: `minioadmin`)
+然后连接到 link:http://localhost:19530[http://localhost:19530] 的向量存储或管理界面 link:http://localhost:9001[http://localhost:9001]（用户：`minioadmin`，密码：`minioadmin`）
 
-== Troubleshooting
+== 故障排除
 
-If Docker complains about resources, then execute:
+如果 Docker 抱怨资源问题，则执行：
 
 [source,bash]
 ----
 docker system prune --all --force --volumes
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Milvus Vector Store implementation provides access to the underlying native Milvus client (`MilvusServiceClient`) through the `getNativeClient()` method:
+Milvus 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Milvus 客户端（`MilvusServiceClient`）的访问：
 
 [source,java]
 ----
@@ -299,8 +293,8 @@ Optional<MilvusServiceClient> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     MilvusServiceClient client = nativeClient.get();
-    // Use the native client for Milvus-specific operations
+    // 使用原生客户端进行 Milvus 特定的操作
 }
 ----
 
-The native client gives you access to Milvus-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端使您能够访问可能未通过 `VectorStore` 接口公开的 Milvus 特定功能和操作。

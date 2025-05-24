@@ -2,37 +2,37 @@
 
 [NOTE]
 ====
-Following the Bedrock recommendations, Spring AI transitioned to using Amazon Bedrock's Converse API for all Chat conversation implementations in Spring AI.
-The xref:api/chat/bedrock-converse.adoc[Bedrock Converse API] has the following key benefits:
+根据 Bedrock 的建议，Spring AI 已过渡到使用 Amazon Bedrock 的 Converse API 来实现 Spring AI 中的所有聊天对话。
+xref:api/chat/bedrock-converse.adoc[Bedrock Converse API] 具有以下主要优势：
 
-- Unified Interface: Write your code once and use it with any supported Amazon Bedrock model
-- Model Flexibility: Seamlessly switch between different conversation models without code changes
-- Extended Functionality: Support for model-specific parameters through dedicated structures
-- Tool Support: Native integration with function calling and tool usage capabilities
-- Multimodal Capabilities: Built-in support for vision and other multimodal features
-- Future-Proof: Aligned with Amazon Bedrock's recommended best practices
+- 统一接口：编写一次代码，即可与任何支持的 Amazon Bedrock 模型一起使用
+- 模型灵活性：无缝切换不同的对话模型，无需更改代码
+- 扩展功能：通过专用结构支持模型特定参数
+- 工具支持：原生集成函数调用和工具使用功能
+- 多模态功能：内置支持视觉和其他多模态功能
+- 面向未来：符合 Amazon Bedrock 推荐的最佳实践
 
-The Converse API does not support embedding operations, so these will remain in the current API and the embedding model functionality in the existing `InvokeModel API` will be maintained
+Converse API 不支持嵌入操作，因此这些操作将保留在当前 API 中，并且现有 `InvokeModel API` 中的嵌入模型功能将保持不变
 ====
 
 
-link:https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html[Amazon Bedrock] is a managed service that provides foundation models from various AI providers, available through a unified API.
+link:https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html[Amazon Bedrock] 是一个托管服务，提供来自各种 AI 提供商的基础模型，通过统一的 API 可用。
 
-Spring AI supports https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids-arns.html[the Embedding AI models] available through Amazon Bedrock by implementing the Spring `EmbeddingModel` interface.
+Spring AI 通过实现 Spring `EmbeddingModel` 接口支持 https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids-arns.html[通过 Amazon Bedrock 可用的嵌入 AI 模型]。
 
-Additionally, Spring AI provides Spring Auto-Configurations and Boot Starters for all clients, making it easy to bootstrap and configure for the Bedrock models.
+此外，Spring AI 为所有客户端提供 Spring 自动配置和 Boot Starters，使为 Bedrock 模型进行引导和配置变得容易。
 
-== Getting Started
+== 开始使用
 
-There are a few steps to get started
+开始使用需要几个步骤
 
-* Add the Spring Boot starter for Bedrock to your project.
-* Obtain AWS credentials: If you don't have an AWS account and AWS CLI configured yet, this video guide can help you configure it: link:https://youtu.be/gswVHTrRX8I?si=buaY7aeI0l3-bBVb[AWS CLI & SDK Setup in Less Than 4 Minutes!]. You should be able to obtain your access and security keys.
-* Enable the Models to use: Go to link:https://us-east-1.console.aws.amazon.com/bedrock/home[Amazon Bedrock] and from the link:https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/modelaccess[Model Access] menu on the left, configure access to the models you are going to use.
+* 将 Bedrock 的 Spring Boot starter 添加到您的项目中。
+* 获取 AWS 凭证：如果您还没有 AWS 账户和配置好的 AWS CLI，这个视频指南可以帮助您配置：link:https://youtu.be/gswVHTrRX8I?si=buaY7aeI0l3-bBVb[AWS CLI & SDK Setup in Less Than 4 Minutes!]。您应该能够获取您的访问和安全密钥。
+* 启用要使用的模型：转到 link:https://us-east-1.console.aws.amazon.com/bedrock/home[Amazon Bedrock] 并从左侧的 link:https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/modelaccess[Model Access] 菜单配置对您将要使用的模型的访问权限。
 
-=== Project Dependencies
+=== 项目依赖
 
-Then add the Spring Boot Starter dependency to your project's Maven `pom.xml` build file:
+然后将 Spring Boot Starter 依赖项添加到您项目的 Maven `pom.xml` 构建文件中：
 
 [source,xml]
 ----
@@ -42,7 +42,7 @@ Then add the Spring Boot Starter dependency to your project's Maven `pom.xml` bu
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -51,11 +51,11 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-=== Connect to AWS Bedrock
+=== 连接到 AWS Bedrock
 
-Use the `BedrockAwsConnectionProperties` to configure AWS credentials and region:
+使用 `BedrockAwsConnectionProperties` 配置 AWS 凭证和区域：
 
 [source,shell]
 ----
@@ -67,48 +67,48 @@ spring.ai.bedrock.aws.secret-key=YOUR_SECRET_KEY
 spring.ai.bedrock.aws.timeout=10m
 ----
 
-The `region` property is compulsory.
+`region` 属性是必需的。
 
-AWS credentials are resolved in the following order:
+AWS 凭证按以下顺序解析：
 
-1. Spring-AI Bedrock `spring.ai.bedrock.aws.access-key` and `spring.ai.bedrock.aws.secret-key` properties.
-2. Java System Properties - `aws.accessKeyId` and `aws.secretAccessKey`.
-3. Environment Variables - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-4. Web Identity Token credentials from system properties or environment variables.
-5. Credential profiles file at the default location (`~/.aws/credentials`) shared by all AWS SDKs and the AWS CLI.
-6. Credentials delivered through the Amazon EC2 container service if the `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` environment variable is set and the security manager has permission to access the variable.
-7. Instance profile credentials delivered through the Amazon EC2 metadata service or set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
+1. Spring-AI Bedrock `spring.ai.bedrock.aws.access-key` 和 `spring.ai.bedrock.aws.secret-key` 属性。
+2. Java 系统属性 - `aws.accessKeyId` 和 `aws.secretAccessKey`。
+3. 环境变量 - `AWS_ACCESS_KEY_ID` 和 `AWS_SECRET_ACCESS_KEY`。
+4. 来自系统属性或环境变量的 Web Identity Token 凭证。
+5. 位于默认位置（`~/.aws/credentials`）的凭证配置文件，由所有 AWS SDK 和 AWS CLI 共享。
+6. 如果设置了 `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` 环境变量且安全管理器有权访问该变量，则通过 Amazon EC2 容器服务提供的凭证。
+7. 通过 Amazon EC2 元数据服务提供的实例配置文件凭证或设置 `AWS_ACCESS_KEY_ID` 和 `AWS_SECRET_ACCESS_KEY` 环境变量。
 
-AWS region is resolved in the following order:
+AWS 区域按以下顺序解析：
 
-1. Spring-AI Bedrock `spring.ai.bedrock.aws.region` property.
-2. Java System Properties - `aws.region`.
-3. Environment Variables - `AWS_REGION`.
-4. Credential profiles file at the default location (`~/.aws/credentials`) shared by all AWS SDKs and the AWS CLI.
-5. Instance profile region delivered through the Amazon EC2 metadata service.
+1. Spring-AI Bedrock `spring.ai.bedrock.aws.region` 属性。
+2. Java 系统属性 - `aws.region`。
+3. 环境变量 - `AWS_REGION`。
+4. 位于默认位置（`~/.aws/credentials`）的凭证配置文件，由所有 AWS SDK 和 AWS CLI 共享。
+5. 通过 Amazon EC2 元数据服务提供的实例配置文件区域。
 
-In addition to the standard Spring-AI Bedrock credentials and region properties configuration, Spring-AI provides support for custom `AwsCredentialsProvider` and `AwsRegionProvider` beans.
+除了标准的 Spring-AI Bedrock 凭证和区域属性配置外，Spring-AI 还支持自定义 `AwsCredentialsProvider` 和 `AwsRegionProvider` bean。
 
-NOTE: For example, using Spring-AI and https://spring.io/projects/spring-cloud-aws[Spring Cloud for Amazon Web Services] at the same time. Spring-AI is compatible with Spring Cloud for Amazon Web Services credential configuration.
+注意：例如，同时使用 Spring-AI 和 https://spring.io/projects/spring-cloud-aws[Spring Cloud for Amazon Web Services]。Spring-AI 与 Spring Cloud for Amazon Web Services 凭证配置兼容。
 
-=== Enable selected Bedrock model
+=== 启用选定的 Bedrock 模型
 
-NOTE: By default, all models are disabled. You have to enable the chosen Bedrock models explicitly using the `spring.ai.bedrock.<model>.embedding.enabled=true` property.
+注意：默认情况下，所有模型都被禁用。您必须使用 `spring.ai.bedrock.<model>.embedding.enabled=true` 属性显式启用所选的 Bedrock 模型。
 
-Here are the supported `<model>`s:
+以下是支持的 `<model>`：
 
 [cols="|,|,|,|"]
 |====
-| Model
+| 模型
 | cohere
-| titan (no batch support yet)
+| titan（尚不支持批处理）
 |====
 
-For example, to enable the Bedrock Cohere embedding model, you need to set `spring.ai.bedrock.cohere.embedding.enabled=true`.
+例如，要启用 Bedrock Cohere 嵌入模型，您需要设置 `spring.ai.bedrock.cohere.embedding.enabled=true`。
 
-Next, you can use the `spring.ai.bedrock.<model>.embedding.*` properties to configure each model as provided.
+接下来，您可以使用 `spring.ai.bedrock.<model>.embedding.*` 属性来配置每个模型。
 
-For more information, refer to the documentation below for each supported model.
+有关更多信息，请参阅下面每个支持的模型的文档。
 
-* xref:api/embeddings/bedrock-cohere-embedding.adoc[Spring AI Bedrock Cohere Embeddings]: `spring.ai.bedrock.cohere.embedding.enabled=true`
-* xref:api/embeddings/bedrock-titan-embedding.adoc[Spring AI Bedrock Titan Embeddings]: `spring.ai.bedrock.titan.embedding.enabled=true`
+* xref:api/embeddings/bedrock-cohere-embedding.adoc[Spring AI Bedrock Cohere Embeddings]：`spring.ai.bedrock.cohere.embedding.enabled=true`
+* xref:api/embeddings/bedrock-titan-embedding.adoc[Spring AI Bedrock Titan Embeddings]：`spring.ai.bedrock.titan.embedding.enabled=true`

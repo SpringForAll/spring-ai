@@ -1,17 +1,17 @@
-= Google VertexAI Text Embeddings
+= Google VertexAI 文本嵌入
 
-Vertex AI supports two types of embeddings models, text and multimodal.
-This document describes how to create a text embedding using the Vertex AI link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api[Text embeddings API].
+Vertex AI支持两种类型的嵌入模型：文本和多模态。
+本文档描述了如何使用Vertex AI link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api[文本嵌入API]创建文本嵌入。
 
-Vertex AI text embeddings API uses dense vector representations. 
-Unlike sparse vectors, which tend to directly map words to numbers, dense vectors are designed to better represent the meaning of a piece of text. 
-The benefit of using dense vector embeddings in generative AI is that instead of searching for direct word or syntax matches, you can better search for passages that align to the meaning of the query, even if the passages don't use the same language.
+Vertex AI文本嵌入API使用密集向量表示。
+与稀疏向量不同，稀疏向量倾向于直接将单词映射到数字，而密集向量旨在更好地表示文本的含义。
+在生成式AI中使用密集向量嵌入的好处是，您不必搜索直接的单词或语法匹配，而是可以更好地搜索与查询含义一致的段落，即使这些段落不使用相同的语言。
 
-== Prerequisites
+== 前提条件
 
-- Install the link:https://cloud.google.com/sdk/docs/install[gcloud] CLI, appropriate for you OS.
-- Authenticate by running the following command. 
-Replace `PROJECT_ID` with your Google Cloud project ID and `ACCOUNT` with your Google Cloud username.
+- 安装适合您操作系统的link:https://cloud.google.com/sdk/docs/install[gcloud] CLI。
+- 通过运行以下命令进行身份验证。
+将`PROJECT_ID`替换为您的Google Cloud项目ID，将`ACCOUNT`替换为您的Google Cloud用户名。
 
 [source]
 ----
@@ -19,24 +19,23 @@ gcloud config set project <PROJECT_ID> &&
 gcloud auth application-default login <ACCOUNT>
 ----
 
-=== Add Repositories and BOM
+=== 添加仓库和BOM
 
-Spring AI artifacts are published in Maven Central and Spring Snapshot repositories.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add these repositories to your build system.
+Spring AI构件发布在Maven Central和Spring Snapshot仓库中。
+请参考xref:getting-started.adoc#artifact-repositories[构件仓库]部分，将这些仓库添加到您的构建系统中。
 
-To help with dependency management, Spring AI provides a BOM (bill of materials) to ensure that a consistent version of Spring AI is used throughout the entire project. Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build system.
+为了帮助依赖管理，Spring AI提供了BOM（物料清单）以确保在整个项目中使用一致版本的Spring AI。请参考xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建系统中。
 
-
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI自动配置、starter模块的构件名称发生了重大变化。
+请参考https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明]获取更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the VertexAI Embedding Model.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI为VertexAI嵌入模型提供了Spring Boot自动配置。
+要启用它，请在项目的Maven `pom.xml`文件中添加以下依赖：
 
 [source, xml]
 ----
@@ -46,7 +45,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -55,53 +54,53 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建文件中。
 
-=== Embedding Properties
+=== 嵌入属性
 
-The prefix `spring.ai.vertex.ai.embedding` is used as the property prefix that lets you connect to VertexAI Embedding API.
+前缀`spring.ai.vertex.ai.embedding`用作属性前缀，允许您连接到VertexAI嵌入API。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.vertex.ai.embedding.project-id   |  Google Cloud Platform project ID |  -
-| spring.ai.vertex.ai.embedding.location   | Region |  -
-| spring.ai.vertex.ai.embedding.apiEndpoint   | Vertex AI Embedding API endpoint. |  -
+| spring.ai.vertex.ai.embedding.project-id   |  Google Cloud Platform项目ID |  -
+| spring.ai.vertex.ai.embedding.location   | 区域 |  -
+| spring.ai.vertex.ai.embedding.apiEndpoint   | Vertex AI嵌入API端点。 |  -
 
 |====
 
 [NOTE]
 ====
-Enabling and disabling of the embedding auto-configurations are now configured via top level properties with the prefix `spring.ai.model.embedding`.
+嵌入自动配置的启用和禁用现在通过前缀为`spring.ai.model.embedding`的顶级属性进行配置。
 
-To enable, spring.ai.model.embedding.text=vertexai (It is enabled by default)
+要启用，spring.ai.model.embedding.text=vertexai（默认启用）
 
-To disable, spring.ai.model.embedding.text=none (or any value which doesn't match vertexai)
+要禁用，spring.ai.model.embedding.text=none（或任何不匹配vertexai的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.vertex.ai.embedding.text` is the property prefix that lets you configure the embedding model implementation for VertexAI Text Embedding.
+前缀`spring.ai.vertex.ai.embedding.text`是配置VertexAI文本嵌入的嵌入模型实现的属性前缀。
 
 [cols="3,5,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.vertex.ai.embedding.text.enabled (Removed and no longer valid) | Enable Vertex AI Embedding API model. | true
-| spring.ai.model.embedding.text | Enable Vertex AI Embedding API model. | vertexai
-| spring.ai.vertex.ai.embedding.text.options.model | This is the link:https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported-models[Vertex Text Embedding model] to use | text-embedding-004
-| spring.ai.vertex.ai.embedding.text.options.task-type | The intended downstream application to help the model produce better quality embeddings. Available link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api#request_body[task-types]  | `RETRIEVAL_DOCUMENT`
-| spring.ai.vertex.ai.embedding.text.options.title | Optional title, only valid with task_type=RETRIEVAL_DOCUMENT.  | -
-| spring.ai.vertex.ai.embedding.text.options.dimensions | The number of dimensions the resulting output embeddings should have. Supported for model version 004 and later. You can use this parameter to reduce the embedding size, for example, for storage optimization.  | -
-| spring.ai.vertex.ai.embedding.text.options.auto-truncate | When set to true, input text will be truncated. When set to false, an error is returned if the input text is longer than the maximum length supported by the model.  | true
+| spring.ai.vertex.ai.embedding.text.enabled（已移除且不再有效） | 启用Vertex AI嵌入API模型。 | true
+| spring.ai.model.embedding.text | 启用Vertex AI嵌入API模型。 | vertexai
+| spring.ai.vertex.ai.embedding.text.options.model | 这是要使用的link:https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported-models[Vertex文本嵌入模型] | text-embedding-004
+| spring.ai.vertex.ai.embedding.text.options.task-type | 预期的下游应用程序，以帮助模型产生更高质量的嵌入。可用的link:https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings-api#request_body[任务类型]  | `RETRIEVAL_DOCUMENT`
+| spring.ai.vertex.ai.embedding.text.options.title | 可选标题，仅在task_type=RETRIEVAL_DOCUMENT时有效。  | -
+| spring.ai.vertex.ai.embedding.text.options.dimensions | 结果输出嵌入应具有的维度数。支持模型版本004及更高版本。您可以使用此参数来减少嵌入大小，例如，用于存储优化。  | -
+| spring.ai.vertex.ai.embedding.text.options.auto-truncate | 设置为true时，输入文本将被截断。设置为false时，如果输入文本长于模型支持的最大长度，则返回错误。  | true
 |====
 
-== Sample Controller
+== 示例控制器
 
-https://start.spring.io/[Create] a new Spring Boot project and add the `spring-ai-starter-model-vertex-ai-embedding` to your pom (or gradle) dependencies.
+在https://start.spring.io/[创建]一个新的Spring Boot项目，并将`spring-ai-starter-model-vertex-ai-embedding`添加到您的pom（或gradle）依赖项中。
 
-Add a `application.properties` file, under the `src/main/resources` directory, to enable and configure the VertexAi chat model:
+在`src/main/resources`目录下添加一个`application.properties`文件，以启用和配置VertexAi聊天模型：
 
 [source,application.properties]
 ----
@@ -110,9 +109,8 @@ spring.ai.vertex.ai.embedding.location=<YOUR_PROJECT_LOCATION>
 spring.ai.vertex.ai.embedding.text.options.model=text-embedding-004
 ----
 
-
-This will create a `VertexAiTextEmbeddingModel` implementation that you can inject into your class.
-Here is an example of a simple `@Controller` class that uses the embedding model for embeddings generations.
+这将创建一个`VertexAiTextEmbeddingModel`实现，您可以将其注入到您的类中。
+以下是一个使用嵌入模型生成嵌入的简单`@Controller`类示例。
 
 [source,java]
 ----
@@ -134,11 +132,11 @@ public class EmbeddingController {
 }
 ----
 
-== Manual Configuration
+== 手动配置
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-embedding/src/main/java/org/springframework/ai/vertexai/embedding/VertexAiTextEmbeddingModel.java[VertexAiTextEmbeddingModel] implements the `EmbeddingModel`.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-vertex-ai-embedding/src/main/java/org/springframework/ai/vertexai/embedding/VertexAiTextEmbeddingModel.java[VertexAiTextEmbeddingModel]实现了`EmbeddingModel`。
 
-Add the `spring-ai-vertex-ai-embedding` dependency to your project's Maven `pom.xml` file:
+在项目的Maven `pom.xml`文件中添加`spring-ai-vertex-ai-embedding`依赖：
 
 [source, xml]
 ----
@@ -148,7 +146,7 @@ Add the `spring-ai-vertex-ai-embedding` dependency to your project's Maven `pom.
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的Gradle `build.gradle`构建文件中。
 
 [source,groovy]
 ----
@@ -157,9 +155,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考xref:getting-started.adoc#dependency-management[依赖管理]部分，将Spring AI BOM添加到您的构建文件中。
 
-Next, create a `VertexAiTextEmbeddingModel` and use it for text generations:
+接下来，创建一个`VertexAiTextEmbeddingModel`并使用它生成文本：
 
 [source,java]
 ----
@@ -179,9 +177,9 @@ EmbeddingResponse embeddingResponse = this.embeddingModel
 	.embedForResponse(List.of("Hello World", "World is big and salvation is near"));
 ----
 
-=== Load credentials from a Google Service Account
+=== 从Google服务账户加载凭据
 
-To programmatically load the GoogleCredentials from a Service Account json file, you can use the following:
+要以编程方式从服务账户json文件加载GoogleCredentials，您可以使用以下方法：
 
 [source,java]
 ----

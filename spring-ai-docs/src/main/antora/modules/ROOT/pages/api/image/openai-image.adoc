@@ -1,28 +1,27 @@
-= OpenAI Image Generation
+= OpenAI 图像生成
 
+Spring AI 支持 OpenAI 的 DALL-E 图像生成模型。
 
-Spring AI supports DALL-E, the Image generation model from OpenAI.
+== 前提条件
 
-== Prerequisites
+您需要创建一个 API 密钥来访问 ChatGPT 模型。
 
-You will need to create an API key with OpenAI to access ChatGPT models.
+在 https://platform.openai.com/signup[OpenAI 注册页面] 创建账户，并在 https://platform.openai.com/account/api-keys[API 密钥页面] 生成令牌。
 
-Create an account at https://platform.openai.com/signup[OpenAI signup page] and generate the token on the https://platform.openai.com/account/api-keys[API Keys page].
+Spring AI 项目定义了一个名为 `spring.ai.openai.api-key` 的配置属性，您应该将其设置为从 openai.com 获取的 `API Key` 值。
 
-The Spring AI project defines a configuration property named `spring.ai.openai.api-key` that you should set to the value of the `API Key` obtained from openai.com.
-
-You can set this configuration property in your `application.properties` file:
+您可以在 `application.properties` 文件中设置此配置属性：
 
 [source,properties]
 ----
 spring.ai.openai.api-key=<your-openai-api-key>
 ----
 
-For enhanced security when handling sensitive information like API keys, you can use Spring Expression Language (SpEL) to reference a custom environment variable:
+为了在处理 API 密钥等敏感信息时增强安全性，您可以使用 Spring 表达式语言 (SpEL) 引用自定义环境变量：
 
 [source,yaml]
 ----
-# In application.yml
+# 在 application.yml 中
 spring:
   ai:
     openai:
@@ -31,28 +30,28 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在您的环境或 .env 文件中
 export OPENAI_API_KEY=<your-openai-api-key>
 ----
 
-You can also set this configuration programmatically in your application code:
+您也可以在应用程序代码中以编程方式设置此配置：
 
 [source,java]
 ----
-// Retrieve API key from a secure source or environment variable
+// 从安全源或环境变量中获取 API 密钥
 String apiKey = System.getenv("OPENAI_API_KEY");
 ----
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the OpenAI Image Generation Client.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 OpenAI 图像生成客户端提供 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -62,7 +61,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -71,93 +70,91 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-=== Image Generation Properties
+=== 图像生成属性
 
-==== Connection Properties
+==== 连接属性
 
-The prefix `spring.ai.openai` is used as the property prefix that lets you connect to OpenAI.
-
-[cols="3,5,1"]
-|====
-| Property | Description | Default
-| spring.ai.openai.base-url   | The URL to connect to |  https://api.openai.com
-| spring.ai.openai.api-key    | The API Key           |  -
-| spring.ai.openai.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.project-id      | Optionally, you can specify which project is used for an API request. |  -
-|====
-
-TIP: For users that belong to multiple organizations (or are accessing their projects through their legacy user API key), optionally, you can specify which organization and project is used for an API request. 
-Usage from these API requests will count as usage for the specified organization and project.
-
-
-==== Retry Properties
-
-The prefix `spring.ai.retry` is used as the property prefix that lets you configure the retry mechanism for the OpenAI Image client.
+前缀 `spring.ai.openai` 是允许您连接到 OpenAI 的属性前缀。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-
-| spring.ai.retry.max-attempts   | Maximum number of retry attempts. |  10
-| spring.ai.retry.backoff.initial-interval | Initial sleep duration for the exponential backoff policy. |  2 sec.
-| spring.ai.retry.backoff.multiplier | Backoff interval multiplier. |  5
-| spring.ai.retry.backoff.max-interval | Maximum backoff duration. |  3 min.
-| spring.ai.retry.on-client-errors | If false, throw a NonTransientAiException, and do not attempt retry for `4xx` client error codes | false
-| spring.ai.retry.exclude-on-http-codes | List of HTTP status codes that should not trigger a retry (e.g. to throw NonTransientAiException). | empty
-| spring.ai.retry.on-http-codes | List of HTTP status codes that should trigger a retry (e.g. to throw TransientAiException). | empty
+| 属性 | 描述 | 默认值
+| spring.ai.openai.base-url | 连接 URL | https://api.openai.com
+| spring.ai.openai.api-key | API 密钥 | -
+| spring.ai.openai.organization-id | 可选，您可以指定用于 API 请求的组织。 | -
+| spring.ai.openai.project-id | 可选，您可以指定用于 API 请求的项目。 | -
 |====
 
-==== Configuration Properties
+提示：对于属于多个组织的用户（或通过其旧版用户 API 密钥访问其项目的用户），您可以选择指定用于 API 请求的组织和项目。
+这些 API 请求的使用将计入指定组织和项目的使用量。
+
+==== 重试属性
+
+前缀 `spring.ai.retry` 是允许您配置 OpenAI 图像客户端重试机制的属性前缀。
+
+[cols="3,5,1"]
+|====
+| 属性 | 描述 | 默认值
+| spring.ai.retry.max-attempts | 最大重试尝试次数。 | 10
+| spring.ai.retry.backoff.initial-interval | 指数退避策略的初始睡眠持续时间。 | 2 秒
+| spring.ai.retry.backoff.multiplier | 退避间隔乘数。 | 5
+| spring.ai.retry.backoff.max-interval | 最大退避持续时间。 | 3 分钟
+| spring.ai.retry.on-client-errors | 如果为 false，则抛出 NonTransientAiException，并且不对 `4xx` 客户端错误代码进行重试 | false
+| spring.ai.retry.exclude-on-http-codes | 不应触发重试的 HTTP 状态代码列表（例如，抛出 NonTransientAiException）。 | 空
+| spring.ai.retry.on-http-codes | 应触发重试的 HTTP 状态代码列表（例如，抛出 TransientAiException）。 | 空
+|====
+
+==== 配置属性
 
 [NOTE]
 ====
-Enabling and disabling of the image auto-configurations are now configured via top level properties with the prefix `spring.ai.model.image`.
+图像自动配置的启用和禁用现在通过前缀为 `spring.ai.model.image` 的顶级属性进行配置。
 
-To enable, spring.ai.model.image=openai (It is enabled by default)
+要启用，spring.ai.model.image=openai（默认启用）
 
-To disable, spring.ai.model.image=none (or any value which doesn't match openai)
+要禁用，spring.ai.model.image=none（或任何不匹配 openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.openai.image` is the property prefix that lets you configure the `ImageModel` implementation for OpenAI.
+前缀 `spring.ai.openai.image` 是允许您配置 OpenAI 的 `ImageModel` 实现的属性前缀。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-| spring.ai.openai.image.enabled (Removed and no longer valid) | Enable OpenAI image model.  | true
-| spring.ai.model.image | Enable OpenAI image model.  | openai
-| spring.ai.openai.image.base-url              | Optional overrides the spring.ai.openai.base-url to provide chat specific url |  -
-| spring.ai.openai.image.api-key               | Optional overrides the spring.ai.openai.api-key to provide chat specific api-key |  -
-| spring.ai.openai.image.organization-id | Optionally you can specify which organization  used for an API request. |  -
-| spring.ai.openai.image.project-id      | Optionally, you can specify which project is used for an API request. |  -
-| spring.ai.openai.image.options.n            | The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.  | -
-| spring.ai.openai.image.options.model        | The model to use for image generation.  | OpenAiImageApi.DEFAULT_IMAGE_MODEL
-| spring.ai.openai.image.options.quality      | The quality of the image that will be generated. HD creates images with finer details and greater consistency across the image. This parameter is only supported for dall-e-3. | -
-| spring.ai.openai.image.options.response_format | The format in which the generated images are returned. Must be one of URL or b64_json. | -
-| `spring.ai.openai.image.options.size`       | The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. | -
-| `spring.ai.openai.image.options.size_width` | The width of the generated images. Must be one of 256, 512, or 1024 for dall-e-2.  | -
-| `spring.ai.openai.image.options.size_height`| The height of the generated images. Must be one of 256, 512, or 1024 for dall-e-2. | -
-| `spring.ai.openai.image.options.style`      | The style of the generated images. Must be one of vivid or natural. Vivid causes the model to lean towards generating hyper-real and dramatic images. Natural causes the model to produce more natural, less hyper-real looking images. This parameter is only supported for dall-e-3. | -
-| `spring.ai.openai.image.options.user`       | A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. | -
+| 属性 | 描述 | 默认值
+| spring.ai.openai.image.enabled（已移除且不再有效） | 启用 OpenAI 图像模型。 | true
+| spring.ai.model.image | 启用 OpenAI 图像模型。 | openai
+| spring.ai.openai.image.base-url | 可选覆盖 spring.ai.openai.base-url 以提供聊天特定的 url | -
+| spring.ai.openai.image.api-key | 可选覆盖 spring.ai.openai.api-key 以提供聊天特定的 api-key | -
+| spring.ai.openai.image.organization-id | 可选，您可以指定用于 API 请求的组织。 | -
+| spring.ai.openai.image.project-id | 可选，您可以指定用于 API 请求的项目。 | -
+| spring.ai.openai.image.options.n | 要生成的图像数量。必须在 1 到 10 之间。对于 dall-e-3，仅支持 n=1。 | -
+| spring.ai.openai.image.options.model | 用于图像生成的模型。 | OpenAiImageApi.DEFAULT_IMAGE_MODEL
+| spring.ai.openai.image.options.quality | 将生成的图像质量。HD 创建具有更精细细节和更高一致性的图像。此参数仅支持 dall-e-3。 | -
+| spring.ai.openai.image.options.response_format | 返回生成图像的格式。必须是 URL 或 b64_json 之一。 | -
+| `spring.ai.openai.image.options.size` | 生成图像的尺寸。对于 dall-e-2，必须是 256x256、512x512 或 1024x1024 之一。对于 dall-e-3 模型，必须是 1024x1024、1792x1024 或 1024x1792 之一。 | -
+| `spring.ai.openai.image.options.size_width` | 生成图像的宽度。对于 dall-e-2，必须是 256、512 或 1024 之一。 | -
+| `spring.ai.openai.image.options.size_height` | 生成图像的高度。对于 dall-e-2，必须是 256、512 或 1024 之一。 | -
+| `spring.ai.openai.image.options.style` | 生成图像的风格。必须是 vivid 或 natural 之一。Vivid 使模型倾向于生成超现实和戏剧性的图像。Natural 使模型生成更自然、不那么超现实的图像。此参数仅支持 dall-e-3。 | -
+| `spring.ai.openai.image.options.user` | 代表您的最终用户的唯一标识符，可以帮助 OpenAI 监控和检测滥用。 | -
 |====
 
-NOTE: You can override the common `spring.ai.openai.base-url`, `spring.ai.openai.api-key`, `spring.ai.openai.organization-id` and `spring.ai.openai.project-id` properties.
-The `spring.ai.openai.image.base-url`, `spring.ai.openai.image.api-key`, `spring.ai.openai.image.organization-id` and `spring.ai.openai.image.project-id` properties if set take precedence over the common properties.
-This is useful if you want to use different OpenAI accounts for different models and different model endpoints.
+注意：您可以覆盖通用的 `spring.ai.openai.base-url`、`spring.ai.openai.api-key`、`spring.ai.openai.organization-id` 和 `spring.ai.openai.project-id` 属性。
+如果设置了 `spring.ai.openai.image.base-url`、`spring.ai.openai.image.api-key`、`spring.ai.openai.image.organization-id` 和 `spring.ai.openai.image.project-id` 属性，它们将优先于通用属性。
+如果您想为不同的模型和不同的模型端点使用不同的 OpenAI 账户，这将很有用。
 
-TIP: All properties prefixed with `spring.ai.openai.image.options` can be overridden at runtime.
+提示：所有以 `spring.ai.openai.image.options` 为前缀的属性都可以在运行时被覆盖。
 
-== Runtime Options [[image-options]]
+== 运行时选项 [[image-options]]
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions.java] provides model configurations, such as the model to use, the quality, the size, etc.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions.java] 提供模型配置，例如要使用的模型、质量、尺寸等。
 
-On start-up, the default options can be configured with the `OpenAiImageModel(OpenAiImageApi openAiImageApi)` constructor and the `withDefaultOptions(OpenAiImageOptions defaultOptions)` method.  Alternatively, use the `spring.ai.openai.image.options.*` properties described previously.
+在启动时，可以通过 `OpenAiImageModel(OpenAiImageApi openAiImageApi)` 构造函数和 `withDefaultOptions(OpenAiImageOptions defaultOptions)` 方法配置默认选项。或者，使用前面描述的 `spring.ai.openai.image.options.*` 属性。
 
-At runtime you can override the default options by adding new, request specific, options to the `ImagePrompt` call.
-For example to override the OpenAI specific options such as quality and the number of images to create, use the following code example:
+在运行时，您可以通过向 `ImagePrompt` 调用添加新的、特定于请求的选项来覆盖默认选项。
+例如，要覆盖 OpenAI 特定选项，如质量和要创建的图像数量，请使用以下代码示例：
 
 [source,java]
 ----
@@ -172,4 +169,4 @@ ImageResponse response = openaiImageModel.call(
 );
 ----
 
-TIP: In addition to the model specific https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions] you can use a portable https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] instance, created with the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()].
+提示：除了模型特定的 https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions] 之外，您还可以使用可移植的 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] 实例，该实例使用 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()] 创建。

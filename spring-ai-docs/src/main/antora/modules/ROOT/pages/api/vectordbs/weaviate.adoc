@@ -1,26 +1,26 @@
 = Weaviate
 
-This section walks you through setting up the Weaviate VectorStore to store document embeddings and perform similarity searches.
+本节将指导您如何设置 Weaviate VectorStore 来存储文档嵌入向量并执行相似性搜索。
 
-link:https://weaviate.io/[Weaviate] is an open-source vector database that allows you to store data objects and vector embeddings from your favorite ML-models and scale seamlessly into billions of data objects.
-It provides tools to store document embeddings, content, and metadata and to search through those embeddings, including metadata filtering.
+link:https://weaviate.io/[Weaviate] 是一个开源向量数据库，允许您存储来自您喜欢的 ML 模型的数据对象和向量嵌入，并可以无缝扩展到数十亿个数据对象。
+它提供了存储文档嵌入、内容和元数据的工具，以及搜索这些嵌入的功能，包括元数据过滤。
 
-== Prerequisites
+== 前提条件
 
-* A running Weaviate instance. The following options are available:
-** link:https://console.weaviate.cloud/[Weaviate Cloud Service] (requires account creation and API key)
-** link:https://weaviate.io/developers/weaviate/installation/docker[Docker container]
-* If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `WeaviateVectorStore`.
+* 一个运行中的 Weaviate 实例。以下选项可用：
+** link:https://console.weaviate.cloud/[Weaviate 云服务]（需要创建账户和 API 密钥）
+** link:https://weaviate.io/developers/weaviate/installation/docker[Docker 容器]
+* 如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 提供一个 API 密钥，用于生成存储在 `WeaviateVectorStore` 中的嵌入向量。
 
-== Dependencies
+== 依赖项
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 的自动配置和启动器模块的构件名称发生了重大变化。
+请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Add the Weaviate Vector Store dependency to your project:
+将 Weaviate 向量存储依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -30,7 +30,7 @@ Add the Weaviate Vector Store dependency to your project:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -39,31 +39,31 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-== Configuration
+== 配置
 
-To connect to Weaviate and use the `WeaviateVectorStore`, you need to provide access details for your instance.
-Configuration can be provided via Spring Boot's _application.properties_:
+要连接到 Weaviate 并使用 `WeaviateVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 _application.properties_ 提供配置：
 
 [source,properties]
 ----
 spring.ai.vectorstore.weaviate.host=<host_of_your_weaviate_instance>
 spring.ai.vectorstore.weaviate.scheme=<http_or_https>
 spring.ai.vectorstore.weaviate.api-key=<your_api_key>
-# API key if needed, e.g. OpenAI
+# 如果需要，API 密钥，例如 OpenAI
 spring.ai.openai.api-key=<api-key>
 ----
 
-If you prefer to use environment variables for sensitive information like API keys, you have multiple options:
+如果您更喜欢使用环境变量来存储敏感信息（如 API 密钥），您有多个选项：
 
-=== Option 1: Using Spring Expression Language (SpEL)
+=== 选项 1：使用 Spring 表达式语言（SpEL）
 
-You can use custom environment variable names and reference them in your application configuration:
+您可以使用自定义环境变量名称并在应用程序配置中引用它们：
 
 [source,yaml]
 ----
-# In application.yml
+# 在 application.yml 中
 spring:
   ai:
     vectorstore:
@@ -77,16 +77,16 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在您的环境或 .env 文件中
 export WEAVIATE_HOST=<host_of_your_weaviate_instance>
 export WEAVIATE_SCHEME=<http_or_https>
 export WEAVIATE_API_KEY=<your_api_key>
 export OPENAI_API_KEY=<api-key>
 ----
 
-=== Option 2: Accessing Environment Variables Programmatically
+=== 选项 2：以编程方式访问环境变量
 
-Alternatively, you can access environment variables in your Java code:
+或者，您可以在 Java 代码中访问环境变量：
 
 [source,java]
 ----
@@ -94,12 +94,12 @@ String weaviateApiKey = System.getenv("WEAVIATE_API_KEY");
 String openAiApiKey = System.getenv("OPENAI_API_KEY");
 ----
 
-NOTE: If you choose to create a shell script to manage your environment variables, be sure to run it prior to starting your application by "sourcing" the file, i.e. `source <your_script_name>.sh`.
+注意：如果您选择创建 shell 脚本来管理环境变量，请确保在启动应用程序之前通过"source"命令运行它，即 `source <your_script_name>.sh`。
 
-== Auto-configuration
+== 自动配置
 
-Spring AI provides Spring Boot auto-configuration for the Weaviate Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Weaviate 向量存储提供了 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source,xml]
 ----
@@ -109,7 +109,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -118,33 +118,33 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-Please have a look at the list of xref:#_weaviatevectorstore_properties[configuration parameters] for the vector store to learn about the default values and configuration options.
+请查看 xref:#_weaviatevectorstore_properties[配置参数] 列表，了解向量存储的默认值和配置选项。
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参考 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参考 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
-Here is an example of the required bean:
+以下是所需 bean 的示例：
 
 [source,java]
 ----
 @Bean
 public EmbeddingModel embeddingModel() {
-    // Retrieve API key from a secure source or environment variable
+    // 从安全源或环境变量中获取 API 密钥
     String apiKey = System.getenv("OPENAI_API_KEY");
 
-    // Can be any other EmbeddingModel implementation
+    // 可以是任何其他 EmbeddingModel 实现
     return new OpenAiEmbeddingModel(OpenAiApi.builder().apiKey(apiKey).build());
 }
 ----
 
-Now you can auto-wire the `WeaviateVectorStore` as a vector store in your application.
+现在您可以在应用程序中自动装配 `WeaviateVectorStore` 作为向量存储。
 
-== Manual Configuration
+== 手动配置
 
-Instead of using Spring Boot auto-configuration, you can manually configure the `WeaviateVectorStore` using the builder pattern:
+除了使用 Spring Boot 自动配置外，您还可以使用构建器模式手动配置 `WeaviateVectorStore`：
 
 [source,java]
 ----
@@ -156,20 +156,20 @@ public WeaviateClient weaviateClient() {
 @Bean
 public VectorStore vectorStore(WeaviateClient weaviateClient, EmbeddingModel embeddingModel) {
     return WeaviateVectorStore.builder(weaviateClient, embeddingModel)
-        .objectClass("CustomClass")                    // Optional: defaults to "SpringAiWeaviate"
-        .consistencyLevel(ConsistentLevel.QUORUM)      // Optional: defaults to ConsistentLevel.ONE
-        .filterMetadataFields(List.of(                 // Optional: fields that can be used in filters
+        .objectClass("CustomClass")                    // 可选：默认为 "SpringAiWeaviate"
+        .consistencyLevel(ConsistentLevel.QUORUM)      // 可选：默认为 ConsistentLevel.ONE
+        .filterMetadataFields(List.of(                 // 可选：可用于过滤的字段
             MetadataField.text("country"),
             MetadataField.number("year")))
         .build();
 }
 ----
 
-== Metadata filtering
+== 元数据过滤
 
-You can leverage the generic, portable xref:api/vectordbs.adoc#metadata-filters[metadata filters] with Weaviate store as well.
+您也可以将通用的可移植 xref:api/vectordbs.adoc#metadata-filters[元数据过滤器] 与 Weaviate 存储一起使用。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -181,7 +181,7 @@ vectorStore.similaritySearch(
         .filterExpression("country in ['UK', 'NL'] && year >= 2020").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -196,16 +196,16 @@ vectorStore.similaritySearch(SearchRequest.builder()
         b.gte("year", 2020)).build()).build());
 ----
 
-NOTE: Those (portable) filter expressions get automatically converted into the proprietary Weaviate link:https://weaviate.io/developers/weaviate/api/graphql/filters[where filters].
+注意：这些（可移植的）过滤表达式会自动转换为专有的 Weaviate link:https://weaviate.io/developers/weaviate/api/graphql/filters[where 过滤器]。
 
-For example, this portable filter expression:
+例如，这个可移植的过滤表达式：
 
 [source,sql]
 ----
 country in ['UK', 'NL'] && year >= 2020
 ----
 
-is converted into the proprietary Weaviate GraphQL filter format:
+被转换为专有的 Weaviate GraphQL 过滤器格式：
 
 [source,graphql]
 ----
@@ -232,9 +232,9 @@ operands:
     }]
 ----
 
-== Run Weaviate in Docker
+== 在 Docker 中运行 Weaviate
 
-To quickly get started with a local Weaviate instance, you can run it in Docker:
+要快速开始使用本地 Weaviate 实例，您可以在 Docker 中运行它：
 
 [source,bash]
 ----
@@ -248,27 +248,27 @@ docker run -it --rm --name weaviate \
     semitechnologies/weaviate:1.22.4
 ----
 
-This starts a Weaviate instance accessible at http://localhost:8080.
+这将在 http://localhost:8080 启动一个可访问的 Weaviate 实例。
 
-== WeaviateVectorStore properties
+== WeaviateVectorStore 属性
 
-You can use the following properties in your Spring Boot configuration to customize the Weaviate vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 Weaviate 向量存储。
 
 [stripes=even]
 |===
-|Property|Description|Default value
+|属性|描述|默认值
 
-|`spring.ai.vectorstore.weaviate.host`|The host of the Weaviate server|localhost:8080
-|`spring.ai.vectorstore.weaviate.scheme`|Connection schema|http
-|`spring.ai.vectorstore.weaviate.api-key`|The API key for authentication|
-|`spring.ai.vectorstore.weaviate.object-class`|The class name for storing documents|SpringAiWeaviate
-|`spring.ai.vectorstore.weaviate.consistency-level`|Desired tradeoff between consistency and speed|ConsistentLevel.ONE
-|`spring.ai.vectorstore.weaviate.filter-field`|Configures metadata fields that can be used in filters. Format: spring.ai.vectorstore.weaviate.filter-field.<field-name>=<field-type>|
+|`spring.ai.vectorstore.weaviate.host`|Weaviate 服务器的主机|localhost:8080
+|`spring.ai.vectorstore.weaviate.scheme`|连接方案|http
+|`spring.ai.vectorstore.weaviate.api-key`|用于身份验证的 API 密钥|
+|`spring.ai.vectorstore.weaviate.object-class`|用于存储文档的类名|SpringAiWeaviate
+|`spring.ai.vectorstore.weaviate.consistency-level`|一致性和速度之间的期望权衡|ConsistentLevel.ONE
+|`spring.ai.vectorstore.weaviate.filter-field`|配置可用于过滤的元数据字段。格式：spring.ai.vectorstore.weaviate.filter-field.<field-name>=<field-type>|
 |===
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Weaviate Vector Store implementation provides access to the underlying native Weaviate client (`WeaviateClient`) through the `getNativeClient()` method:
+Weaviate 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Weaviate 客户端（`WeaviateClient`）的访问：
 
 [source,java]
 ----
@@ -277,8 +277,8 @@ Optional<WeaviateClient> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     WeaviateClient client = nativeClient.get();
-    // Use the native client for Weaviate-specific operations
+    // 使用原生客户端进行 Weaviate 特定的操作
 }
 ----
 
-The native client gives you access to Weaviate-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端使您能够访问可能未通过 `VectorStore` 接口公开的 Weaviate 特定功能和操作。

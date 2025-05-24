@@ -1,18 +1,17 @@
-= Azure OpenAI Image Generation
+= Azure OpenAI 图像生成
 
+Spring AI 支持 Azure OpenAI 的 DALL-E 图像生成模型。
 
-Spring AI supports DALL-E, the Image generation model from Azure OpenAI.
+== 前提条件
 
-== Prerequisites
+从 Azure OpenAI 服务部分获取您的 Azure OpenAI `endpoint` 和 `api-key`。
 
-Obtain your Azure OpenAI `endpoint` and `api-key` from the Azure OpenAI Service section on the link:https://portal.azure.com[Azure Portal].
+Spring AI 定义了两个配置属性：
 
-Spring AI defines two configuration properties:
+1. `spring.ai.azure.openai.api-key`：设置为从 Azure 获取的 `API Key` 值。
+2. `spring.ai.azure.openai.endpoint`：设置为在 Azure 中配置模型时获取的端点 URL。
 
-1. `spring.ai.azure.openai.api-key`: Set this to the value of the `API Key` obtained from Azure.
-2. `spring.ai.azure.openai.endpoint`: Set this to the endpoint URL obtained when provisioning your model in Azure.
-
-You can set these configuration properties in your `application.properties` file:
+您可以在 `application.properties` 文件中设置这些配置属性：
 
 [source,properties]
 ----
@@ -20,11 +19,11 @@ spring.ai.azure.openai.api-key=<your-azure-openai-api-key>
 spring.ai.azure.openai.endpoint=<your-azure-openai-endpoint>
 ----
 
-For enhanced security when handling sensitive information like API keys, you can use Spring Expression Language (SpEL) to reference custom environment variables:
+为了在处理 API 密钥等敏感信息时增强安全性，您可以使用 Spring 表达式语言 (SpEL) 引用自定义环境变量：
 
 [source,yaml]
 ----
-# In application.yml
+# 在 application.yml 中
 spring:
   ai:
     azure:
@@ -35,64 +34,63 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在您的环境或 .env 文件中
 export AZURE_OPENAI_API_KEY=<your-azure-openai-api-key>
 export AZURE_OPENAI_ENDPOINT=<your-azure-openai-endpoint>
 ----
 
-You can also set these configurations programmatically in your application code:
+您也可以在应用程序代码中以编程方式设置这些配置：
 
 [source,java]
 ----
-// Retrieve API key and endpoint from secure sources or environment variables
+// 从安全源或环境变量中获取 API 密钥和端点
 String apiKey = System.getenv("AZURE_OPENAI_API_KEY");
 String endpoint = System.getenv("AZURE_OPENAI_ENDPOINT");
 ----
 
-=== Deployment Name
+=== 部署名称
 
-To use run Azure AI applications, create an Azure AI Deployment through the [Azure AI Portal](https://oai.azure.com/portal).
+要运行 Azure AI 应用程序，请通过 [Azure AI 门户](https://oai.azure.com/portal) 创建 Azure AI 部署。
 
-In Azure, each client must specify a `Deployment Name` to connect to the Azure OpenAI service.
+在 Azure 中，每个客户端必须指定一个 `Deployment Name` 来连接到 Azure OpenAI 服务。
 
-It's essential to understand that the `Deployment Name` is different from the model you choose to deploy
+重要的是要理解 `Deployment Name` 与您选择部署的模型不同。
 
-For instance, a deployment named 'MyImgAiDeployment' could be configured to use either the `Dalle3`  model or the `Dalle2` model.
+例如，名为 'MyImgAiDeployment' 的部署可以配置为使用 `Dalle3` 模型或 `Dalle2` 模型。
 
-For now, to keep things simple, you can create a deployment using the following settings:
+目前，为了保持简单，您可以使用以下设置创建部署：
 
-Deployment Name: `MyImgAiDeployment`
-Model Name: `Dalle3`
+部署名称：`MyImgAiDeployment`
+模型名称：`Dalle3`
 
-This Azure configuration will align with the default configurations of the Spring Boot Azure AI Starter and its Autoconfiguration feature.
+此 Azure 配置将与 Spring Boot Azure AI Starter 及其自动配置功能的默认配置保持一致。
 
-If you use a different Deployment Name, update the configuration property accordingly:
+如果您使用不同的部署名称，请相应地更新配置属性：
 
 ```
 spring.ai.azure.openai.image.options.deployment-name=<my deployment name>
 ```
 
-The different deployment structures of Azure OpenAI and OpenAI leads to a property in the Azure OpenAI client library named `deploymentOrModelName`.
-This is because in OpenAI there is no `Deployment Name`, only a `Model Name`.
+Azure OpenAI 和 OpenAI 的不同部署结构导致 Azure OpenAI 客户端库中有一个名为 `deploymentOrModelName` 的属性。
+这是因为在 OpenAI 中没有 `Deployment Name`，只有 `Model Name`。
 
-=== Add Repositories and BOM
+=== 添加仓库和 BOM
 
-Spring AI artifacts are published in Maven Central and Spring Snapshot repositories.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add these repositories to your build system.
+Spring AI 构件发布在 Maven Central 和 Spring Snapshot 仓库中。
+请参考 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将这些仓库添加到您的构建系统中。
 
-To help with dependency management, Spring AI provides a BOM (bill of materials) to ensure that a consistent version of Spring AI is used throughout the entire project. Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build system.
+为了帮助依赖管理，Spring AI 提供了 BOM（物料清单）以确保在整个项目中使用一致版本的 Spring AI。请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建系统中。
 
-
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Azure OpenAI Chat Client.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Azure OpenAI 聊天客户端提供 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -102,7 +100,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -111,58 +109,58 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-=== Image Generation Properties
+=== 图像生成属性
 
 [NOTE]
 ====
-Enabling and disabling of the image auto-configurations are now configured via top level properties with the prefix `spring.ai.model.image`.
+图像自动配置的启用和禁用现在通过前缀为 `spring.ai.model.image` 的顶级属性进行配置。
 
-To enable, spring.ai.model.image=azure-openai (It is enabled by default)
+要启用，spring.ai.model.image=azure-openai（默认启用）
 
-To disable, spring.ai.model.image=none (or any value which doesn't match azure-openai)
+要禁用，spring.ai.model.image=none（或任何不匹配 azure-openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.openai.image` is the property prefix that lets you configure the `ImageModel` implementation for OpenAI.
+前缀 `spring.ai.openai.image` 是允许您配置 OpenAI 的 `ImageModel` 实现的属性前缀。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-| spring.ai.azure.openai.image.enabled (Removed and no longer valid) | Enable OpenAI image model.  | true
-| spring.ai.model.image | Enable OpenAI image model.  | azure-openai
-| spring.ai.azure.openai.image.options.n            | The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.  | -
-| spring.ai.azure.openai.image.options.model        | The model to use for image generation.  | AzureOpenAiImageOptions.DEFAULT_IMAGE_MODEL
-| spring.ai.azure.openai.image.options.quality      | The quality of the image that will be generated. HD creates images with finer details and greater consistency across the image. This parameter is only supported for dall-e-3. | -
-| spring.ai.azure.openai.image.options.response_format | The format in which the generated images are returned. Must be one of URL or b64_json. | -
-| `spring.ai.openai.image.options.size`       | The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models. | -
-| `spring.ai.openai.image.options.size_width` | The width of the generated images. Must be one of 256, 512, or 1024 for dall-e-2.  | -
-| `spring.ai.openai.image.options.size_height`| The height of the generated images. Must be one of 256, 512, or 1024 for dall-e-2. | -
-| `spring.ai.openai.image.options.style`      | The style of the generated images. Must be one of vivid or natural. Vivid causes the model to lean towards generating hyper-real and dramatic images. Natural causes the model to produce more natural, less hyper-real looking images. This parameter is only supported for dall-e-3. | -
-| `spring.ai.openai.image.options.user`       | A unique identifier representing your end-user, which can help Azure OpenAI to monitor and detect abuse. | -
+| 属性 | 描述 | 默认值
+| spring.ai.azure.openai.image.enabled（已移除且不再有效） | 启用 OpenAI 图像模型。 | true
+| spring.ai.model.image | 启用 OpenAI 图像模型。 | azure-openai
+| spring.ai.azure.openai.image.options.n | 要生成的图像数量。必须在 1 到 10 之间。对于 dall-e-3，仅支持 n=1。 | -
+| spring.ai.azure.openai.image.options.model | 用于图像生成的模型。 | AzureOpenAiImageOptions.DEFAULT_IMAGE_MODEL
+| spring.ai.azure.openai.image.options.quality | 将生成的图像质量。HD 创建具有更精细细节和更高一致性的图像。此参数仅支持 dall-e-3。 | -
+| spring.ai.azure.openai.image.options.response_format | 返回生成图像的格式。必须是 URL 或 b64_json 之一。 | -
+| `spring.ai.openai.image.options.size` | 生成图像的尺寸。对于 dall-e-2，必须是 256x256、512x512 或 1024x1024 之一。对于 dall-e-3 模型，必须是 1024x1024、1792x1024 或 1024x1792 之一。 | -
+| `spring.ai.openai.image.options.size_width` | 生成图像的宽度。对于 dall-e-2，必须是 256、512 或 1024 之一。 | -
+| `spring.ai.openai.image.options.size_height` | 生成图像的高度。对于 dall-e-2，必须是 256、512 或 1024 之一。 | -
+| `spring.ai.openai.image.options.style` | 生成图像的风格。必须是 vivid 或 natural 之一。Vivid 使模型倾向于生成超现实和戏剧性的图像。Natural 使模型生成更自然、不那么超现实的图像。此参数仅支持 dall-e-3。 | -
+| `spring.ai.openai.image.options.user` | 代表您的最终用户的唯一标识符，可以帮助 Azure OpenAI 监控和检测滥用。 | -
 |====
 
-==== Connection Properties
+==== 连接属性
 
-The prefix `spring.ai.openai` is used as the property prefix that lets you connect to Azure OpenAI.
+前缀 `spring.ai.openai` 是允许您连接到 Azure OpenAI 的属性前缀。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-| spring.ai.azure.openai.endpoint   | The URL to connect to |  https://my-dalle3.openai.azure.com/
-| spring.ai.azure.openai.apiKey    | The API Key           |  -
+| 属性 | 描述 | 默认值
+| spring.ai.azure.openai.endpoint | 连接 URL | https://my-dalle3.openai.azure.com/
+| spring.ai.azure.openai.apiKey | API 密钥 | -
 |====
 
-== Runtime Options [[image-options]]
+== 运行时选项 [[image-options]]
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions.java] provides model configurations, such as the model to use, the quality, the size, etc.
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-openai/src/main/java/org/springframework/ai/openai/OpenAiImageOptions.java[OpenAiImageOptions.java] 提供模型配置，例如要使用的模型、质量、尺寸等。
 
-On start-up, the default options can be configured with the `AzureOpenAiImageModel(OpenAiImageApi openAiImageApi)` constructor and the `withDefaultOptions(OpenAiImageOptions defaultOptions)` method.  Alternatively, use the `spring.ai.azure.openai.image.options.*` properties described previously.
+在启动时，可以通过 `AzureOpenAiImageModel(OpenAiImageApi openAiImageApi)` 构造函数和 `withDefaultOptions(OpenAiImageOptions defaultOptions)` 方法配置默认选项。或者，使用前面描述的 `spring.ai.azure.openai.image.options.*` 属性。
 
-At runtime you can override the default options by adding new, request specific, options to the `ImagePrompt` call.
-For example to override the OpenAI specific options such as quality and the number of images to create, use the following code example:
+在运行时，您可以通过向 `ImagePrompt` 调用添加新的、特定于请求的选项来覆盖默认选项。
+例如，要覆盖 OpenAI 特定选项，如质量和要创建的图像数量，请使用以下代码示例：
 
 [source,java]
 ----
@@ -177,4 +175,4 @@ ImageResponse response = azureOpenaiImageModel.call(
 );
 ----
 
-TIP: In addition to the model specific https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-azure-openai/src/main/java/org/springframework/ai/azure/openai/AzureOpenAiImageOptions.java[AzureOpenAiImageOptions] you can use a portable https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] instance, created with the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()].
+提示：除了模型特定的 https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-azure-openai/src/main/java/org/springframework/ai/azure/openai/AzureOpenAiImageOptions.java[AzureOpenAiImageOptions] 之外，您还可以使用可移植的 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] 实例，该实例使用 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()] 创建。

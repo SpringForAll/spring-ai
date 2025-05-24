@@ -1,9 +1,7 @@
 [[testcontainers]]
 = Testcontainers
 
-Spring AI provides Spring Boot auto-configuration for establishing a connection to a model service
-or vector store running via Testcontainers. To enable it, add the following dependency
-to your project's Maven `pom.xml` file:
+Spring AI 提供了 Spring Boot 自动配置，用于建立与通过 Testcontainers 运行的模型服务或向量存储的连接。要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source,xml]
 ----
@@ -13,7 +11,7 @@ to your project's Maven `pom.xml` file:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -22,40 +20,40 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-== Service Connections
+== 服务连接
 
-The following service connection factories are provided in the `spring-ai-spring-boot-testcontainers` module:
+`spring-ai-spring-boot-testcontainers` 模块中提供了以下服务连接工厂：
 
 [cols="|,|"]
 |====
-| Connection Details	 | Matched on
+| 连接详情 | 匹配条件
 
 | `AwsOpenSearchConnectionDetails`
-| Containers of type `LocalStackContainer`
+| 类型为 `LocalStackContainer` 的容器
 
 | `ChromaConnectionDetails`
-| Containers of type `ChromaDBContainer`
+| 类型为 `ChromaDBContainer` 的容器
 
 | `MilvusServiceClientConnectionDetails`
-| Containers of type `MilvusContainer`
+| 类型为 `MilvusContainer` 的容器
 
 | `MongoConnectionDetails`
-| Containers of type `MongoDBAtlasLocalContainer`
+| 类型为 `MongoDBAtlasLocalContainer` 的容器
 
 | `OllamaConnectionDetails`
-| Containers of type `OllamaContainer`
+| 类型为 `OllamaContainer` 的容器
 
 | `OpenSearchConnectionDetails`
-| Containers of type `OpensearchContainer`
+| 类型为 `OpensearchContainer` 的容器
 
 | `QdrantConnectionDetails`
-| Containers of type `QdrantContainer`
+| 类型为 `QdrantContainer` 的容器
 
 | `TypesenseConnectionDetails`
-| Containers of type `TypesenseContainer`
+| 类型为 `TypesenseContainer` 的容器
 
 | `WeaviateConnectionDetails`
-| Containers of type `WeaviateContainer`
+| 类型为 `WeaviateContainer` 的容器
 |====

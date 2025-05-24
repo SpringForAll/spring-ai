@@ -1,17 +1,17 @@
 [[introduction]]
-= Observability
+= 可观测性
 
-Spring AI builds upon the observability features in the Spring ecosystem to provide insights into AI-related operations.
-Spring AI provides metrics and tracing capabilities for its core components: `ChatClient` (including `Advisor`),
-`ChatModel`, `EmbeddingModel`, `ImageModel`, and `VectorStore`.
+Spring AI 基于 Spring 生态系统中的可观测性功能，为 AI 相关操作提供洞察。
+Spring AI 为其核心组件提供指标和追踪功能：`ChatClient`（包括 `Advisor`）、
+`ChatModel`、`EmbeddingModel`、`ImageModel` 和 `VectorStore`。
 
-NOTE: Low cardinality keys will be added to metrics and traces, while high cardinality keys will only be added to traces.
+注意：低基数键将被添加到指标和追踪中，而高基数键仅添加到追踪中。
 
 [WARNING]
 ====
-**1.0.0-RC1 Breaking Changes** 
+**1.0.0-RC1 重大变更** 
 
-Following configuration properties have been renamed to better reflect their purpose:
+以下配置属性已重命名以更好地反映其用途：
 
 * `spring.ai.chat.client.observations.include-prompt` → `spring.ai.chat.client.observations.log-prompt`
 * `spring.ai.chat.observations.include-prompt` → `spring.ai.chat.observations.log-prompt`
@@ -20,346 +20,342 @@ Following configuration properties have been renamed to better reflect their pur
 * `spring.ai.vectorstore.observations.include-query-response` → `spring.ai.vectorstore.observations.log-query-response`
 ====
 
-== Chat Client
+== 聊天客户端
 
-The `spring.ai.chat.client` observations are recorded when a ChatClient `call()` or `stream()` operations are invoked. 
-They measure the time spent performing the invocation and propagate the related tracing information.
+当调用 ChatClient 的 `call()` 或 `stream()` 操作时，会记录 `spring.ai.chat.client` 观测数据。
+它们测量执行调用所花费的时间并传播相关的追踪信息。
 
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name` | Always `framework`.
-|`gen_ai.system` | Always `spring_ai`.
-|`spring.ai.chat.client.stream` | Is the chat model response a stream - `true or false`
-|`spring.ai.kind` | The kind of framework API in Spring AI: `chat_client`.
+|`gen_ai.operation.name` | 始终为 `framework`。
+|`gen_ai.system` | 始终为 `spring_ai`。
+|`spring.ai.chat.client.stream` | 聊天模型响应是否为流 - `true 或 false`
+|`spring.ai.kind` | Spring AI 中框架 API 的类型：`chat_client`。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.prompt` | The content of the prompt sent via the chat client. Optional.
-|`spring.ai.chat.client.advisor.params` (deprecated) | Map of advisor parameters. The conversation ID is now included in `spring.ai.chat.client.conversation.id`.
-|`spring.ai.chat.client.advisors` | List of configured chat client advisors.
-|`spring.ai.chat.client.conversation.id` | Identifier of the conversation when using the chat memory.
-|`spring.ai.chat.client.system.params` (deprecated) |Chat client system parameters. Optional. Superseded by `gen_ai.prompt`.
-|`spring.ai.chat.client.system.text` (deprecated) |Chat client system text. Optional. Superseded by `gen_ai.prompt`.
-|`spring.ai.chat.client.tool.function.names` (deprecated) | Enabled tool function names. Superseded by `spring.ai.chat.client.tool.names`.
-|`spring.ai.chat.client.tool.function.callbacks` (deprecated) |List of configured chat client function callbacks. Superseded by `spring.ai.chat.client.tool.names`.
-|`spring.ai.chat.client.tool.names` | Names of the tools passed to the chat client.
-|`spring.ai.chat.client.user.params` (deprecated) | Chat client user parameters. Optional. Superseded by `gen_ai.prompt`.
-|`spring.ai.chat.client.user.text` (deprecated) | Chat client user text. Optional. Superseded by `gen_ai.prompt`.
+|`gen_ai.prompt` | 通过聊天客户端发送的提示内容。可选。
+|`spring.ai.chat.client.advisor.params`（已弃用） | 顾问参数映射。会话 ID 现在包含在 `spring.ai.chat.client.conversation.id` 中。
+|`spring.ai.chat.client.advisors` | 已配置的聊天客户端顾问列表。
+|`spring.ai.chat.client.conversation.id` | 使用聊天内存时的会话标识符。
+|`spring.ai.chat.client.system.params`（已弃用） | 聊天客户端系统参数。可选。已被 `gen_ai.prompt` 取代。
+|`spring.ai.chat.client.system.text`（已弃用） | 聊天客户端系统文本。可选。已被 `gen_ai.prompt` 取代。
+|`spring.ai.chat.client.tool.function.names`（已弃用） | 启用的工具函数名称。已被 `spring.ai.chat.client.tool.names` 取代。
+|`spring.ai.chat.client.tool.function.callbacks`（已弃用） | 已配置的聊天客户端函数回调列表。已被 `spring.ai.chat.client.tool.names` 取代。
+|`spring.ai.chat.client.tool.names` | 传递给聊天客户端的工具名称。
+|`spring.ai.chat.client.user.params`（已弃用） | 聊天客户端用户参数。可选。已被 `gen_ai.prompt` 取代。
+|`spring.ai.chat.client.user.text`（已弃用） | 聊天客户端用户文本。可选。已被 `gen_ai.prompt` 取代。
 |===
 
-=== Prompt Content
+=== 提示内容
 
-The `ChatClient` prompt content is typically big and possibly containing sensitive information.
-For those reasons, it is not exported by default.
+`ChatClient` 提示内容通常很大，可能包含敏感信息。
+因此，默认情况下不会导出。
 
-Spring AI supports logging the prompt content to help with debugging and troubleshooting.
+Spring AI 支持记录提示内容以帮助调试和故障排除。
 
 [cols="6,3,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| `spring.ai.chat.client.observations.log-prompt` |  Whether to log the chat client prompt content. | `false`
+| `spring.ai.chat.client.observations.log-prompt` | 是否记录聊天客户端提示内容。 | `false`
 |====
 
-WARNING: If you enable logging of the chat client prompt content, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果启用聊天客户端提示内容的记录，可能会暴露敏感或私人信息。请谨慎使用！
 
-=== Input Data (Deprecated)
+=== 输入数据（已弃用）
 
-WARNING: The `spring.ai.chat.client.observations.include-input` property is deprecated, replaced by `spring.ai.chat.client.observations.log-prompt`. See xref:_prompt_content[Prompt Content].
+警告：`spring.ai.chat.client.observations.include-input` 属性已弃用，替换为 `spring.ai.chat.client.observations.log-prompt`。参见 xref:_prompt_content[提示内容]。
 
-The `ChatClient` input data is typically big and possibly containing sensitive information.
-For those reasons, it is not exported by default.
+`ChatClient` 输入数据通常很大，可能包含敏感信息。
+因此，默认情况下不会导出。
 
-Spring AI supports logging input data to help with debugging and troubleshooting.
+Spring AI 支持记录输入数据以帮助调试和故障排除。
 
 [cols="6,3,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| `spring.ai.chat.client.observations.include-input` |  Whether to include the input content in the observations. | `false`
+| `spring.ai.chat.client.observations.include-input` | 是否在观测中包含输入内容。 | `false`
 |====
 
-WARNING: If you enable the inclusion of the input content in the observations, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果在观测中包含输入内容，可能会暴露敏感或私人信息。请谨慎使用！
 
-=== Chat Client Advisors
+=== 聊天客户端顾问
 
-The `spring.ai.advisor` observations are recorded when an advisor is executed.
-They measure the time spent in the advisor (including the time spend on the inner advisors) and propagate the related tracing information.
+当执行顾问时，会记录 `spring.ai.advisor` 观测数据。
+它们测量在顾问中花费的时间（包括内部顾问的时间）并传播相关的追踪信息。
 
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name` | Always `framework`.
-|`gen_ai.system` | Always `spring_ai`.
-|`spring.ai.advisor.type` (deprecated) | Where the advisor applies it's logic in the request processing, one of `BEFORE`, `AFTER`, or `AROUND`. This distinction doesn't apply anymore since all Advisors are always of the same type.
-|`spring.ai.kind` | The kind of framework API in Spring AI: `advisor`.
+|`gen_ai.operation.name` | 始终为 `framework`。
+|`gen_ai.system` | 始终为 `spring_ai`。
+|`spring.ai.advisor.type`（已弃用） | 顾问在请求处理中应用其逻辑的位置，为 `BEFORE`、`AFTER` 或 `AROUND` 之一。由于所有顾问现在都是相同类型，这个区分不再适用。
+|`spring.ai.kind` | Spring AI 中框架 API 的类型：`advisor`。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`spring.ai.advisor.name`| Name of the advisor.
-|`spring.ai.advisor.order`| Advisor order in the advisor chain.
+|`spring.ai.advisor.name`| 顾问的名称。
+|`spring.ai.advisor.order`| 顾问在顾问链中的顺序。
 |===
 
-== Chat Model
+== 聊天模型
 
-NOTE: Observability features are currently supported only for `ChatModel` implementations from the following AI model
-providers: Anthropic, Azure OpenAI, Mistral AI, Ollama, OpenAI, Vertex AI, MiniMax, Moonshot, QianFan, Zhiu AI.
-Additional AI model providers will be supported in a future release.
+注意：目前仅支持以下 AI 模型提供商的 `ChatModel` 实现的可观测性功能：
+Anthropic、Azure OpenAI、Mistral AI、Ollama、OpenAI、Vertex AI、MiniMax、Moonshot、QianFan、Zhiu AI。
+其他 AI 模型提供商将在未来版本中支持。
 
-The `gen_ai.client.operation` observations are recorded when calling the ChatModel `call` or `stream` methods. 
-They measure the time spent on method completion and propagate the related tracing information.
+当调用 ChatModel 的 `call` 或 `stream` 方法时，会记录 `gen_ai.client.operation` 观测数据。
+它们测量方法完成所花费的时间并传播相关的追踪信息。
 
-IMPORTANT: The `gen_ai.client.token.usage` metrics measures number of input and output tokens used by a single model call.
+重要：`gen_ai.client.token.usage` 指标测量单个模型调用使用的输入和输出令牌数量。
 
-
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name` | The name of the operation being performed.
-|`gen_ai.system` | The model provider as identified by the client instrumentation.
-|`gen_ai.request.model` | The name of the model a request is being made to.
-|`gen_ai.response.model` | The name of the model that generated the response.
+|`gen_ai.operation.name` | 正在执行的操作名称。
+|`gen_ai.system` | 由客户端检测识别的模型提供商。
+|`gen_ai.request.model` | 请求所针对的模型名称。
+|`gen_ai.response.model` | 生成响应的模型名称。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.request.frequency_penalty` | The frequency penalty setting for the model request.
-|`gen_ai.request.max_tokens` | The maximum number of tokens the model generates for a request.
-|`gen_ai.request.presence_penalty` | The presence penalty setting for the model request.
-|`gen_ai.request.stop_sequences` | List of sequences that the model will use to stop generating further tokens.
-|`gen_ai.request.temperature` | The temperature setting for the model request.
-|`gen_ai.request.top_k` | The top_k sampling setting for the model request.
-|`gen_ai.request.top_p` | The top_p sampling setting for the model request.
-|`gen_ai.response.finish_reasons` | Reasons the model stopped generating tokens, corresponding to each generation received.
-|`gen_ai.response.id` | The unique identifier for the AI response.
-|`gen_ai.usage.input_tokens` | The number of tokens used in the model input (prompt).
-|`gen_ai.usage.output_tokens` | The number of tokens used in the model output (completion).
-|`gen_ai.usage.total_tokens` | The total number of tokens used in the model exchange.
-|`gen_ai.prompt` | The full prompt sent to the model. Optional.
-|`gen_ai.completion` | The full response received from the model. Optional.
-|`spring.ai.model.request.tool.names` | List of tool definitions provided to the model in the request.
+|`gen_ai.request.frequency_penalty` | 模型请求的频率惩罚设置。
+|`gen_ai.request.max_tokens` | 模型为请求生成的最大令牌数。
+|`gen_ai.request.presence_penalty` | 模型请求的存在惩罚设置。
+|`gen_ai.request.stop_sequences` | 模型将用于停止生成更多令牌的序列列表。
+|`gen_ai.request.temperature` | 模型请求的温度设置。
+|`gen_ai.request.top_k` | 模型请求的 top_k 采样设置。
+|`gen_ai.request.top_p` | 模型请求的 top_p 采样设置。
+|`gen_ai.response.finish_reasons` | 模型停止生成令牌的原因，对应于每个接收到的生成。
+|`gen_ai.response.id` | AI 响应的唯一标识符。
+|`gen_ai.usage.input_tokens` | 模型输入（提示）中使用的令牌数。
+|`gen_ai.usage.output_tokens` | 模型输出（完成）中使用的令牌数。
+|`gen_ai.usage.total_tokens` | 模型交换中使用的总令牌数。
+|`gen_ai.prompt` | 发送给模型的完整提示。可选。
+|`gen_ai.completion` | 从模型接收的完整响应。可选。
+|`spring.ai.model.request.tool.names` | 在请求中提供给模型的工具定义列表。
 |===
 
-NOTE: For measuring user tokens, the previous table lists the values present in an observation trace.
-Use the metric name `gen_ai.client.token.usage` that is provided by the `ChatModel`.
+注意：对于测量用户令牌，上表列出了观测追踪中存在的值。
+使用由 `ChatModel` 提供的指标名称 `gen_ai.client.token.usage`。
 
+=== 聊天提示和完成数据
 
-=== Chat Prompt and Completion Data
+聊天提示和完成数据通常很大，可能包含敏感信息。
+因此，默认情况下不会导出。
 
-The chat prompt and completion data is typically big and possibly containing sensitive information.
-For those reasons, it is not exported by default.
-
-Spring AI supports logging chat prompt and completion data, useful for troubleshooting scenarios. When tracing is available, the logs will include trace information for better correlation.
+Spring AI 支持记录聊天提示和完成数据，对故障排除场景很有用。当追踪可用时，日志将包含追踪信息以更好地关联。
 
 [cols="6,3,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| `spring.ai.chat.observations.log-prompt` | Log the prompt content. `true` or `false` | `false`
-| `spring.ai.chat.observations.log-completion` | Log the completion content. `true` or `false` | `false`
-| `spring.ai.chat.observations.include-error-logging` | Include error logging in observations. `true` or `false` | `false`
+| `spring.ai.chat.observations.log-prompt` | 记录提示内容。`true` 或 `false` | `false`
+| `spring.ai.chat.observations.log-completion` | 记录完成内容。`true` 或 `false` | `false`
+| `spring.ai.chat.observations.include-error-logging` | 在观测中包含错误日志记录。`true` 或 `false` | `false`
 |====
 
-WARNING: If you enable logging of the chat prompt and completion data, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果启用聊天提示和完成数据的记录，可能会暴露敏感或私人信息。请谨慎使用！
 
-== Tool Calling
+== 工具调用
 
-The `spring.ai.tool` observations are recorded when performing tool calling in the context of a chat model interaction. They measure the time spent on toll call completion and propagate the related tracing information.
+在聊天模型交互的上下文中执行工具调用时，会记录 `spring.ai.tool` 观测数据。
+它们测量工具调用完成所花费的时间并传播相关的追踪信息。
 
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name` | The name of the operation being performed. It's always `framework`.
-|`gen_ai.system` | The provider responsible for the operation. It's always `spring_ai`.
-|`spring.ai.kind` | The kind of operation performed by Spring AI. It's always `tool_call`.
-|`spring.ai.tool.definition.name` | The name of the tool.
+|`gen_ai.operation.name` | 正在执行的操作名称。始终为 `framework`。
+|`gen_ai.system` | 负责操作的提供商。始终为 `spring_ai`。
+|`spring.ai.kind` | Spring AI 执行的操作类型。始终为 `tool_call`。
+|`spring.ai.tool.definition.name` | 工具的名称。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
-|`spring.ai.tool.definition.description` | Description of the tool.
-|`spring.ai.tool.definition.schema` | Schema of the parameters used to call the tool.
-|`spring.ai.tool.call.arguments` | The input arguments to the tool call. (Only when enabled)
-|`spring.ai.tool.call.result` | Schema of the parameters used to call the tool. (Only when enabled)
+|名称 | 描述
+|`spring.ai.tool.definition.description` | 工具的描述。
+|`spring.ai.tool.definition.schema` | 用于调用工具的参数模式。
+|`spring.ai.tool.call.arguments` | 工具调用的输入参数。（仅在启用时）
+|`spring.ai.tool.call.result` | 用于调用工具的参数模式。（仅在启用时）
 |===
 
-=== Tool Call Arguments and Result Data
+=== 工具调用参数和结果数据
 
-The input arguments and result from the tool call are not exported by default, as they can be potentially sensitive.
+默认情况下不会导出工具调用的输入参数和结果，因为它们可能包含敏感信息。
 
-Spring AI supports exporting tool call arguments and result data as span attributes.
+Spring AI 支持将工具调用参数和结果数据导出为跨度属性。
 
 [cols="6,3,1", stripes=even]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| `spring.ai.tools.observations.include-content` | Include the tool call content in observations. `true` or `false` | `false`
+| `spring.ai.tools.observations.include-content` | 在观测中包含工具调用内容。`true` 或 `false` | `false`
 |====
 
-WARNING: If you enable the inclusion of the tool call arguments and result in the observations, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果在观测中包含工具调用参数和结果，可能会暴露敏感或私人信息。请谨慎使用！
 
-== EmbeddingModel
+== 嵌入模型
 
-NOTE: Observability features are currently supported only for `EmbeddingModel` implementations from the following
-AI model providers: Azure OpenAI, Mistral AI, Ollama, and OpenAI.
-Additional AI model providers will be supported in a future release.
+注意：目前仅支持以下 AI 模型提供商的 `EmbeddingModel` 实现的可观测性功能：
+Azure OpenAI、Mistral AI、Ollama 和 OpenAI。
+其他 AI 模型提供商将在未来版本中支持。
 
-The `gen_ai.client.operation` observations are recorded on embedding model method calls. 
-They measure the time spent on method completion and propagate the related tracing information.
+在嵌入模型方法调用时记录 `gen_ai.client.operation` 观测数据。
+它们测量方法完成所花费的时间并传播相关的追踪信息。
 
-IMPORTANT: The `gen_ai.client.token.usage` metrics measures number of input and output tokens used by a single model call.
+重要：`gen_ai.client.token.usage` 指标测量单个模型调用使用的输入和输出令牌数量。
 
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name` | The name of the operation being performed.
-|`gen_ai.system` | The model provider as identified by the client instrumentation.
-|`gen_ai.request.model` | The name of the model a request is being made to.
-|`gen_ai.response.model` | The name of the model that generated the response.
+|`gen_ai.operation.name` | 正在执行的操作名称。
+|`gen_ai.system` | 由客户端检测识别的模型提供商。
+|`gen_ai.request.model` | 请求所针对的模型名称。
+|`gen_ai.response.model` | 生成响应的模型名称。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.request.embedding.dimensions` | The number of dimensions the resulting output embeddings have.
-|`gen_ai.usage.input_tokens` | The number of tokens used in the model input.
-|`gen_ai.usage.total_tokens` | The total number of tokens used in the model exchange.
+|`gen_ai.request.embedding.dimensions` | 结果输出嵌入的维度数。
+|`gen_ai.usage.input_tokens` | 模型输入中使用的令牌数。
+|`gen_ai.usage.total_tokens` | 模型交换中使用的总令牌数。
 |===
 
-NOTE: For measuring user tokens, the previous table lists the values present in an observation trace.
-Use the metric name `gen_ai.client.token.usage` that is provided by the `EmbeddingModel`.
+注意：对于测量用户令牌，上表列出了观测追踪中存在的值。
+使用由 `EmbeddingModel` 提供的指标名称 `gen_ai.client.token.usage`。
 
-== Image Model
+== 图像模型
 
-NOTE: Observability features are currently supported only for `ImageModel` implementations from the following AI model
-providers: OpenAI.
-Additional AI model providers will be supported in a future release.
+注意：目前仅支持以下 AI 模型提供商的 `ImageModel` 实现的可观测性功能：
+OpenAI。
+其他 AI 模型提供商将在未来版本中支持。
 
-The `gen_ai.client.operation` observations are recorded on image model method calls. 
-They measure the time spent on method completion and propagate the related tracing information.
+在图像模型方法调用时记录 `gen_ai.client.operation` 观测数据。
+它们测量方法完成所花费的时间并传播相关的追踪信息。
 
-IMPORTANT: The `gen_ai.client.token.usage` metrics measures number of input and output tokens used by a single model call.
+重要：`gen_ai.client.token.usage` 指标测量单个模型调用使用的输入和输出令牌数量。
 
-
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.operation.name`| The name of the operation being performed.
-|`gen_ai.system`| The model provider as identified by the client instrumentation.
-|`gen_ai.request.model`| The name of the model a request is being made to.
+|`gen_ai.operation.name`| 正在执行的操作名称。
+|`gen_ai.system`| 由客户端检测识别的模型提供商。
+|`gen_ai.request.model`| 请求所针对的模型名称。
 |===
 
-.High Cardinality Keys
+.高基数键
 |===
-|Name | Description
+|名称 | 描述
 
-|`gen_ai.request.image.response_format` | The format in which the generated image is returned.
-|`gen_ai.request.image.size` | The size of the image to generate.
-|`gen_ai.request.image.style` | The style of the image to generate.
-|`gen_ai.response.id` | The unique identifier for the AI response.
-|`gen_ai.response.model` | The name of the model that generated the response.
-|`gen_ai.usage.input_tokens` | The number of tokens used in the model input (prompt).
-|`gen_ai.usage.output_tokens` | The number of tokens used in the model output (generation).
-|`gen_ai.usage.total_tokens` | The total number of tokens used in the model exchange.
-|`gen_ai.prompt` | The full prompt sent to the model. Optional.
+|`gen_ai.request.image.response_format` | 返回生成的图像的格式。
+|`gen_ai.request.image.size` | 要生成的图像大小。
+|`gen_ai.request.image.style` | 要生成的图像样式。
+|`gen_ai.response.id` | AI 响应的唯一标识符。
+|`gen_ai.response.model` | 生成响应的模型名称。
+|`gen_ai.usage.input_tokens` | 模型输入（提示）中使用的令牌数。
+|`gen_ai.usage.output_tokens` | 模型输出（生成）中使用的令牌数。
+|`gen_ai.usage.total_tokens` | 模型交换中使用的总令牌数。
+|`gen_ai.prompt` | 发送给模型的完整提示。可选。
 |===
 
-NOTE: For measuring user tokens, the previous table lists the values present in an observation trace.
-Use the metric name `gen_ai.client.token.usage` that is provided by the `ImageModel`.
+注意：对于测量用户令牌，上表列出了观测追踪中存在的值。
+使用由 `ImageModel` 提供的指标名称 `gen_ai.client.token.usage`。
 
+=== 图像提示数据
 
-=== Image Prompt Data
+图像提示数据通常很大，可能包含敏感信息。
+因此，默认情况下不会导出。
 
-The image prompt data is typically big and possibly containing sensitive information.
-For those reasons, it is not exported by default.
-
-Spring AI supports logging image prompt data, useful for troubleshooting scenarios. When tracing is available, the logs will include trace information for better correlation.
+Spring AI 支持记录图像提示数据，对故障排除场景很有用。当追踪可用时，日志将包含追踪信息以更好地关联。
 
 [cols="6,3,1", stripes=even]
-|===
-| Property | Description | Default
+|====
+| 属性 | 描述 | 默认值
 
-| `spring.ai.image.observations.log-prompt` | Log the image prompt content. `true` or `false` | `false`
-|===
+| `spring.ai.image.observations.log-prompt` | 记录图像提示内容。`true` 或 `false` | `false`
+|====
 
-WARNING: If you enable logging of the image prompt data, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果启用图像提示数据的记录，可能会暴露敏感或私人信息。请谨慎使用！
 
-== Vector Stores
+== 向量存储
 
-All vector store implementations in Spring AI are instrumented to provide metrics and distributed tracing data through Micrometer.
+Spring AI 中的所有向量存储实现都通过 Micrometer 提供指标和分布式追踪数据。
 
-The `db.vector.client.operation` observations are recorded when interacting with the Vector Store. 
-They measure the time spent on the `query`, `add` and `remove` operations and propagate the related tracing information.
+在与向量存储交互时记录 `db.vector.client.operation` 观测数据。
+它们测量 `query`、`add` 和 `remove` 操作所花费的时间并传播相关的追踪信息。
 
-.Low Cardinality Keys
+.低基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`db.operation.name` | The name of the operation or command being executed. One of `add`, `delete`, or `query`.
-|`db.system` | The database management system (DBMS) product as identified by the client instrumentation. One of `pg_vector`, `azure`, `cassandra`, `chroma`, `elasticsearch`, `milvus`, `neo4j`, `opensearch`, `qdrant`, `redis`, `typesense`, `weaviate`, `pinecone`, `oracle`, `mongodb`, `gemfire`, `hana`, `simple`.
-|`spring.ai.kind` | The kind of framework API in Spring AI: `vector_store`.
+|`db.operation.name` | 正在执行的操作或命令名称。为 `add`、`delete` 或 `query` 之一。
+|`db.system` | 由客户端检测识别的数据库管理系统（DBMS）产品。为 `pg_vector`、`azure`、`cassandra`、`chroma`、`elasticsearch`、`milvus`、`neo4j`、`opensearch`、`qdrant`、`redis`、`typesense`、`weaviate`、`pinecone`、`oracle`、`mongodb`、`gemfire`、`hana`、`simple` 之一。
+|`spring.ai.kind` | Spring AI 中框架 API 的类型：`vector_store`。
 |===
 
-.High Cardinality Keys
+.高基数键
 [cols="a,a", stripes=even]
 |===
-|Name | Description
+|名称 | 描述
 
-|`db.collection.name` | The name of a collection (table, container) within the database.
-|`db.namespace` | The name of the database, fully qualified within the server address and port.
-|`db.record.id` | The record identifier if present.
-|`db.search.similarity_metric` | The metric used in similarity search.
-|`db.vector.dimension_count` | The dimension of the vector.
-|`db.vector.field_name` | The name field as of the vector (e.g. a field name).
-|`db.vector.query.content` | The content of the search query being executed.
-|`db.vector.query.filter` | The metadata filters used in the search query.
-|`db.vector.query.response.documents` | Returned documents from a similarity search query. Optional.
-|`db.vector.query.similarity_threshold` | Similarity threshold that accepts all search scores. A threshold value of 0.0 means any similarity is accepted or disable the similarity threshold filtering. A threshold value of 1.0 means an exact match is required.
-|`db.vector.query.top_k` | The top-k most similar vectors returned by a query.
+|`db.collection.name` | 数据库中的集合（表、容器）名称。
+|`db.namespace` | 数据库的名称，在服务器地址和端口内完全限定。
+|`db.record.id` | 记录标识符（如果存在）。
+|`db.search.similarity_metric` | 相似性搜索中使用的度量标准。
+|`db.vector.dimension_count` | 向量的维度。
+|`db.vector.field_name` | 向量的名称字段（例如字段名）。
+|`db.vector.query.content` | 正在执行的搜索查询内容。
+|`db.vector.query.filter` | 搜索查询中使用的元数据过滤器。
+|`db.vector.query.response.documents` | 从相似性搜索查询返回的文档。可选。
+|`db.vector.query.similarity_threshold` | 接受所有搜索分数的相似性阈值。阈值 0.0 表示接受任何相似性或禁用相似性阈值过滤。阈值 1.0 表示需要完全匹配。
+|`db.vector.query.top_k` | 查询返回的最相似向量的 top-k。
 |===
 
+=== 响应数据
 
-=== Response Data
+向量搜索响应数据通常很大，可能包含敏感信息。
+因此，默认情况下不会导出。
 
-The vector search response data is typically big and possibly containing sensitive information.
-For those reasons, it is not exported by default.
-
-Spring AI supports logging vector search response data, useful for troubleshooting scenarios. When tracing is available, the logs will include trace information for better correlation.
+Spring AI 支持记录向量搜索响应数据，对故障排除场景很有用。当追踪可用时，日志将包含追踪信息以更好地关联。
 
 [cols="6,3,1", stripes=even]
-|===
-| Property | Description | Default
+|====
+| 属性 | 描述 | 默认值
 
-| `spring.ai.vectorstore.observations.log-query-response` | Log the vector store query response content. `true` or `false` | `false`
-|===
+| `spring.ai.vectorstore.observations.log-query-response` | 记录向量存储查询响应内容。`true` 或 `false` | `false`
+|====
 
-WARNING: If you enable logging of the vector search response data, there's a risk of exposing sensitive or private information. Please, be careful!
+警告：如果启用向量搜索响应数据的记录，可能会暴露敏感或私人信息。请谨慎使用！

@@ -1,30 +1,30 @@
 [[Tools]]
-= Tool Calling
+= 工具调用
 
-_Tool calling_ (also known as _function calling_) is a common pattern in AI applications allowing a model to interact with a set of APIs, or _tools_, augmenting its capabilities.
+_工具调用_（也称为_函数调用_）是 AI 应用程序中的一种常见模式，允许模型与一组 API 或_工具_交互，从而增强其能力。
 
-Tools are mainly used for:
+工具主要用于：
 
-* **Information Retrieval**. Tools in this category can be used to retrieve information from external sources, such as a database, a web service, a file system, or a web search engine. The goal is to augment the knowledge of the model, allowing it to answer questions that it would not be able to answer otherwise. As such, they can be used in Retrieval Augmented Generation (RAG) scenarios. For example, a tool can be used to retrieve the current weather for a given location, to retrieve the latest news articles, or to query a database for a specific record.
-* **Taking Action**. Tools in this category can be used to take action in a software system, such as sending an email, creating a new record in a database, submitting a form, or triggering a workflow. The goal is to automate tasks that would otherwise require human intervention or explicit programming. For example, a tool can be used to book a flight for a customer interacting with a chatbot, to fill out a form on a web page, or to implement a Java class based on an automated test (TDD) in a code generation scenario.
+* **信息检索**。此类工具可用于从外部源（如数据库、Web 服务、文件系统或 Web 搜索引擎）检索信息。目标是增强模型的知识，使其能够回答原本无法回答的问题。因此，它们可以在检索增强生成（RAG）场景中使用。例如，工具可用于检索给定位置的当前天气、检索最新新闻文章或查询数据库中的特定记录。
+* **执行操作**。此类工具可用于在软件系统中执行操作，如发送电子邮件、在数据库中创建新记录、提交表单或触发工作流。目标是自动化原本需要人工干预或显式编程的任务。例如，工具可用于为客户预订航班、填写网页表单或基于自动化测试（TDD）实现 Java 类。
 
-Even though we typically refer to _tool calling_ as a model capability, it is actually up to the client application to provide the tool calling logic. The model can only request a tool call and provide the input arguments, whereas the application is responsible for executing the tool call from the input arguments and returning the result. The model never gets access to any of the APIs provided as tools, which is a critical security consideration.
+尽管我们通常将_工具调用_称为模型能力，但实际上是由客户端应用程序提供工具调用逻辑。模型只能请求工具调用并提供输入参数，而应用程序负责从输入参数执行工具调用并返回结果。模型永远无法访问作为工具提供的任何 API，这是一个关键的安全考虑因素。
 
-Spring AI provides convenient APIs to define tools, resolve tool call requests from a model, and execute the tool calls. The following sections provide an overview of the tool calling capabilities in Spring AI.
+Spring AI 提供了便捷的 API 来定义工具、解析来自模型的工具调用请求并执行工具调用。以下部分提供了 Spring AI 中工具调用功能的概述。
 
-NOTE: Check the xref:api/chat/comparison.adoc[Chat Model Comparisons] to see which AI models support tool calling invocation.
+注意：查看 xref:api/chat/comparison.adoc[聊天模型比较]以了解哪些 AI 模型支持工具调用。
 
-TIP: Follow the guide to migrate from the deprecated xref:api/tools-migration.adoc[FunctionCallback to ToolCallback API].
+提示：按照指南从已弃用的 xref:api/tools-migration.adoc[FunctionCallback 迁移到 ToolCallback API]。
 
-== Quick Start
+== 快速开始
 
-Let's see how to start using tool calling in Spring AI. We'll implement two simple tools: one for information retrieval and one for taking action. The information retrieval tool will be used to get the current date and time in the user's time zone. The action tool will be used to set an alarm for a specified time.
+让我们看看如何在 Spring AI 中开始使用工具调用。我们将实现两个简单的工具：一个用于信息检索，一个用于执行操作。信息检索工具将用于获取用户时区的当前日期和时间。操作工具将用于在指定时间设置闹钟。
 
-=== Information Retrieval
+=== 信息检索
 
-AI models don't have access to real-time information. Any question that assumes awareness of information such as the current date or weather forecast cannot be answered by the model. However, we can provide a tool that can retrieve this information, and let the model call this tool when access to real-time information is needed.
+AI 模型无法访问实时信息。任何假设了解当前日期或天气预报等信息的问题都无法由模型回答。但是，我们可以提供一个可以检索这些信息的工具，让模型在需要访问实时信息时调用这个工具。
 
-Let's implement a tool to get the current date and time in the user's time zone in a `DateTimeTools` class. The tool will take no argument. The `LocaleContextHolder` from Spring Framework can provide the user's time zone. The tool will be defined as a method annotated with `@Tool`. To help the model understand if and when to call this tool, we'll provide a detailed description of what the tools does.
+让我们在 `DateTimeTools` 类中实现一个工具来获取用户时区的当前日期和时间。该工具不需要参数。Spring Framework 的 `LocaleContextHolder` 可以提供用户的时区。该工具将定义为带有 `@Tool` 注解的方法。为了帮助模型理解是否以及何时调用此工具，我们将提供工具功能的详细描述。
 
 [source,java]
 ----
@@ -42,7 +42,7 @@ class DateTimeTools {
 }
 ----
 
-Next, let's make the tool available to the model. In this example, we'll use the `ChatClient` to interact with the model. We'll provide the tool to the model by passing an instance of `DateTimeTools` via the `tools()` method. When the model needs to know the current date and time, it will request the tool to be called. Internally, the `ChatClient` will call the tool and return the result to the model, which will then use the tool call result to generate the final response to the original question.
+接下来，让我们使工具对模型可用。在此示例中，我们将使用 `ChatClient` 与模型交互。我们将通过 `tools()` 方法传递 `DateTimeTools` 的实例来向模型提供工具。当模型需要知道当前日期和时间时，它将请求调用工具。在内部，`ChatClient` 将调用工具并将结果返回给模型，然后模型将使用工具调用结果来生成对原始问题的最终响应。
 
 [source,java]
 ----
@@ -57,29 +57,29 @@ String response = ChatClient.create(chatModel)
 System.out.println(response);
 ----
 
-The output will be something like:
+输出将类似于：
 
 [source]
 ----
 Tomorrow is 2015-10-21.
 ----
 
-You can retry asking the same question again. This time, don't provide the tool to the model. The output will be something like:
+你可以再次尝试问同样的问题。这次，不要向模型提供工具。输出将类似于：
 
 [source]
 ----
 I am an AI and do not have access to real-time information. Please provide the current date so I can accurately determine what day tomorrow will be.
 ----
 
-Without the tool, the model doesn't know how to answer the question because it doesn't have the ability to determine the current date and time.
+没有工具，模型不知道如何回答这个问题，因为它无法确定当前日期和时间。
 
-=== Taking Actions
+=== 执行操作
 
-AI models can be used to generate plans for accomplishing certain goals. For example, a model can generate a plan for booking a trip to Denmark. However, the model doesn't have the ability to execute the plan. That's where tools come in: they can be used to execute the plan that a model generates.
+AI 模型可用于生成实现某些目标的计划。例如，模型可以生成预订丹麦之旅的计划。但是，模型没有执行计划的能力。这就是工具的用武之地：它们可用于执行模型生成的计划。
 
-In the previous example, we used a tool to determine the current date and time. In this example, we'll define a second tool for setting an alarm at a specific time. The goal is to set an alarm for 10 minutes from now, so we need to provide both tools to the model to accomplish this task.
+在前面的示例中，我们使用工具来确定当前日期和时间。在此示例中，我们将定义第二个工具，用于在特定时间设置闹钟。目标是设置从现在起 10 分钟的闹钟，因此我们需要向模型提供两个工具来完成此任务。
 
-We'll add the new tool to the same `DateTimeTools` class as before. The new tool will take a single parameter, which is the time in ISO-8601 format. The tool will then print a message to the console indicating that the alarm has been set for the given time. Like before, the tool is defined as a method annotated with `@Tool`, which we also use to provide a detailed description to help the model understand when and how to use the tool.
+我们将新工具添加到与之前相同的 `DateTimeTools` 类中。新工具将接受一个参数，即 ISO-8601 格式的时间。然后，工具将在控制台打印一条消息，指示已为给定时间设置闹钟。与之前一样，该工具定义为带有 `@Tool` 注解的方法，我们还用它来提供详细描述，以帮助模型理解何时以及如何使用该工具。
 
 [source,java]
 ----
@@ -104,7 +104,7 @@ class DateTimeTools {
 }
 ----
 
-Next, let's make both tools available to the model. We'll use the `ChatClient` to interact with the model. We'll provide the tools to the model by passing an instance of `DateTimeTools` via the `tools()` method. When we ask to set up an alarm 10 minutes from now, the model will first need to know the current date and time. Then, it will use the current date and time to calculate the alarm time. Finally, it will use the alarm tool to set up the alarm. Internally, the `ChatClient` will handle any tool call request from the model and send back to it any tool call execution result, so that the model can generate the final response.
+接下来，让我们使两个工具对模型可用。我们将使用 `ChatClient` 与模型交互。我们将通过 `tools()` 方法传递 `DateTimeTools` 的实例来向模型提供工具。当我们要求从现在起 10 分钟设置闹钟时，模型首先需要知道当前日期和时间。然后，它将使用当前日期和时间来计算闹钟时间。最后，它将使用闹钟工具来设置闹钟。在内部，`ChatClient` 将处理来自模型的任何工具调用请求，并将任何工具调用执行结果发送回模型，以便模型可以生成最终响应。
 
 [source,java]
 ----
@@ -119,41 +119,41 @@ String response = ChatClient.create(chatModel)
 System.out.println(response);
 ----
 
-In the application logs, you can check the alarm has been set at the correct time.
+在应用程序日志中，你可以检查闹钟是否已在正确的时间设置。
 
-== Overview
+== 概述
 
-Spring AI supports tool calling through a set of flexible abstractions that allow you to define, resolve, and execute tools in a consistent way. This section provides an overview of the main concepts and components of tool calling in Spring AI.
+Spring AI 通过一组灵活的抽象来支持工具调用，这些抽象允许你以一致的方式定义、解析和执行工具。本节提供了 Spring AI 中工具调用的主要概念和组件的概述。
 
-image::tools/tool-calling-01.jpg[The main sequence of actions for tool calling, width=700, align="center"]
+image::tools/tool-calling-01.jpg[工具调用的主要操作序列, width=700, align="center"]
 
-1. When we want to make a tool available to the model, we include its definition in the chat request. Each tool definition comprises of a name, a description, and the schema of the input parameters.
-2. When the model decides to call a tool, it sends a response with the tool name and the input parameters modeled after the defined schema.
-3. The application is responsible for using the tool name to identify and execute the tool with the provided input parameters.
-4. The result of the tool call is processed by the application.
-5. The application sends the tool call result back to the model.
-6. The model generates the final response using the tool call result as additional context.
+1. 当我们想要使工具对模型可用时，我们在聊天请求中包含其定义。每个工具定义包括名称、描述和输入参数的架构。
+2. 当模型决定调用工具时，它会发送一个包含工具名称和按照定义架构建模的输入参数的响应。
+3. 应用程序负责使用工具名称来识别和执行具有提供的输入参数的工具。
+4. 工具调用的结果由应用程序处理。
+5. 应用程序将工具调用结果发送回模型。
+6. 模型使用工具调用结果作为额外上下文生成最终响应。
 
-Tools are the building blocks of tool calling and they are modeled by the `ToolCallback` interface. Spring AI provides built-in support for specifying `ToolCallback`(s) from methods and functions, but you can always define your own `ToolCallback` implementations to support more use cases.
+工具是工具调用的构建块，它们由 `ToolCallback` 接口建模。Spring AI 提供了内置支持，用于从方法和函数指定 `ToolCallback`(s)，但你始终可以定义自己的 `ToolCallback` 实现以支持更多用例。
 
-`ChatModel` implementations transparently dispatch tool call requests to the corresponding `ToolCallback` implementations and will send the tool call results back to the model, which will ultimately generate the final response. They do so using the `ToolCallingManager` interface, which is responsible for managing the tool execution lifecycle.
+`ChatModel` 实现透明地将工具调用请求分派给相应的 `ToolCallback` 实现，并将工具调用结果发送回模型，模型最终将生成最终响应。它们使用 `ToolCallingManager` 接口来执行此操作，该接口负责管理工具执行生命周期。
 
-Both `ChatClient` and `ChatModel` accept a list of `ToolCallback` objects to make the tools available to the model and the `ToolCallingManager` that will eventually execute them. 
+`ChatClient` 和 `ChatModel` 都接受 `ToolCallback` 对象列表，以使工具对模型可用，以及最终执行它们的 `ToolCallingManager`。
 
-Besides passing the `ToolCallback` objects directly, you can also pass a list of tool names, that will be resolved dynamically using the `ToolCallbackResolver` interface.
+除了直接传递 `ToolCallback` 对象外，你还可以传递工具名称列表，这些名称将使用 `ToolCallbackResolver` 接口动态解析。
 
-The following sections will go into more details about all these concepts and APIs, including how to customize and extend them to support more use cases.
+以下部分将详细介绍所有这些概念和 API，包括如何自定义和扩展它们以支持更多用例。
 
-== Methods as Tools
+== 方法作为工具
 
-Spring AI provides built-in support for specifying tools (i.e. `ToolCallback`(s)) from methods in two ways:
+Spring AI 提供了内置支持，用于以两种方式从方法指定工具（即 `ToolCallback`(s)）：
 
-- declaratively, using the `@Tool` annotation
-- programmatically, using the low-level `MethodToolCallback` implementation.
+- 声明式，使用 `@Tool` 注解
+- 编程式，使用低级 `MethodToolCallback` 实现。
 
-=== Declarative Specification: `@Tool`
+=== 声明式规范：`@Tool`
 
-You can turn a method into a tool by annotating it with `@Tool`.
+你可以通过用 `@Tool` 注解方法来将方法转换为工具。
 
 [source,java]
 ----
@@ -167,22 +167,22 @@ class DateTimeTools {
 }
 ----
 
-The `@Tool` annotation allows you to provide key information about the tool:
+`@Tool` 注解允许你提供有关工具的关键信息：
 
-- `name`: The name of the tool. If not provided, the method name will be used. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same class. The name must be unique across all the tools available to the model for a specific chat request.
-- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
-- `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
-- `resultConverter`: The `ToolCallResultConverter` implementation to use for converting the result of a tool call to a `String object` to send back to the AI model. See xref:_result_conversion[] for more details.
+- `name`：工具的名称。如果未提供，将使用方法名称。AI 模型在调用工具时使用此名称来识别工具。因此，不允许在同一类中有两个具有相同名称的工具。该名称在特定聊天请求中模型可用的所有工具中必须是唯一的。
+- `description`：工具的描述，模型可以使用它来理解何时以及如何调用工具。如果未提供，将使用方法名称作为工具描述。但是，强烈建议提供详细描述，因为这对于模型理解工具的目的和使用方式至关重要。未能提供好的描述可能导致模型在应该使用时没有使用工具，或者使用不当。
+- `returnDirect`：工具结果是否应该直接返回给客户端或传回给模型。有关详细信息，请参见 xref:_return_direct[]。
+- `resultConverter`：用于将工具调用结果转换为要发送回 AI 模型的 `String` 对象的 `ToolCallResultConverter` 实现。有关详细信息，请参见 xref:_result_conversion[]。
 
-The method can be either static or instance, and it can have any visibility (public, protected, package-private, or private). The class that contains the method can be either a top-level class or a nested class, and it can also have any visibility (as long as it's accessible where you're planning to instantiate it).
+该方法可以是静态的或实例的，它可以具有任何可见性（public、protected、package-private 或 private）。包含该方法的类可以是顶级类或嵌套类，它也可以具有任何可见性（只要它在计划实例化它的地方可访问）。
 
-NOTE: Spring AI provides built-in support for AOT compilation of the `@Tool`-annotated methods as long as the class containing the methods is a Spring bean (e.g. `@Component`). Otherwise, you'll need to provide the necessary configuration to the GraalVM compiler. For example, by annotating the class with `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)`.
+注意：只要包含方法的类是 Spring bean（例如 `@Component`），Spring AI 就提供对 `@Tool` 注解方法的 AOT 编译的内置支持。否则，你需要向 GraalVM 编译器提供必要的配置。例如，通过用 `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)` 注解类。
 
-You can define any number of arguments for the method (including no argument) with most types (primitives, POJOs, enums, lists, arrays, maps, and so on). Similarly, the method can return most types, including `void`. If the method returns a value, the return type must be a serializable type, as the result will be serialized and sent back to the model.
+你可以为方法定义任意数量的参数（包括无参数），支持大多数类型（基本类型、POJO、枚举、列表、数组、映射等）。同样，该方法可以返回大多数类型，包括 `void`。如果该方法返回值，则返回类型必须是可序列化类型，因为结果将被序列化并发送回模型。
 
-NOTE: Some types are not supported. See xref:_method_tool_limitations[] for more details.
+注意：某些类型不受支持。有关详细信息，请参见 xref:_method_tool_limitations[]。
 
-Spring AI will generate the JSON schema for the input parameters of the `@Tool`-annotated method automatically. The schema is used by the model to understand how to call the tool and prepare the tool request. The `@ToolParam` annotation can be used to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required.
+Spring AI 将自动为 `@Tool` 注解方法的输入参数生成 JSON 架构。该架构由模型用来理解如何调用工具和准备工具请求。可以使用 `@ToolParam` 注解来提供有关输入参数的额外信息，例如描述或参数是必需还是可选的。默认情况下，所有输入参数都被视为必需的。
 
 [source,java]
 ----
@@ -202,18 +202,18 @@ class DateTimeTools {
 }
 ----
 
-The `@ToolParam` annotation allows you to provide key information about a tool parameter:
+`@ToolParam` 注解允许你提供有关工具参数的关键信息：
 
-- `description`: The description for the parameter, which can be used by the model to understand better how to use it. For example, what format the parameter should be in, what values are allowed, and so on.
-- `required`: Whether the parameter is required or optional. By default, all parameters are considered required. 
+- `description`：参数的描述，模型可以使用它来更好地理解如何使用它。例如，参数应该采用什么格式，允许什么值，等等。
+- `required`：参数是必需还是可选的。默认情况下，所有参数都被视为必需的。
 
-If a parameter is annotated as `@Nullable`, it will be considered optional unless explicitly marked as required using the `@ToolParam` annotation.
+如果参数被注解为 `@Nullable`，除非使用 `@ToolParam` 注解明确标记为必需，否则它将被视为可选的。
 
-Besides the `@ToolParam` annotation, you can also use the `@Schema` annotation from Swagger or `@JsonProperty` from Jackson. See xref:_json_schema[] for more details.
+除了 `@ToolParam` 注解外，你还可以使用 Swagger 的 `@Schema` 注解或 Jackson 的 `@JsonProperty`。有关详细信息，请参见 xref:_json_schema[]。
 
-==== Adding Tools to `ChatClient`
+==== 向 `ChatClient` 添加工具
 
-When using the declarative specification approach, you can pass the tool class instance to the `tools()` method when invoking a `ChatClient`. Such tools will only be available for the specific chat request they are added to.
+使用声明式规范方法时，你可以在调用 `ChatClient` 时通过 `tools()` 方法传递工具类实例。此类工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -224,19 +224,19 @@ ChatClient.create(chatModel)
     .content();
 ----
 
-Under the hood, the `ChatClient` will generate a `ToolCallback` from each `@Tool`-annotated method in the tool class instance and pass them to the model. In case you prefer to generate the `ToolCallback`(s) yourself, you can use the `ToolCallbacks` utility class.
+在底层，`ChatClient` 将从工具类实例中的每个 `@Tool` 注解方法生成 `ToolCallback`，并将它们传递给模型。如果你希望自己生成 `ToolCallback`(s)，可以使用 `ToolCallbacks` 工具类。
 
 [source,java]
 ----
 ToolCallback[] dateTimeTools = ToolCallbacks.from(new DateTimeTools());
 ----
 
-==== Adding Default Tools to `ChatClient`
+==== 向 `ChatClient` 添加默认工具
 
-When using the declarative specification approach, you can add default tools to a `ChatClient.Builder` by passing the tool class instance to the `defaultTools()` method.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用声明式规范方法时，你可以通过将工具类实例传递给 `defaultTools()` 方法来向 `ChatClient.Builder` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在所有由同一 `ChatClient.Builder` 构建的所有 `ChatClient` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -246,9 +246,9 @@ ChatClient chatClient = ChatClient.builder(chatModel)
     .build();
 ----
 
-==== Adding Tools to `ChatModel`
+==== 向 `ChatModel` 添加工具
 
-When using the declarative specification approach, you can pass the tool class instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` you use to call a `ChatModel`. Such tools will only be available for the specific chat request they are added to.
+使用声明式规范方法时，你可以通过将工具类实例传递给用于调用 `ChatModel` 的 `ToolCallingChatOptions` 的 `toolCallbacks()` 方法来向 `ChatModel` 添加工具。此类工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -261,12 +261,12 @@ Prompt prompt = new Prompt("What day is tomorrow?", chatOptions);
 chatModel.call(prompt);
 ----
 
-==== Adding Default Tools to `ChatModel`
+==== 向 `ChatModel` 添加默认工具
 
-When using the declarative specification approach, you can add default tools to `ChatModel` at construction time by passing the tool class instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用声明式规范方法时，你可以通过将工具类实例传递给用于创建 `ChatModel` 的 `ToolCallingChatOptions` 实例的 `toolCallbacks()` 方法来向 `ChatModel` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在该 `ChatModel` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -279,9 +279,9 @@ ChatModel chatModel = OllamaChatModel.builder()
     .build();
 ----
 
-=== Programmatic Specification: `MethodToolCallback`
+=== 编程式规范：`MethodToolCallback`
 
-You can turn a method into a tool by building a `MethodToolCallback` programmatically.
+你可以通过构建低级 `MethodToolCallback` 程序化来将方法转换为工具。
 
 [source,java]
 ----
@@ -294,23 +294,23 @@ class DateTimeTools {
 }
 ----
 
-The `MethodToolCallback.Builder` allows you to build a `MethodToolCallback` instance and provide key information about the tool:
+`MethodToolCallback.Builder` 允许你构建 `MethodToolCallback` 实例并提供有关工具的关键信息：
 
-- `toolDefinition`: The `ToolDefinition` instance that defines the tool name, description, and input schema. You can build it using the `ToolDefinition.Builder` class. Required.
-- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client, and the result converter to use. You can build it using the `ToolMetadata.Builder` class.
-- `toolMethod`: The `Method` instance that represents the tool method. Required.
-- `toolObject`: The object instance that contains the tool method. If the method is static, you can omit this parameter.
-- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `String` object to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
+- `toolDefinition`：定义工具名称、描述和输入架构的 `ToolDefinition` 实例。你可以使用 `ToolDefinition.Builder` 类来构建它。必需。
+- `toolMetadata`：定义附加设置的 `ToolMetadata` 实例，例如结果是否应该直接返回给客户端或传回给模型，以及要使用的结果转换器。你可以使用 `ToolMetadata.Builder` 类来构建它。
+- `toolMethod`：表示工具方法的 `Method` 实例。必需。
+- `toolObject`：包含工具方法的对象实例。如果方法是静态的，你可以省略此参数。
+- `toolCallResultConverter`：用于将工具调用结果转换为要发送回 AI 模型的 `String` 对象的 `ToolCallResultConverter` 实例。如果未提供，将使用默认转换器（`DefaultToolCallResultConverter`）。
 
-The `ToolDefinition.Builder` allows you to build a `ToolDefinition` instance and define the tool name, description, and input schema:
+`ToolDefinition.Builder` 允许你构建 `ToolDefinition` 实例并定义工具名称、描述和输入架构：
 
-- `name`: The name of the tool. If not provided, the method name will be used. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same class. The name must be unique across all the tools available to the model for a specific chat request.
-- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
-- `inputSchema`: The JSON schema for the input parameters of the tool. If not provided, the schema will be generated automatically based on the method parameters. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
+- `name`：工具的名称。如果未提供，将使用方法名称。AI 模型在调用工具时使用此名称来识别工具。因此，不允许在同一类中有两个具有相同名称的工具。该名称在特定聊天请求中模型可用的所有工具中必须是唯一的。
+- `description`：工具的描述，模型可以使用它来理解何时以及如何调用工具。如果未提供，将使用方法名称作为工具描述。但是，强烈建议提供详细描述，因为这对于模型理解工具的目的和使用方式至关重要。未能提供好的描述可能导致模型在应该使用时没有使用工具，或者使用不当。
+- `inputSchema`：工具的输入参数的 JSON 架构。如果未提供，将根据方法参数自动生成架构。可以使用 `@ToolParam` 注解来提供有关输入参数的额外信息，例如描述或参数是必需还是可选的。默认情况下，所有输入参数都被视为必需的。有关详细信息，请参见 xref:_json_schema[]。
 
-The `ToolMetadata.Builder` allows you to build a `ToolMetadata` instance and define additional settings for the tool:
+`ToolMetadata.Builder` 允许你构建 `ToolMetadata` 实例并定义工具的附加设置：
 
-- `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
+- `returnDirect`：结果是否应该直接返回给客户端或传回给模型。有关详细信息，请参见 xref:_return_direct[]。
 
 [source,java]
 ----
@@ -324,15 +324,15 @@ ToolCallback toolCallback = MethodToolCallback.builder()
     .build();
 ----
 
-The method can be either static or instance, and it can have any visibility (public, protected, package-private, or private). The class that contains the method can be either a top-level class or a nested class, and it can also have any visibility (as long as it's accessible where you're planning to instantiate it).
+该方法可以是静态的或实例的，它可以具有任何可见性（public、protected、package-private、或 private）。包含该方法的类可以是顶级类或嵌套类，它也可以具有任何可见性（只要它在计划实例化它的地方可访问）。
 
-NOTE: Spring AI provides built-in support for AOT compilation of the tool methods as long as the class containing the methods is a Spring bean (e.g. `@Component`). Otherwise, you'll need to provide the necessary configuration to the GraalVM compiler. For example, by annotating the class with `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)`.
+注意：只要包含方法的类是 Spring bean（例如 `@Component`），Spring AI 就提供对工具方法的 AOT 编译的内置支持。否则，你需要向 GraalVM 编译器提供必要的配置。例如，通过用 `@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_METHODS)` 注解类。
 
-You can define any number of arguments for the method (including no argument) with most types (primitives, POJOs, enums, lists, arrays, maps, and so on). Similarly, the method can return most types, including `void`. If the method returns a value, the return type must be a serializable type, as the result will be serialized and sent back to the model.
+你可以为方法定义任意数量的参数（包括无参数），支持大多数类型（基本类型、POJO、枚举、列表、数组、映射等）。同样，该方法可以返回大多数类型，包括 `void`。如果该方法返回值，则返回类型必须是可序列化类型，因为结果将被序列化并发送回模型。
 
-NOTE: Some types are not supported. See xref:_method_tool_limitations[] for more details.
+注意：某些类型不受支持。有关详细信息，请参见 xref:_method_tool_limitations[]。
 
-If the method is static, you can omit the `toolObject()` method, as it's not needed.
+如果方法是静态的，你可以省略 `toolObject()` 方法，因为它不需要。
 
 [source,java]
 ----
@@ -356,7 +356,7 @@ ToolCallback toolCallback = MethodToolCallback.builder()
     .build();
 ----
 
-Spring AI will generate the JSON schema for the input parameters of the method automatically. The schema is used by the model to understand how to call the tool and prepare the tool request. The `@ToolParam` annotation can be used to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required.
+Spring AI 将自动为方法的输入参数生成 JSON 架构。该架构由模型用来理解如何调用工具和准备工具请求。可以使用 `@ToolParam` 注解来提供有关输入参数的额外信息，例如描述或参数是必需还是可选的。默认情况下，所有输入参数都被视为必需的。
 
 [source,java]
 ----
@@ -374,19 +374,19 @@ class DateTimeTools {
 }
 ----
 
-The `@ToolParam` annotation allows you to provide key information about a tool parameter:
+`@ToolParam` 注解允许你提供有关工具参数的关键信息：
 
-- `description`: The description for the parameter, which can be used by the model to understand better how to use it. For example, what format the parameter should be in, what values are allowed, and so on.
-- `required`: Whether the parameter is required or optional. By default, all parameters are considered required. 
+- `description`：参数的描述，模型可以使用它来更好地理解如何使用它。例如，参数应该采用什么格式，允许什么值，等等。
+- `required`：参数是必需还是可选的。默认情况下，所有参数都被视为必需的。
 
-If a parameter is annotated as `@Nullable`, it will be considered optional unless explicitly marked as required using the `@ToolParam` annotation.
+如果参数被注解为 `@Nullable`，除非使用 `@ToolParam` 注解明确标记为必需，否则它将被视为可选的。
 
-Besides the `@ToolParam` annotation, you can also use the `@Schema` annotation from Swagger or `@JsonProperty` from Jackson. See xref:_json_schema[] for more details.
+除了 `@ToolParam` 注解外，你还可以使用 Swagger 的 `@Schema` 注解或 Jackson 的 `@JsonProperty`。有关详细信息，请参见 xref:_json_schema[]。
 
-==== Adding Tools to `ChatClient` and `ChatModel`
+==== 向 `ChatClient` 和 `ChatModel` 添加工具
 
-When using the programmatic specification approach, you can pass the `MethodToolCallback` instance to the `tools()` method of `ChatClient`.
-The tool will only be available for the specific chat request it's added to.
+使用编程式规范方法时，你可以通过将 `MethodToolCallback` 实例传递给 `tools()` 方法来向 `ChatClient` 添加工具。
+该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -398,12 +398,12 @@ ChatClient.create(chatModel)
     .content();
 ----
 
-==== Adding Default Tools to `ChatClient`
+==== 向 `ChatClient` 添加默认工具
 
-When using the programmatic specification approach, you can add default tools to a `ChatClient.Builder` by passing the `MethodToolCallback` instance to the `defaultTools()` method.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用编程式规范方法时，你可以通过将 `MethodToolCallback` 实例传递给 `defaultTools()` 方法来向 `ChatClient.Builder` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在所有由同一 `ChatClient.Builder` 构建的所有 `ChatClient` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -414,9 +414,9 @@ ChatClient chatClient = ChatClient.builder(chatModel)
     .build();
 ----
 
-==== Adding Tools to `ChatModel`
+==== 向 `ChatModel` 添加工具
 
-When using the programmatic specification approach, you can pass the `MethodToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` you use to call a `ChatModel`. The tool will only be available for the specific chat request it's added to.
+使用编程式规范方法时，你可以通过将 `MethodToolCallback` 实例传递给用于调用 `ChatModel` 的 `ToolCallingChatOptions` 的 `toolCallbacks()` 方法来向 `ChatModel` 添加工具。该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -429,12 +429,12 @@ Prompt prompt = new Prompt("What day is tomorrow?", chatOptions);
 chatModel.call(prompt);
 ----
 
-==== Adding Default Tools to `ChatModel`
+==== 向 `ChatModel` 添加默认工具
 
-When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `MethodToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用编程式规范方法时，你可以通过将 `MethodToolCallback` 实例传递给用于创建 `ChatModel` 的 `ToolCallingChatOptions` 实例的 `toolCallbacks()` 方法来向 `ChatModel` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在该 `ChatModel` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -447,24 +447,24 @@ ChatModel chatModel = OllamaChatModel.builder()
     .build();
 ----
 
-=== Method Tool Limitations
+=== 方法工具限制
 
-The following types are not currently supported as parameters or return types for methods used as tools:
+以下类型目前不支持作为方法参数或返回类型：
 
 - `Optional`
-- Asynchronous types (e.g. `CompletableFuture`, `Future`)
-- Reactive types (e.g. `Flow`, `Mono`, `Flux`)
-- Functional types (e.g. `Function`, `Supplier`, `Consumer`).
+- 异步类型（例如 `CompletableFuture`、`Future`）
+- 反应类型（例如 `Flow`、`Mono`、`Flux`）
+- 功能类型（例如 `Function`、`Supplier`、`Consumer`）。
 
-Functional types are supported using the function-based tool specification approach. See xref:_functions_as_tools[] for more details.
+功能类型支持使用基于函数的工具规范方法。有关详细信息，请参见 xref:_functions_as_tools[]。
 
-== Functions as Tools
+== 函数作为工具
 
-Spring AI provides built-in support for specifying tools from functions, either programmatically using the low-level `FunctionToolCallback` implementation or dynamically as `@Bean`(s) resolved at runtime.
+Spring AI 提供了内置支持，用于从函数指定工具，无论是通过低级 `FunctionToolCallback` 实现程序化还是动态地作为 `@Bean`(s) 在运行时解析。
 
-=== Programmatic Specification: `FunctionToolCallback`
+=== 编程式规范：`FunctionToolCallback`
 
-You can turn a functional type (`Function`, `Supplier`, `Consumer`, or `BiFunction`) into a tool by building a `FunctionToolCallback` programmatically.
+你可以通过构建低级 `FunctionToolCallback` 程序化来将功能类型（`Function`、`Supplier`、`Consumer` 或 `BiFunction`）转换为工具。
 
 [source,java]
 ----
@@ -479,19 +479,19 @@ public record WeatherRequest(String location, Unit unit) {}
 public record WeatherResponse(double temp, Unit unit) {}
 ----
 
-The `FunctionToolCallback.Builder` allows you to build a `FunctionToolCallback` instance and provide key information about the tool:
+`FunctionToolCallback.Builder` 允许你构建 `FunctionToolCallback` 实例并提供有关工具的关键信息：
 
-- `name`: The name of the tool. AI models use this name to identify the tool when calling it. Therefore, it's not allowed to have two tools with the same name in the same context. The name must be unique across all the tools available to the model for a specific chat request. Required.
-- `toolFunction`: The functional object that represents the tool method (`Function`, `Supplier`, `Consumer`, or `BiFunction`). Required.
-- `description`: The description for the tool, which can be used by the model to understand when and how to call the tool. If not provided, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
-- `inputType`: The type of the function input. Required.
-- `inputSchema`: The JSON schema for the input parameters of the tool. If not provided, the schema will be generated automatically based on the `inputType`. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
-- `toolMetadata`: The `ToolMetadata` instance that defines additional settings such as whether the result should be returned directly to the client, and the result converter to use. You can build it using the `ToolMetadata.Builder` class.
-- `toolCallResultConverter`: The `ToolCallResultConverter` instance to use for converting the result of a tool call to a `String` object to send back to the AI model. If not provided, the default converter will be used (`DefaultToolCallResultConverter`).
+- `name`：工具的名称。AI 模型在调用工具时使用此名称来识别工具。因此，不允许在同一上下文中有两个具有相同名称的工具。该名称在特定聊天请求中模型可用的所有工具中必须是唯一的。
+- `toolFunction`：表示工具方法（`Function`、`Supplier`、`Consumer` 或 `BiFunction`）的功能对象。必需。
+- `description`：工具的描述，模型可以使用它来理解何时以及如何调用工具。如果未提供，将使用方法名称作为工具描述。但是，强烈建议提供详细描述，因为这对于模型理解工具的目的和使用方式至关重要。未能提供好的描述可能导致模型在应该使用时没有使用工具，或者使用不当。
+- `inputType`：函数输入的类型。必需。
+- `inputSchema`：工具的输入参数的 JSON 架构。如果未提供，将根据 `inputType` 自动生成架构。可以使用 `@ToolParam` 注解来提供有关输入参数的额外信息，例如描述或参数是必需还是可选的。默认情况下，所有输入参数都被视为必需的。有关详细信息，请参见 xref:_json_schema[]。
+- `toolMetadata`：定义附加设置的 `ToolMetadata` 实例，例如结果是否应该直接返回给客户端或传回给模型，以及要使用的结果转换器。你可以使用 `ToolMetadata.Builder` 类来构建它。
+- `toolCallResultConverter`：用于将工具调用结果转换为要发送回 AI 模型的 `String` 对象的 `ToolCallResultConverter` 实例。如果未提供，将使用默认转换器（`DefaultToolCallResultConverter`）。
 
-The `ToolMetadata.Builder` allows you to build a `ToolMetadata` instance and define additional settings for the tool:
+`ToolMetadata.Builder` 允许你构建 `ToolMetadata` 实例并定义工具的附加设置：
 
-- `returnDirect`: Whether the tool result should be returned directly to the client or passed back to the model. See xref:_return_direct[] for more details.
+- `returnDirect`：结果是否应该直接返回给客户端或传回给模型。有关详细信息，请参见 xref:_return_direct[]。
 
 [source,java]
 ----
@@ -502,13 +502,13 @@ ToolCallback toolCallback = FunctionToolCallback
     .build();
 ----
 
-The function inputs and outputs can be either `Void` or POJOs. The input and output POJOs must be serializable, as the result will be serialized and sent back to the model. The function as well as the input and output types must be public.
+函数输入和输出可以是 `Void` 或 POJO。输入和输出 POJO 必须是可序列化的，因为结果将被序列化并发送回模型。函数以及输入和输出类型必须是公共的。
 
-NOTE: Some types are not supported. See xref:_function_tool_limitations[] for more details.
+注意：某些类型不受支持。有关详细信息，请参见 xref:_function_tool_limitations[]。
 
-==== Adding Tools to `ChatClient`
+==== 向 `ChatClient` 添加工具
 
-When using the programmatic specification approach, you can pass the `FunctionToolCallback` instance to the `tools()` method of `ChatClient`. The tool will only be available for the specific chat request it's added to.
+使用编程式规范方法时，你可以通过将 `FunctionToolCallback` 实例传递给 `tools()` 方法来向 `ChatClient` 添加工具。该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -520,12 +520,12 @@ ChatClient.create(chatModel)
     .content();
 ----
 
-==== Adding Default Tools to `ChatClient`
+==== 向 `ChatClient` 添加默认工具
 
-When using the programmatic specification approach, you can add default tools to a `ChatClient.Builder` by passing the `FunctionToolCallback` instance to the `defaultTools()` method.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用编程式规范方法时，你可以通过将 `FunctionToolCallback` 实例传递给 `defaultTools()` 方法来向 `ChatClient.Builder` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在所有由同一 `ChatClient.Builder` 构建的所有 `ChatClient` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -536,9 +536,9 @@ ChatClient chatClient = ChatClient.builder(chatModel)
     .build();
 ----
 
-==== Adding Tools to `ChatModel`
+==== 向 `ChatModel` 添加工具
 
-When using the programmatic specification approach, you can pass the `FunctionToolCallback` instance to the `toolCallbacks()` method of `ToolCallingChatOptions`. The tool will only be available for the specific chat request it's added to.
+使用编程式规范方法时，你可以通过将 `FunctionToolCallback` 实例传递给用于调用 `ChatModel` 的 `ToolCallingChatOptions` 的 `toolCallbacks()` 方法来向 `ChatModel` 添加工具。该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -551,12 +551,12 @@ Prompt prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions
 chatModel.call(prompt);
 ----
 
-==== Adding Default Tools to `ChatModel`
+==== 向 `ChatModel` 添加默认工具
 
-When using the programmatic specification approach, you can add default tools to a `ChatModel` at construction time by passing the `FunctionToolCallback` instance to the `toolCallbacks()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用编程式规范方法时，你可以通过将 `FunctionToolCallback` 实例传递给用于创建 `ChatModel` 的 `ToolCallingChatOptions` 实例的 `toolCallbacks()` 方法来向 `ChatModel` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在该 `ChatModel` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -569,9 +569,9 @@ ChatModel chatModel = OllamaChatModel.builder()
     .build();
 ----
 
-=== Dynamic Specification: `@Bean`
+=== 动态规范：`@Bean`
 
-Instead of specifying tools programmatically, you can define tools as Spring beans and let Spring AI resolve them dynamically at runtime using the `ToolCallbackResolver` interface (via the `SpringBeanToolCallbackResolver` implementation). This option gives you the possibility to use any `Function`, `Supplier`, `Consumer`, or `BiFunction` bean as a tool. The bean name will be used as the tool name, and the `@Description` annotation from Spring Framework can be used to provide a description for the tool, used by the model to understand when and how to call the tool. If you don't provide a description, the method name will be used as the tool description. However, it's strongly recommended to provide a detailed description because that's paramount for the model to understand the tool's purpose and how to use it. Failing in providing a good description can lead to the model not using the tool when it should or using it incorrectly.
+与其通过编程方式指定工具，不如将工具定义为 Spring beans，并让 Spring AI 在运行时使用 `ToolCallbackResolver` 接口（通过 `SpringBeanToolCallbackResolver` 实现）解析它们。此选项允许你将任何 `Function`、`Supplier`、`Consumer` 或 `BiFunction` bean 用作工具。bean 名称将用作工具名称，Spring Framework 的 `@Description` 注解可以用于提供工具描述，模型可以使用它来理解何时以及如何调用工具。如果你不提供描述，方法名称将用作工具描述。但是，强烈建议提供详细描述，因为这对于模型理解工具的目的和使用方式至关重要。未能提供好的描述可能导致模型在应该使用时没有使用工具，或者使用不当。
 
 [source,java]
 ----
@@ -589,16 +589,16 @@ class WeatherTools {
 }
 ----
 
-NOTE: Some types are not supported. See xref:_function_tool_limitations[] for more details.
+注意：某些类型不受支持。有关详细信息，请参见 xref:_function_tool_limitations[]。
 
-The JSON schema for the input parameters of the tool will be generated automatically. You can use the `@ToolParam` annotation to provide additional information about the input parameters, such as a description or whether the parameter is required or optional. By default, all input parameters are considered required. See xref:_json_schema[] for more details.
+工具的输入参数的 JSON 架构将自动生成。可以使用 `@ToolParam` 注解来提供有关输入参数的额外信息，例如描述或参数是必需还是可选的。默认情况下，所有输入参数都被视为必需的。有关详细信息，请参见 xref:_json_schema[]。
 
 [source,java]
 ----
 record WeatherRequest(@ToolParam(description = "The name of a city or a country") String location, Unit unit) {}
 ----
 
-This tool specification approach has the drawback of not guaranteeing type safety, as the tool resolution is done at runtime. To mitigate this, you can specify the tool name explicitly using the `@Bean` annotation and storing the value in a constant, so that you can use it in a chat request instead of hard-coding the tool name.
+此工具规范方法的缺点是，工具解析是运行时完成的，无法保证类型安全。为了减轻这一点，你可以通过将工具名称明确指定为 `@Bean` 注解并存储在常量中，以便在聊天请求中使用，而不是硬编码工具名称。
 
 [source,java]
 ----
@@ -616,10 +616,10 @@ class WeatherTools {
 }
 ----
 
-==== Adding Tools to `ChatClient`
+==== 向 `ChatClient` 添加工具
 
-When using the dynamic specification approach, you can pass the tool name (i.e. the function bean name) to the `tools()` method of `ChatClient`.
-The tool will only be available for the specific chat request it's added to.
+使用动态规范方法时，你可以通过将工具名称（即函数 bean 名称）传递给 `tools()` 方法来向 `ChatClient` 添加工具。
+该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -630,12 +630,12 @@ ChatClient.create(chatModel)
     .content();
 ----
 
-==== Adding Default Tools to `ChatClient`
+==== 向 `ChatClient` 添加默认工具
 
-When using the dynamic specification approach, you can add default tools to a `ChatClient.Builder` by passing the tool name to the `defaultTools()` method.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用动态规范方法时，你可以通过将工具名称传递给 `defaultTools()` 方法来向 `ChatClient.Builder` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by all the `ChatClient` instances built from the same `ChatClient.Builder`. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在所有由同一 `ChatClient.Builder` 构建的所有 `ChatClient` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -645,9 +645,9 @@ ChatClient chatClient = ChatClient.builder(chatModel)
     .build();
 ----
 
-==== Adding Tools to `ChatModel`
+==== 向 `ChatModel` 添加工具
 
-When using the dynamic specification approach, you can pass the tool name to the `toolNames()` method of the `ToolCallingChatOptions` you use to call the `ChatModel`. The tool will only be available for the specific chat request it's added to.
+使用动态规范方法时，你可以通过将工具名称传递给用于调用 `ChatModel` 的 `ToolCallingChatOptions` 的 `toolNames()` 方法来向 `ChatModel` 添加工具。该工具仅对添加它们的特定聊天请求可用。
 
 [source,java]
 ----
@@ -659,12 +659,12 @@ Prompt prompt = new Prompt("What's the weather like in Copenhagen?", chatOptions
 chatModel.call(prompt);
 ----
 
-==== Adding Default Tools to `ChatModel`
+==== 向 `ChatModel` 添加默认工具
 
-When using the dynamic specification approach, you can add default tools to `ChatModel` at construction time by passing the tool name to the `toolNames()` method of the `ToolCallingChatOptions` instance used to create the `ChatModel`.
-If both default and runtime tools are provided, the runtime tools will completely override the default tools.
+使用动态规范方法时，你可以通过将工具名称传递给用于创建 `ChatModel` 的 `ToolCallingChatOptions` 实例的 `toolNames()` 方法来向 `ChatModel` 添加默认工具。
+如果同时提供了默认工具和运行时工具，运行时工具将完全覆盖默认工具。
 
-WARNING: Default tools are shared across all the chat requests performed by that `ChatModel` instance. They are useful for tools that are commonly used across different chat requests, but they can also be dangerous if not used carefully, risking to make them available when they shouldn't.
+警告：默认工具在该 `ChatModel` 实例执行的所有聊天请求之间共享。它们对于在不同聊天请求之间常用的工具很有用，但如果使用不当，也可能很危险，可能会在不应该时使它们可用。
 
 [source,java]
 ----
@@ -676,88 +676,88 @@ ChatModel chatModel = OllamaChatModel.builder()
     .build();
 ----
 
-=== Function Tool Limitations
+=== 函数工具限制
 
-The following types are not currently supported as input or output types for functions used as tools:
+以下类型目前不支持作为函数输入或输出类型：
 
-- Primitive types
+- 基本类型
 - `Optional`
-- Collection types (e.g. `List`, `Map`, `Array`, `Set`) 
-- Asynchronous types (e.g. `CompletableFuture`, `Future`)
-- Reactive types (e.g. `Flow`, `Mono`, `Flux`).
+- 集合类型（例如 `List`、`Map`、`Array`、`Set`）
+- 异步类型（例如 `CompletableFuture`、`Future`）
+- 反应类型（例如 `Flow`、`Mono`、`Flux`）。
 
-Primitive types and collections are supported using the method-based tool specification approach. See xref:_methods_as_tools[] for more details.
+基本类型和集合支持使用方法基于工具规范方法。有关详细信息，请参见 xref:_methods_as_tools[]。
 
-== Tool Specification
+== 工具规范
 
-In Spring AI, tools are modeled via the `ToolCallback` interface. In the previous sections, we've seen how to define tools from methods and functions using the built-in support provided by Spring AI (see xref:_methods_as_tools[] and xref:_functions_as_tools[]). This section will dive deeper into the tool specification and how to customize and extend it to support more use cases.
+在 Spring AI 中，工具通过 `ToolCallback` 接口建模。在前面的部分中，我们已经看到了如何使用 Spring AI 提供的内置支持从方法和函数指定工具（请参见 xref:_methods_as_tools[] 和 xref:_functions_as_tools[]）。本节将深入探讨工具规范，以及如何自定义和扩展它以支持更多用例。
 
 === Tool Callback
 
-The `ToolCallback` interface provides a way to define a tool that can be called by the AI model, including both definition and execution logic. It's the main interface to implement when you want to define a tool from scratch. For example, you can define a `ToolCallback` from an MCP Client (using the Model Context Protocol) or a `ChatClient` (to build a modular agentic application).
+`ToolCallback` 接口提供了一种方法来定义可以由 AI 模型调用的工具，包括定义和执行逻辑。它是当你想要从头定义工具时需要实现的主要接口。例如，你可以通过 MCP Client（使用模型上下文协议）或 `ChatClient`（构建模块代理应用程序）定义 `ToolCallback`。
 
-The interface provides the following methods:
+该接口提供了以下方法：
 
 [source,java]
 ----
 public interface ToolCallback {
 
 	/**
-	 * Definition used by the AI model to determine when and how to call the tool.
+	 * 用于确定 AI 模型何时以及如何调用工具的定义。
 	 */
 	ToolDefinition getToolDefinition();
 
 	/**
-	 * Metadata providing additional information on how to handle the tool.
+	 * 提供有关如何处理工具的附加信息。
 	 */
 	ToolMetadata getToolMetadata();
 
     /**
-	 * Execute tool with the given input and return the result to send back to the AI model.
+	 * 执行工具并返回结果以发送回 AI 模型。
 	 */
 	String call(String toolInput);
 
     /**
-	 * Execute tool with the given input and context, and return the result to send back to the AI model.
+	 * 执行工具并返回结果以发送回 AI 模型。
 	 */
 	String call(String toolInput, ToolContext tooContext);
 
 }
 ----
 
-Spring AI provides built-in implementations for tool methods (`MethodToolCallback`) and tool functions (`FunctionToolCallback`).
+Spring AI 提供了内置实现工具方法（`MethodToolCallback`）和工具函数（`FunctionToolCallback`）。
 
 === Tool Definition
 
-The `ToolDefinition` interface provides the required information for the AI model to know about the availability of the tool, including the tool name, description, and input schema. Each `ToolCallback` implementation must provide a `ToolDefinition` instance to define the tool.
+`ToolDefinition` 接口提供了 AI 模型了解工具可用性的必要信息，包括工具名称、描述和输入架构。每个 `ToolCallback` 实现必须提供 `ToolDefinition` 实例来定义工具。
 
-The interface provides the following methods:
+该接口提供了以下方法：
 
 [source,java]
 ----
 public interface ToolDefinition {
 
 	/**
-	 * The tool name. Unique within the tool set provided to a model.
+	 * 工具名称。在提供给模型的工具集中是唯一的。
 	 */
 	String name();
 
 	/**
-	 * The tool description, used by the AI model to determine what the tool does.
+	 * 用于确定 AI 模型工具的作用的工具描述。
 	 */
 	String description();
 
 	/**
-	 * The schema of the parameters used to call the tool.
+	 * 调用工具时使用的参数架构。
 	 */
 	String inputSchema();
 
 }
 ----
 
-NOTE: See xref:_json_schema[] for more details on the input schema.
+注意：有关输入架构的更多详细信息，请参见 xref:_json_schema[]。
 
-The `ToolDefinition.Builder` lets you build a `ToolDefinition` instance using the default implementation (`DefaultToolDefinition`).
+`ToolDefinition.Builder` 允许你使用默认实现（`DefaultToolDefinition`）构建 `ToolDefinition` 实例。
 
 [source,java]
 ----
@@ -784,7 +784,7 @@ ToolDefinition toolDefinition = ToolDefinition.builder()
 
 ==== Method Tool Definition
 
-When building tools from a method, the `ToolDefinition` is automatically generated for you. In case you prefer to generate the `ToolDefinition` yourself, you can use this convenient builder.
+当从方法构建工具时，`ToolDefinition` 是自动生成的。如果你希望自己生成 `ToolDefinition`，可以使用此方便的构建器。
 
 [source,java]
 ----
@@ -792,11 +792,11 @@ Method method = ReflectionUtils.findMethod(DateTimeTools.class, "getCurrentDateT
 ToolDefinition toolDefinition = ToolDefinition.from(method);
 ----
 
-The `ToolDefinition` generated from a method includes the method name as the tool name, the method name as the tool description, and the JSON schema of the method input parameters. If the method is annotated with `@Tool`, the tool name and description will be taken from the annotation, if set.
+从方法生成的 `ToolDefinition` 包括方法名称作为工具名称、方法名称作为工具描述以及方法输入参数的 JSON 架构。如果方法被注解为 `@Tool`，工具名称和描述将从注解中获取。
 
-NOTE: See xref:_methods_as_tools[] for more details.
+注意：有关详细信息，请参见 xref:_methods_as_tools[]。
 
-If you'd rather provide some or all of the attributes explicitly, you can use the `ToolDefinition.Builder` to build a custom `ToolDefinition` instance.
+如果你宁愿提供一些或所有属性显式地，你可以使用 `ToolDefinition.Builder` 来构建自定义 `ToolDefinition` 实例。
 
 [source,java]
 ----
@@ -810,28 +810,28 @@ ToolDefinition toolDefinition = ToolDefinition.builder(method)
 
 ==== Function Tool Definition
 
-When building tools from a function, the `ToolDefinition` is automatically generated for you. When you use the `FunctionToolCallback.Builder` to build a `FunctionToolCallback` instance, you can provide the tool name, description, and input schema that will be used to generate the `ToolDefinition`. See xref:_functions_as_tools[] for more details.
+当从函数构建工具时，`ToolDefinition` 是自动生成的。当你使用 `FunctionToolCallback.Builder` 来构建 `FunctionToolCallback` 实例时，你可以提供工具名称、描述和输入架构，这些架构将用于生成 `ToolDefinition`。有关详细信息，请参见 xref:_functions_as_tools[]。
 
 === JSON Schema
 
-When providing a tool to the AI model, the model needs to know the schema of the input type for calling the tool. The schema is used to understand how to call the tool and prepare the tool request. Spring AI provides built-in support for generating the JSON Schema of the input type for a tool via the `JsonSchemaGenerator` class. The schema is provided as part of the `ToolDefinition`.
+提供工具给 AI 模型时，模型需要知道工具的输入类型架构，以便理解如何调用工具和准备工具请求。Spring AI 提供了内置支持，用于通过 `JsonSchemaGenerator` 类生成工具的输入类型架构。架构作为 `ToolDefinition` 的一部分提供。
 
-NOTE: See xref:_tool_definition[] for more details on the `ToolDefinition` and how to pass the input schema to it.
+注意：有关 `ToolDefinition` 和如何传递输入架构的更多详细信息，请参见 xref:_tool_definition[]。
 
-The `JsonSchemaGenerator` class is used under the hood to generate the JSON schema for the input parameters of a method or a function, using any of the strategies described in xref:_methods_as_tools[] and xref:_functions_as_tools[]. The JSON schema generation logic supports a series of annotations that you can use on the input parameters for methods and functions to customize the resulting schema.
+`JsonSchemaGenerator` 类用于生成方法或函数的输入参数的 JSON 架构，使用 xref:_methods_as_tools[] 和 xref:_functions_as_tools[] 中描述的策略系列。JSON 架构生成逻辑支持一系列注解，你可以将这些注解用于方法和函数的输入参数，以自定义生成的架构。
 
-This section describes two main options you can customize when generating the JSON schema for the input parameters of a tool: description and required status.
+本节描述了两个主要选项，你可以自定义这些选项，以生成工具输入参数的 JSON 架构：描述和必需状态。
 
 ==== Description
 
-Besides providing a description for the tool itself, you can also provide a description for the input parameters of a tool. The description can be used to provide key information about the input parameters, such as what format the parameter should be in, what values are allowed, and so on. This is useful to help the model understand the input schema and how to use it. Spring AI provides built-in support for generating the description for an input parameter using one of the following annotations:
+除了提供工具本身的描述外，还可以为工具的输入参数提供描述。描述可以用于提供有关输入参数的关键信息，例如参数应该采用什么格式、允许什么值等。这对于帮助模型理解输入架构和如何使用它非常有用。Spring AI 提供了内置支持，用于使用以下注解之一生成输入参数描述：
 
-- `@ToolParam(description = "...")` from Spring AI
-- `@JsonClassDescription(description = "...")` from Jackson
-- `@JsonPropertyDescription(description = "...")` from Jackson
-- `@Schema(description = "...")` from Swagger.
+- Spring AI 的 `@ToolParam(description = "...")`
+- Jackson 的 `@JsonClassDescription(description = "...")`
+- Jackson 的 `@JsonPropertyDescription(description = "...")`
+- Swagger 的 `@Schema(description = "...")`。
 
-This approach works for both methods and functions, and you can use it recursively for nested types.
+此方法适用于方法和函数，你可以递归使用它来嵌套类型。
 
 [source,java]
 ----
@@ -854,14 +854,14 @@ class DateTimeTools {
 
 ==== Required/Optional
 
-By default, each input parameter is considered required, which forces the AI model to provide a value for it when calling the tool. However, you can make an input parameter optional by using one of the following annotations, in this order of precedence:
+默认情况下，每个输入参数都被视为必需的，这迫使 AI 模型在调用工具时为其提供值。但是，你可以使用以下注解之一来使输入参数可选，按此顺序优先：
 
-- `@ToolParam(required = false)` from Spring AI
-- `@JsonProperty(required = false)` from Jackson
-- `@Schema(required = false)` from Swagger
-- `@Nullable` from Spring Framework.
+- Spring AI 的 `@ToolParam(required = false)`
+- Jackson 的 `@JsonProperty(required = false)`
+- Swagger 的 `@Schema(required = false)`
+- Spring Framework 的 `@Nullable`。
 
-This approach works for both methods and functions, and you can use it recursively for nested types.
+此方法适用于方法和函数，你可以递归使用它来嵌套类型。
 
 [source,java]
 ----
@@ -875,13 +875,13 @@ class CustomerTools {
 }
 ----
 
-WARNING: Defining the correct required status for the input parameter is crucial to mitigate the risk of hallucinations and ensure the model provides the right input when calling the tool. In the previous example, the `email` parameter is optional, which means the model can call the tool without providing a value for it. If the parameter was required, the model would have to provide a value for it when calling the tool. And if no value existed, the model would probably make one up, leading to hallucinations.
+警告：为输入参数定义正确的必需状态对于防止幻觉和确保模型在调用工具时提供正确的输入至关重要。在之前的示例中，`email` 参数是可选的，这意味着模型可以调用工具而不提供值。如果参数是必需的，模型必须提供值。如果值不存在，模型可能会制作一个，导致幻觉。
 
 === Result Conversion
 
-The result of a tool call is serialized using a `ToolCallResultConverter` and then sent back to the AI model. The `ToolCallResultConverter` interface provides a way to convert the result of a tool call to a `String` object.
+工具调用的结果使用 `ToolCallResultConverter` 序列化并发送回 AI 模型。`ToolCallResultConverter` 接口提供了一种方法，用于将工具调用结果转换为 `String` 对象。
 
-The interface provides the following method:
+该接口提供了以下方法：
 
 [source,java]
 ----
@@ -889,21 +889,20 @@ The interface provides the following method:
 public interface ToolCallResultConverter {
 
 	/**
-	 * Given an Object returned by a tool, convert it to a String compatible with the
-	 * given class type.
+	 * 给定一个由工具返回的对象，将其转换为与给定类类型兼容的字符串。
 	 */
 	String convert(@Nullable Object result, @Nullable Type returnType);
 
 }
 ----
 
-The result must be a serializable type. By default, the result is serialized to JSON using Jackson (`DefaultToolCallResultConverter`), but you can customize the serialization process by providing your own `ToolCallResultConverter` implementation.
+结果必须是可序列化类型。默认情况下，结果序列化为 JSON 使用 Jackson（`DefaultToolCallResultConverter`），但你可以自定义序列化过程，通过提供自己的 `ToolCallResultConverter` 实现。
 
-Spring AI relies on the `ToolCallResultConverter` in both method and function tools.
+Spring AI 在方法和函数工具中依赖于 `ToolCallResultConverter`。
 
 ==== Method Tool Call Result Conversion
 
-When building tools from a method with the declarative approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `@Tool` annotation.
+当使用声明式方法构建工具时，你可以通过设置 `resultConverter()` 属性来为工具提供自定义 `ToolCallResultConverter`。
 
 [source,java]
 ----
@@ -917,21 +916,21 @@ class CustomerTools {
 }
 ----
 
-If using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `MethodToolCallback.Builder`.
+如果使用编程方法，你可以通过设置 `resultConverter()` 属性来为工具提供自定义 `ToolCallResultConverter`。
 
-See xref:_methods_as_tools[] for more details.
+有关详细信息，请参见 xref:_methods_as_tools[]。
 
 ==== Function Tool Call Result Conversion
 
-When building tools from a function using the programmatic approach, you can provide a custom `ToolCallResultConverter` to use for the tool by setting the `resultConverter()` attribute of the `FunctionToolCallback.Builder`.
+当使用编程方法构建工具时，你可以通过设置 `resultConverter()` 属性来为工具提供自定义 `ToolCallResultConverter`。
 
-See xref:_functions_as_tools[] for more details.
+有关详细信息，请参见 xref:_functions_as_tools[]。
 
 === Tool Context
 
-Spring AI supports passing additional contextual information to tools through the `ToolContext` API. This feature allows you to provide extra, user-provided data that can be used within the tool execution along with the tool arguments passed by the AI model. 
+Spring AI 支持通过 `ToolContext` API 将附加上下文信息传递给工具。此功能允许你提供额外的、用户提供的数据，这些数据可以在工具执行过程中与工具参数传递的 AI 模型一起使用。
 
-image::tools/tool-context.jpg[Providing additional contextual info to tools, width=700, align="center"]
+image::tools/tool-context.jpg[提供附加上下文信息给工具, width=700, align="center"]
 
 [source,java]
 ----
@@ -945,7 +944,7 @@ class CustomerTools {
 }
 ----
 
-The `ToolContext` is populated with the data provided by the user when invoking `ChatClient`.
+`ToolContext` 由用户在调用 `ChatClient` 时填充。
 
 [source,java]
 ----
@@ -961,9 +960,9 @@ String response = ChatClient.create(chatModel)
 System.out.println(response);
 ----
 
-NOTE: None of the data provided in the `ToolContext` is sent to the AI model.
+注意：在 `ToolContext` 中提供的任何数据都不会发送给 AI 模型。
 
-Similarly, you can define tool context data when invoking the `ChatModel` directly.
+同样，你可以在调用 `ChatModel` 时定义工具上下文数据。
 
 [source,java]
 ----
@@ -977,32 +976,32 @@ Prompt prompt = new Prompt("Tell me more about the customer with ID 42", chatOpt
 chatModel.call(prompt);
 ----
 
-If the `toolContext` option is set both in the default options and in the runtime options, the resulting `ToolContext` will be the merge of the two,
-where the runtime options take precedence over the default options.
+如果 `toolContext` 选项在默认选项和运行时选项中都设置，则生成的 `ToolContext` 将是两个的合并，
+其中运行时选项优先于默认选项。
 
 === Return Direct
 
-By default, the result of a tool call is sent back to the model as a response. Then, the model can use the result to continue the conversation.
+默认情况下，工具调用结果作为响应发送回模型。然后，模型可以使用结果继续对话。
 
-There are cases where you'd rather return the result directly to the caller instead of sending it back to the model. For example, if you build an agent that relies on a RAG tool, you might want to return the result directly to the caller instead of sending it back to the model for unnecessary post-processing. Or perhaps you have certain tools that should end the reasoning loop of the agent.
+有些情况下，你宁愿直接将结果返回给调用者，而不是发送回模型。例如，如果你构建一个依赖于 RAG 工具的代理，你可能希望直接将结果返回给调用者，而不是发送回模型进行不必要的后处理。或者也许你有某些工具应该结束代理的推理循环。
 
-Each `ToolCallback` implementation can define whether the result of a tool call should be returned directly to the caller or sent back to the model. By default, the result is sent back to the model. But you can change this behavior per tool.
+每个 `ToolCallback` 实现可以定义工具调用结果是否应该直接返回给调用者或发送回模型。默认情况下，结果发送回模型。但你可以更改此行为每个工具。
 
-The `ToolCallingManager`, responsible for managing the tool execution lifecycle, is in charge of handling the `returnDirect` attribute associated with the tool. If the attribute is set to `true`, the result of the tool call is returned directly to the caller. Otherwise, the result is sent back to the model.
+`ToolCallingManager`，负责管理工具执行生命周期，负责处理与工具相关的 `returnDirect` 属性。如果属性设置为 `true`，则工具调用结果直接返回给调用者。否则，结果发送回模型。
 
-NOTE: If multiple tool calls are requested at once, the `returnDirect` attribute must be set to `true` for all the tools to return the results directly to the caller. Otherwise, the results will be sent back to the model.
+注意：如果一次请求多个工具调用，则必须将 `returnDirect` 属性设置为 `true` 才能返回结果给调用者。否则，结果将发送回模型。
 
-image::tools/return-direct.jpg[Returning tool call results directly to the caller, width=700, align="center"]
+image::tools/return-direct.jpg[直接返回工具调用结果给调用者, width=700, align="center"]
 
-1. When we want to make a tool available to the model, we include its definition in the chat request. If we want the result of the tool execution to be returned directly to the caller, we set the `returnDirect` attribute to `true`.
-2. When the model decides to call a tool, it sends a response with the tool name and the input parameters modeled after the defined schema.
-3. The application is responsible for using the tool name to identify and execute the tool with the provided input parameters.
-4. The result of the tool call is processed by the application.
-5. The application sends the tool call result directly to the caller, instead of sending it back to the model.
+1. 当我们想要使工具对模型可用时，我们在聊天请求中包含其定义。如果我们要工具执行结果直接返回给调用者，我们将 `returnDirect` 属性设置为 `true`。
+2. 当模型决定调用工具时，它会发送一个包含工具名称和按照定义架构建模的输入参数的响应。
+3. 应用程序负责使用工具名称来识别和执行具有提供的输入参数的工具。
+4. 工具调用的结果由应用程序处理。
+5. 应用程序将工具调用结果直接发送给调用者，而不是发送回模型。
 
 ==== Method Return Direct
 
-When building tools from a method with the declarative approach, you can mark a tool to return the result directly to the caller by setting the `returnDirect` attribute of the `@Tool` annotation to `true`.
+当使用声明式方法构建工具时，你可以通过设置 `returnDirect` 属性来将工具标记为直接返回结果给调用者。
 
 [source,java]
 ----
@@ -1016,7 +1015,7 @@ class CustomerTools {
 }
 ----
 
-If using the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to the `MethodToolCallback.Builder`.
+如果使用编程方法，你可以通过设置 `returnDirect` 属性到 `ToolMetadata` 接口并传递给 `MethodToolCallback.Builder`。
 
 [source,java]
 ----
@@ -1025,11 +1024,11 @@ ToolMetadata toolMetadata = ToolMetadata.builder()
     .build();
 ----
 
-See xref:_methods_as_tools[] for more details.
+有关详细信息，请参见 xref:_methods_as_tools[]。
 
 ==== Function Return Direct
 
-When building tools from a function with the programmatic approach, you can set the `returnDirect` attribute via the `ToolMetadata` interface and pass it to the `FunctionToolCallback.Builder`.
+当使用编程方法构建工具时，你可以通过设置 `returnDirect` 属性到 `ToolMetadata` 接口并传递给 `FunctionToolCallback.Builder`。
 
 [source,java]
 ----
@@ -1038,30 +1037,30 @@ ToolMetadata toolMetadata = ToolMetadata.builder()
     .build();
 ----
 
-See xref:_functions_as_tools[] for more details.
+有关详细信息，请参见 xref:_functions_as_tools[]。
 
-== Tool Execution
+== 工具执行
 
-The tool execution is the process of calling the tool with the provided input arguments and returning the result. The tool execution is handled by the `ToolCallingManager` interface, which is responsible for managing the tool execution lifecycle.
+工具执行是调用工具并返回结果的过程。工具执行由 `ToolCallingManager` 接口处理，该接口负责管理工具执行生命周期。
 
 [source,java]
 ----
 public interface ToolCallingManager {
 
 	/**
-	 * Resolve the tool definitions from the model's tool calling options.
+	 * 解析模型工具调用选项中的工具定义。
 	 */
 	List<ToolDefinition> resolveToolDefinitions(ToolCallingChatOptions chatOptions);
 
 	/**
-	 * Execute the tool calls requested by the model.
+	 * 执行模型请求的工具调用。
 	 */
 	ToolExecutionResult executeToolCalls(Prompt prompt, ChatResponse chatResponse);
 
 }
 ----
 
-If you're using any of the Spring AI Spring Boot Starters, `DefaultToolCallingManager` is the autoconfigured implementation of the `ToolCallingManager` interface. You can customize the tool execution behavior by providing your own `ToolCallingManager` bean.
+如果你使用任何 Spring AI Spring Boot Starters，`DefaultToolCallingManager` 是 `ToolCallingManager` 接口的自动配置实现。你可以通过提供自己的 `ToolCallingManager` bean 来自定义工具执行行为。
 
 [source,java]
 ----
@@ -1071,26 +1070,24 @@ ToolCallingManager toolCallingManager() {
 }
 ----
 
-By default, Spring AI manages the tool execution lifecycle transparently for you from within each `ChatModel` implementation. But you have the possibility to opt-out of this behavior and control the tool execution yourself. This section describes these two scenarios.
+默认情况下，Spring AI 从每个 `ChatModel` 实现透明地管理工具执行生命周期。但你可以选择退出此行为并控制工具执行。本节描述了这两种情况。
 
 === Framework-Controlled Tool Execution
 
-When using the default behavior, Spring AI will automatically intercept any tool call request from the model, call the tool and return the result to the model. All of this is done transparently for you by each `ChatModel` implementation using a `ToolCallingManager`.
+当使用默认行为时，Spring AI 将自动拦截任何工具调用请求从模型，调用工具并返回结果到模型。所有这些都透明地由每个 `ChatModel` 实现完成，使用 `ToolCallingManager`。
 
 image::tools/framework-manager.jpg[Framework-controlled tool execution lifecycle, width=700, align="center"]
 
-1. When we want to make a tool available to the model, we include its definition in the chat request (`Prompt`) and invoke the `ChatModel` API which sends the request to the AI model.
-2. When the model decides to call a tool, it sends a response (`ChatResponse`) with the tool name and the input parameters modeled after the defined schema.
-3. The `ChatModel` sends the tool call request to the `ToolCallingManager` API.
-4. The `ToolCallingManager` is responsible for identifying the tool to call and executing it with the provided input parameters.
-5. The result of the tool call is returned to the `ToolCallingManager`.
-6. The `ToolCallingManager` returns the tool execution result back to the `ChatModel`.
-7. The `ChatModel` sends the tool execution result back to the AI model (`ToolResponseMessage`).
-8. The AI model generates the final response using the tool call result as additional context and sends it back to the caller (`ChatResponse`) via the `ChatClient`.
+1. 当我们想要使工具对模型可用时，我们在聊天请求中包含其定义。如果我们要工具执行结果直接返回给调用者，我们将 `returnDirect` 属性设置为 `true`。
+2. 当模型决定调用工具时，它会发送一个包含工具名称和按照定义架构建模的输入参数的响应。
+3. 应用程序负责使用工具名称来识别和执行具有提供的输入参数的工具。
+4. 工具调用的结果由应用程序处理。
+5. 应用程序将工具调用结果直接发送给调用者，而不是发送回模型。
+6. 模型使用工具调用结果作为额外上下文生成最终响应并发送回调用者（`ChatResponse`）通过 `ChatClient`。
 
-WARNING: Currently, the internal messages exchanged with the model regarding the tool execution are not exposed to the user. If you need to access these messages, you should use the user-controlled tool execution approach.
+警告：目前，与模型相关的工具执行内部消息交换不会暴露给用户。如果你需要访问这些消息，你应该使用用户控制的工具执行方法。
 
-The logic determining whether a tool call is eligible for execution is handled by the `ToolExecutionEligibilityPredicate` interface. By default, the tool execution eligibility is determined by checking if the `internalToolExecutionEnabled` attribute of `ToolCallingChatOptions` is set to `true` (the default value), and if the `ChatResponse` contains any tool calls.
+工具执行资格判断逻辑由 `ToolExecutionEligibilityPredicate` 接口处理。默认情况下，工具执行资格由检查 `internalToolExecutionEnabled` 属性是否设置为 `true`（默认值），以及 `ChatResponse` 是否包含任何工具调用来确定。
 
 [source,java]
 ----
@@ -1105,15 +1102,15 @@ public class DefaultToolExecutionEligibilityPredicate implements ToolExecutionEl
 }
 ----
 
-You can provide your custom implementation of `ToolExecutionEligibilityPredicate` when creating the `ChatModel` bean.
+你可以提供自定义的 `ToolExecutionEligibilityPredicate` 实现，当你创建 `ChatModel` bean 时。
 
 === User-Controlled Tool Execution
 
-There are cases where you'd rather control the tool execution lifecycle yourself. You can do so by setting the `internalToolExecutionEnabled` attribute of `ToolCallingChatOptions` to `false`.
+有些情况下，你宁愿控制工具执行生命周期。你可以通过将 `internalToolExecutionEnabled` 属性设置为 `false` 来实现。
 
-When you invoke a `ChatModel` with this option, the tool execution will be delegated to the caller, giving you full control over the tool execution lifecycle. It's your responsibility checking for tool calls in the `ChatResponse` and executing them using the `ToolCallingManager`.
+当你使用此选项调用 `ChatModel` 时，工具执行将委托给调用者，使你完全控制工具执行生命周期。这是你的责任检查 `ChatResponse` 中的工具调用并使用 `ToolCallingManager` 执行它们。
 
-The following example demonstrates a minimal implementation of the user-controlled tool execution approach:
+以下示例演示了用户控制工具执行方法的最小实现：
 
 [source,java]
 ----
@@ -1139,9 +1136,9 @@ while (chatResponse.hasToolCalls()) {
 System.out.println(chatResponse.getResult().getOutput().getText());
 ----
 
-NOTE: When choosing the user-controlled tool execution approach, we recommend using a `ToolCallingManager` to manage the tool calling operations. This way, you can benefit from the built-in support provided by Spring AI for tool execution. However, nothing prevents you from implementing your own tool execution logic.
+注意：当选择用户控制工具执行方法时，我们建议使用 `ToolCallingManager` 来管理工具调用操作。这样，你可以受益于 Spring AI 提供的内置支持工具执行。但是，没有什么可以阻止你实现自己的工具执行逻辑。
 
-The next examples shows a minimal implementation of the user-controlled tool execution approach combined with the usage of the `ChatMemory` API:
+下一个示例显示了用户控制工具执行方法与 `ChatMemory` API 使用的最小实现相结合：
 
 [source,java]
 ----
@@ -1180,7 +1177,7 @@ ChatResponse newResponse = chatModel.call(new Prompt(chatMemory.get(conversation
 
 === Exception Handling
 
-When a tool call fails, the exception is propagated as a `ToolExecutionException` which can be caught to handle the error. A `ToolExecutionExceptionProcessor` can be used to handle a `ToolExecutionException` with two outcomes: either producing an error message to be sent back to the AI model or throwing an exception to be handled by the caller.
+当工具调用失败时，异常作为 `ToolExecutionException` 传播，可以捕获以处理错误。可以使用 `ToolExecutionExceptionProcessor` 来处理 `ToolExecutionException` 有两个结果：要么生成错误消息以发送回 AI 模型，要么抛出异常以由调用者处理。
 
 [source,java]
 ----
@@ -1188,15 +1185,14 @@ When a tool call fails, the exception is propagated as a `ToolExecutionException
 public interface ToolExecutionExceptionProcessor {
 
 	/**
-	 * Convert an exception thrown by a tool to a String that can be sent back to the AI
-	 * model or throw an exception to be handled by the caller.
+	 * 将工具抛出的异常转换为可以发送回 AI 模型的字符串，或者抛出异常以由调用者处理。
 	 */
 	String process(ToolExecutionException exception);
 
 }
 ----
 
-If you're using any of the Spring AI Spring Boot Starters, `DefaultToolExecutionExceptionProcessor` is the autoconfigured implementation of the `ToolExecutionExceptionProcessor` interface. By default, the error message is sent back to the model. The `DefaultToolExecutionExceptionProcessor` constructor lets you set the `alwaysThrow` attribute to `true` or `false`. If `true`, an exception will be thrown instead of sending an error message back to the model.
+如果你使用任何 Spring AI Spring Boot Starters，`DefaultToolExecutionExceptionProcessor` 是 `ToolExecutionExceptionProcessor` 接口的自动配置实现。默认情况下，错误消息发送回模型。`DefaultToolExecutionExceptionProcessor` 构造函数允许你将 `alwaysThrow` 属性设置为 `true` 或 `false`。如果 `true`，则抛出异常而不是发送错误消息回模型。
 
 [source,java]
 ----
@@ -1206,23 +1202,23 @@ ToolExecutionExceptionProcessor toolExecutionExceptionProcessor() {
 }
 ----
 
-NOTE: If you defined your own `ToolCallback` implementation, make sure to throw a `ToolExecutionException` when an error occurs as part of the tool execution logic in the `call()` method.
+注意：如果你定义了自己的 `ToolCallback` 实现，请在 `call()` 方法的工具执行逻辑中抛出 `ToolExecutionException` 作为工具执行逻辑的一部分。
 
-The `ToolExecutionExceptionProcessor` is used internally by the default `ToolCallingManager` (`DefaultToolCallingManager`) to handle exceptions during tool execution. See xref:_tool_execution[] for more details about the tool execution lifecycle.
+`ToolExecutionExceptionProcessor` 用于内部默认 `ToolCallingManager`（`DefaultToolCallingManager`）处理工具执行期间的异常。有关工具执行生命周期的更多详细信息，请参见 xref:_tool_execution[]。
 
-== Tool Resolution
+== 工具解析
 
-The main approach for passing tools to a model is by providing the `ToolCallback`(s) when invoking the `ChatClient` or the `ChatModel`,
-using one of the strategies described in xref:_methods_as_tools[] and xref:_functions_as_tools[].
+传递工具到模型的主要方法是通过在调用 `ChatClient` 或 `ChatModel` 时提供 `ToolCallback`(s)，
+使用 xref:_methods_as_tools[] 和 xref:_functions_as_tools[] 中描述的策略之一。
 
-However, Spring AI also supports resolving tools dynamically at runtime using the `ToolCallbackResolver` interface. 
+然而，Spring AI 也支持在运行时使用 `ToolCallbackResolver` 接口动态解析工具。
 
 [source,java]
 ----
 public interface ToolCallbackResolver {
 
 	/**
-	 * Resolve the {@link ToolCallback} for the given tool name.
+	 * 解析给定工具名称的 {@link ToolCallback}。
 	 */
 	@Nullable
 	ToolCallback resolve(String toolName);
@@ -1230,17 +1226,17 @@ public interface ToolCallbackResolver {
 }
 ----
 
-When using this approach:
+当使用此方法时：
 
-- On the client-side, you provide the tool names to the `ChatClient` or the `ChatModel` instead of the `ToolCallback`(s).
-- On the server-side, a `ToolCallbackResolver` implementation is responsible for resolving the tool names to the corresponding `ToolCallback` instances.
+- 在客户端端，你提供工具名称而不是 `ToolCallback`(s) 给 `ChatClient` 或 `ChatModel`。
+- 在服务器端，`ToolCallbackResolver` 实现负责将工具名称解析为相应的 `ToolCallback` 实例。
 
-By default, Spring AI relies on a `DelegatingToolCallbackResolver` that delegates the tool resolution to a list of `ToolCallbackResolver` instances:
+默认情况下，Spring AI 依赖于 `DelegatingToolCallbackResolver`，它将解析委托给一组 `ToolCallbackResolver` 实例：
 
-- The `SpringBeanToolCallbackResolver` resolves tools from Spring beans of type `Function`, `Supplier`, `Consumer`, or `BiFunction`. See xref:_dynamic_specification_bean[] for more details.
-- The `StaticToolCallbackResolver` resolves tools from a static list of `ToolCallback` instances. When using the Spring Boot Autoconfiguration, this resolver is automatically configured with all the beans of type `ToolCallback` defined in the application context.
+- `SpringBeanToolCallbackResolver` 解析从 Spring beans 类型为 `Function`、`Supplier`、`Consumer` 或 `BiFunction` 的工具。有关详细信息，请参见 xref:_dynamic_specification_bean[]。
+- `StaticToolCallbackResolver` 解析从静态 `ToolCallback` 实例列表中解析工具。当使用 Spring Boot Autoconfiguration 时，此解析器自动配置为应用程序上下文中所有类型为 `ToolCallback` 的 bean。
 
-If you rely on the Spring Boot Autoconfiguration, you can customize the resolution logic by providing a custom `ToolCallbackResolver` bean.
+如果你依赖 Spring Boot Autoconfiguration，你可以自定义解析逻辑，通过提供自定义 `ToolCallbackResolver` bean。
 
 [source,java]
 ----
@@ -1251,14 +1247,14 @@ ToolCallbackResolver toolCallbackResolver(List<FunctionCallback> toolCallbacks) 
 }
 ----
 
-The `ToolCallbackResolver` is used internally by the `ToolCallingManager` to resolve tools dynamically at runtime, supporting both xref:_framework_controlled_tool_execution[] and xref:_user_controlled_tool_execution[].
+`ToolCallbackResolver` 用于内部 `ToolCallingManager` 解析工具动态运行时，支持 xref:_framework_controlled_tool_execution[] 和 xref:_user_controlled_tool_execution[]。
 
 == Observability
 
-Tool calling includes observability support with spring.ai.tool observations that measure completion time and propagate tracing information. See xref:observability/index.adoc#_tool_calling[Tool Calling Observability].
+工具调用包括 spring.ai.tool 观察支持，spring.ai.tool 观察测量完成时间和传播跟踪信息。有关详细信息，请参见 xref:observability/index.adoc#_tool_calling[Tool Calling Observability]。
 
-Optionally, Spring AI can export tool call arguments and results as span attributes, disabled by default for sensitivity reasons. Details: xref:observability/index.adoc#_tool_call_arguments_and_result_data[Tool Call Arguments and Result Data].
+可选地，Spring AI 可以将工具调用参数和结果作为跨度属性导出，默认情况下为敏感原因禁用。详细信息：xref:observability/index.adoc#_tool_call_arguments_and_result_data[Tool Call Arguments and Result Data]。
 
 === Logging
 
-All the main operations of the tool calling features are logged at the `DEBUG` level. You can enable the logging by setting the log level to `DEBUG` for the `org.springframework.ai` package.
+所有主要工具调用功能操作都在 `DEBUG` 级别记录。你可以通过将日志级别设置为 `DEBUG` 来启用日志记录 `org.springframework.ai` 包。

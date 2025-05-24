@@ -1,34 +1,34 @@
 = Redis
 
-This section walks you through setting up `RedisVectorStore` to store document embeddings and perform similarity searches.
+本节将指导您如何设置 `RedisVectorStore` 来存储文档嵌入并执行相似性搜索。
 
-link:https://redis.io[Redis] is an open source (BSD licensed), in-memory data structure store used as a database, cache, message broker, and streaming engine. Redis provides data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes, and streams.
+link:https://redis.io[Redis] 是一个开源（BSD 许可）的内存数据结构存储，用作数据库、缓存、消息代理和流处理引擎。Redis 提供字符串、哈希、列表、集合、带范围查询的有序集合、位图、超日志、地理空间索引和流等数据结构。
 
-link:https://redis.io/docs/interact/search-and-query/[Redis Search and Query] extends the core features of Redis OSS and allows you to use Redis as a vector database:
+link:https://redis.io/docs/interact/search-and-query/[Redis Search and Query] 扩展了 Redis OSS 的核心功能，允许您将 Redis 用作向量数据库：
 
-* Store vectors and the associated metadata within hashes or JSON documents
-* Retrieve vectors
-* Perform vector searches
+* 在哈希或 JSON 文档中存储向量和关联的元数据
+* 检索向量
+* 执行向量搜索
 
-== Prerequisites
+== 前提条件
 
-1. A Redis Stack instance
-- https://app.redislabs.com/#/[Redis Cloud] (recommended)
-- link:https://hub.docker.com/r/redis/redis-stack[Docker] image _redis/redis-stack:latest_
+1. Redis Stack 实例
+- https://app.redislabs.com/#/[Redis Cloud]（推荐）
+- link:https://hub.docker.com/r/redis/redis-stack[Docker] 镜像 _redis/redis-stack:latest_
 
-2. `EmbeddingModel` instance to compute the document embeddings. Several options are available:
-- If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `RedisVectorStore`.
+2. `EmbeddingModel` 实例用于计算文档嵌入。有多个选项可用：
+- 如果需要，xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 的 API 密钥用于生成存储在 `RedisVectorStore` 中的嵌入。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Redis Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Redis Vector Store 提供了 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到您项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -38,7 +38,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -47,19 +47,19 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-The vector store implementation can initialize the requisite schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+向量存储实现可以为您初始化所需的模式，但您必须通过在适当的构造函数中指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+注意：这是一个重大变更！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-Please have a look at the list of <<redisvector-properties,configuration parameters>> for the vector store to learn about the default values and configuration options.
+请查看 <<redisvector-properties,配置参数>> 列表，了解向量存储的默认值和配置选项。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
-Now you can auto-wire the `RedisVectorStore` as a vector store in your application.
+现在您可以在应用程序中自动装配 `RedisVectorStore` 作为向量存储。
 
 [source,java]
 ----
@@ -72,18 +72,18 @@ List <Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to Redis
+// 将文档添加到 Redis
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
 [[redisvector-properties]]
-=== Configuration Properties
+=== 配置属性
 
-To connect to Redis and use the `RedisVectorStore`, you need to provide access details for your instance.
-A simple configuration can be provided via Spring Boot's `application.yml`,
+要连接到 Redis 并使用 `RedisVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [source,yaml]
 ----
@@ -99,7 +99,7 @@ spring:
         prefix: custom-prefix
 ----
 
-For redis connection configuration, alternatively, a simple configuration can be provided via Spring Boot's _application.properties_.
+对于 redis 连接配置，也可以通过 Spring Boot 的 _application.properties_ 提供简单配置。
 
 [source,properties]
 ----
@@ -110,22 +110,22 @@ spring.data.redis.password=
 
 ----
 
-Properties starting with `spring.ai.vectorstore.redis.*` are used to configure the `RedisVectorStore`:
+以 `spring.ai.vectorstore.redis.*` 开头的属性用于配置 `RedisVectorStore`：
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
+|属性 | 描述 | 默认值
 
-|`spring.ai.vectorstore.redis.initialize-schema`| Whether to initialize the required schema | `false`
-|`spring.ai.vectorstore.redis.index-name` | The name of the index to store the vectors | `spring-ai-index`
-|`spring.ai.vectorstore.redis.prefix` | The prefix for Redis keys | `embedding:`
+|`spring.ai.vectorstore.redis.initialize-schema`| 是否初始化所需的模式 | `false`
+|`spring.ai.vectorstore.redis.index-name` | 用于存储向量的索引名称 | `spring-ai-index`
+|`spring.ai.vectorstore.redis.prefix` | Redis 键的前缀 | `embedding:`
 |===
 
-== Metadata Filtering
+== 元数据过滤
 
-You can leverage the generic, portable xref:api/vectordbs.adoc#metadata-filters[metadata filters] with Redis as well.
+您也可以利用通用的、可移植的 xref:api/vectordbs.adoc#metadata-filters[元数据过滤器] 与 Redis。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -136,7 +136,7 @@ vectorStore.similaritySearch(SearchRequest.builder()
         .filterExpression("country in ['UK', 'NL'] && year >= 2020").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -151,25 +151,25 @@ vectorStore.similaritySearch(SearchRequest.builder()
                 b.gte("year", 2020)).build()).build());
 ----
 
-NOTE: Those (portable) filter expressions get automatically converted into link:https://redis.io/docs/interact/search-and-query/query/[Redis search queries].
+注意：这些（可移植的）过滤器表达式会自动转换为 link:https://redis.io/docs/interact/search-and-query/query/[Redis 搜索查询]。
 
-For example, this portable filter expression:
+例如，这个可移植的过滤器表达式：
 
 [source,sql]
 ----
 country in ['UK', 'NL'] && year >= 2020
 ----
 
-is converted into the proprietary Redis filter format:
+被转换为专有的 Redis 过滤器格式：
 
 [source,text]
 ----
 @country:{UK | NL} @year:[2020 inf]
 ----
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the Redis vector store. For this you need to add the `spring-ai-redis-store` to your project:
+不使用 Spring Boot 自动配置，您可以手动配置 Redis 向量存储。为此，您需要将 `spring-ai-redis-store` 添加到您的项目中：
 
 [source,xml]
 ----
@@ -179,7 +179,7 @@ Instead of using the Spring Boot auto-configuration, you can manually configure 
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -188,7 +188,7 @@ dependencies {
 }
 ----
 
-Create a `JedisPooled` bean:
+创建 `JedisPooled` bean：
 
 [source,java]
 ----
@@ -198,24 +198,24 @@ public JedisPooled jedisPooled() {
 }
 ----
 
-Then create the `RedisVectorStore` bean using the builder pattern:
+然后使用构建器模式创建 `RedisVectorStore` bean：
 
 [source,java]
 ----
 @Bean
 public VectorStore vectorStore(JedisPooled jedisPooled, EmbeddingModel embeddingModel) {
     return RedisVectorStore.builder(jedisPooled, embeddingModel)
-        .indexName("custom-index")                // Optional: defaults to "spring-ai-index"
-        .prefix("custom-prefix")                  // Optional: defaults to "embedding:"
-        .metadataFields(                         // Optional: define metadata fields for filtering
+        .indexName("custom-index")                // 可选：默认为 "spring-ai-index"
+        .prefix("custom-prefix")                  // 可选：默认为 "embedding:"
+        .metadataFields(                         // 可选：定义用于过滤的元数据字段
             MetadataField.tag("country"),
             MetadataField.numeric("year"))
-        .initializeSchema(true)                   // Optional: defaults to false
-        .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+        .initializeSchema(true)                   // 可选：默认为 false
+        .batchingStrategy(new TokenCountBatchingStrategy()) // 可选：默认为 TokenCountBatchingStrategy
         .build();
 }
 
-// This can be any EmbeddingModel implementation
+// 这可以是任何 EmbeddingModel 实现
 @Bean
 public EmbeddingModel embeddingModel() {
     return new OpenAiEmbeddingModel(new OpenAiApi(System.getenv("OPENAI_API_KEY")));
@@ -224,13 +224,13 @@ public EmbeddingModel embeddingModel() {
 
 [NOTE]
 ====
-You must list explicitly all metadata field names and types (`TAG`, `TEXT`, or `NUMERIC`) for any metadata field used in filter expressions.
-The `metadataFields` above registers filterable metadata fields: `country` of type `TAG`, `year` of type `NUMERIC`.
+您必须明确列出用于过滤器表达式的所有元数据字段名称和类型（`TAG`、`TEXT` 或 `NUMERIC`）。
+上面的 `metadataFields` 注册了可过滤的元数据字段：类型为 `TAG` 的 `country`，类型为 `NUMERIC` 的 `year`。
 ====
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Redis Vector Store implementation provides access to the underlying native Redis client (`JedisPooled`) through the `getNativeClient()` method:
+Redis Vector Store 实现通过 `getNativeClient()` 方法提供对底层原生 Redis 客户端（`JedisPooled`）的访问：
 
 [source,java]
 ----
@@ -239,8 +239,8 @@ Optional<JedisPooled> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     JedisPooled jedis = nativeClient.get();
-    // Use the native client for Redis-specific operations
+    // 使用原生客户端进行 Redis 特定的操作
 }
 ----
 
-The native client gives you access to Redis-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口公开的 Redis 特定功能和操作。

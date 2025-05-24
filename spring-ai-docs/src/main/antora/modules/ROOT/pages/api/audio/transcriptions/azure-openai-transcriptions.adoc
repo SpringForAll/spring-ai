@@ -1,24 +1,24 @@
-= Azure OpenAI Transcriptions
+= Azure OpenAI 转录
 
-Spring AI supports https://learn.microsoft.com/en-us/azure/ai-services/openai/whisper-quickstart?tabs=command-line%2Cpython-new&pivots=rest-api[Azure Whisper model].
+Spring AI 支持 https://learn.microsoft.com/en-us/azure/ai-services/openai/whisper-quickstart?tabs=command-line%2Cpython-new&pivots=rest-api[Azure Whisper 模型]。
 
-== Prerequisites
+== 前置条件
 
-Obtain your Azure OpenAI `endpoint` and `api-key` from the Azure OpenAI Service section on the link:https://portal.azure.com[Azure Portal].
-Spring AI defines a configuration property named `spring.ai.azure.openai.api-key` that you should set to the value of the `API Key` obtained from Azure.
-There is also a configuration property named `spring.ai.azure.openai.endpoint` that you should set to the endpoint URL obtained when provisioning your model in Azure.
-Exporting an environment variable is one way to set that configuration property:
+请在 https://portal.azure.com[Azure Portal] 的 Azure OpenAI 服务部分获取 Azure OpenAI 的 `endpoint` 和 `api-key`。
+Spring AI 定义了一个名为 `spring.ai.azure.openai.api-key` 的配置属性，你应将其设置为从 Azure 获取的 API Key。
+还有一个名为 `spring.ai.azure.openai.endpoint` 的配置属性，你应将其设置为在 Azure 中配置模型时获得的 endpoint URL。
+导出环境变量是一种设置这些配置属性的方式：
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置和 starter 模块的 artifact 名称发生了重大变化。
+详情请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明]。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Azure OpenAI Transcription Generation Client.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Azure OpenAI 转录生成客户端提供了 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 文件中添加如下依赖：
 
 [source,xml]
 ----
@@ -28,7 +28,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或在 Gradle `build.gradle` 文件中：
 
 [source,groovy]
 ----
@@ -37,44 +37,44 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+TIP: 依赖管理请参考 xref:getting-started.adoc#dependency-management[Dependency Management] 部分。
 
-=== Transcription Properties
+=== 转录属性
 
 [NOTE]
 ====
-Enabling and disabling of the audio transcription auto-configurations are now configured via top level properties with the prefix `spring.ai.model.audio.transcription`.
+音频转录自动配置的启用和禁用现在通过顶级属性 `spring.ai.model.audio.transcription` 配置。
 
-To enable, spring.ai.model.audio.transcription=azure-openai (It is enabled by default)
+启用：spring.ai.model.audio.transcription=azure-openai（默认已启用）
 
-To disable, spring.ai.model.audio.transcription=none (or any value which doesn't match azure-openai)
+禁用：spring.ai.model.audio.transcription=none（或任何不匹配 azure-openai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改允许配置多个模型。
 ====
 
-The prefix `spring.ai.openai.audio.transcription` is used as the property prefix that lets you configure the retry mechanism for the OpenAI image model.
+前缀 `spring.ai.openai.audio.transcription` 用于配置 OpenAI 图像模型的重试机制。
 
 [cols="3,5,2"]
 |====
-| Property | Description | Default
+| 属性 | 描述 | 默认值
 
-| spring.ai.azure.openai.audio.transcription.enabled (Removed and no longer valid)  | Enable Azure OpenAI transcription model. | true
-| spring.ai.model.audio.transcription  | Enable Azure OpenAI transcription model. | azure-openai
-| spring.ai.azure.openai.audio.transcription.options.model  | ID of the model to use. Only whisper is currently available. | whisper
-| spring.ai.azure.openai.audio.transcription.options.deployment-name  | The deployment name under which the model is deployed. |
-| spring.ai.azure.openai.audio.transcription.options.response-format | The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt. | json
-| spring.ai.azure.openai.audio.transcription.options.prompt | An optional text to guide the model's style or continue a previous audio segment. The prompt should match the audio language. |
-| spring.ai.azure.openai.audio.transcription.options.language | The language of the input audio. Supplying the input language in ISO-639-1 format will improve accuracy and latency. |
-| spring.ai.azure.openai.audio.transcription.options.temperature | The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use log probability to automatically increase the temperature until certain thresholds are hit. | 0
-| spring.ai.azure.openai.audio.transcription.options.timestamp-granularities | The timestamp granularities to populate for this transcription. response_format must be set verbose_json to use timestamp granularities. Either or both of these options are supported: word, or segment. Note: There is no additional latency for segment timestamps, but generating word timestamps incurs additional latency. | segment
+| spring.ai.azure.openai.audio.transcription.enabled（已移除，不再有效）  | 启用 Azure OpenAI 转录模型。 | true
+| spring.ai.model.audio.transcription  | 启用 Azure OpenAI 转录模型。 | azure-openai
+| spring.ai.azure.openai.audio.transcription.options.model  | 要使用的模型 ID。目前仅支持 whisper。 | whisper
+| spring.ai.azure.openai.audio.transcription.options.deployment-name  | 部署模型时的部署名称。 |
+| spring.ai.azure.openai.audio.transcription.options.response-format | 转录输出的格式，可选项有：json、text、srt、verbose_json 或 vtt。 | json
+| spring.ai.azure.openai.audio.transcription.options.prompt | 可选文本，用于引导模型风格或延续先前音频片段。提示应与音频语言一致。 |
+| spring.ai.azure.openai.audio.transcription.options.language | 输入音频的语言。以 ISO-639-1 格式提供输入语言可提升准确性和延迟表现。 |
+| spring.ai.azure.openai.audio.transcription.options.temperature | 采样温度，范围 0 到 1。较高值如 0.8 使输出更随机，较低值如 0.2 使输出更集中和确定。若设为 0，模型将使用对数概率自动提升温度直到达到某些阈值。 | 0
+| spring.ai.azure.openai.audio.transcription.options.timestamp-granularities | 要为本次转录填充的时间戳粒度。response_format 必须设置为 verbose_json 才能使用时间戳粒度。支持 word 或 segment。注意：segment 时间戳无额外延迟，但生成 word 时间戳会增加延迟。 | segment
 |====
 
-== Runtime Options
+== 运行时选项
 
-The `AzureOpenAiAudioTranscriptionOptions` class provides the options to use when making a transcription.
-On start-up, the options specified by `spring.ai.azure.openai.audio.transcription` are used, but you can override these at runtime.
+`AzureOpenAiAudioTranscriptionOptions` 类提供了进行转录时可用的选项。
+启动时使用 `spring.ai.azure.openai.audio.transcription` 指定的选项，但你可以在运行时覆盖。
 
-For example:
+例如：
 
 [source,java]
 ----
@@ -90,9 +90,9 @@ AudioTranscriptionPrompt transcriptionRequest = new AudioTranscriptionPrompt(aud
 AudioTranscriptionResponse response = azureOpenAiTranscriptionModel.call(this.transcriptionRequest);
 ----
 
-== Manual Configuration
+== 手动配置
 
-Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
+在项目的 Maven `pom.xml` 文件中添加 `spring-ai-openai` 依赖：
 
 [source,xml]
 ----
@@ -102,7 +102,7 @@ Add the `spring-ai-openai` dependency to your project's Maven `pom.xml` file:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或在 Gradle `build.gradle` 文件中：
 
 [source,groovy]
 ----
@@ -111,9 +111,9 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+TIP: 依赖管理请参考 xref:getting-started.adoc#dependency-management[Dependency Management] 部分。
 
-Next, create a `AzureOpenAiAudioTranscriptionModel`
+接下来，创建 `AzureOpenAiAudioTranscriptionModel`
 
 [source,java]
 ----

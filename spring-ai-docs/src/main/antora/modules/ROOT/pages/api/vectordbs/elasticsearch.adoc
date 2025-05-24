@@ -1,28 +1,27 @@
 = Elasticsearch
 
-This section walks you through setting up the Elasticsearch `VectorStore` to store document embeddings and perform similarity searches.
+本节将指导您设置 Elasticsearch `VectorStore` 来存储文档嵌入和执行相似性搜索。
 
-link:https://www.elastic.co/elasticsearch[Elasticsearch] is an open source search and analytics engine based on the Apache Lucene library.
+link:https://www.elastic.co/elasticsearch[Elasticsearch] 是一个基于 Apache Lucene 库的开源搜索和分析引擎。
 
-== Prerequisites
+== 前提条件
 
-A running Elasticsearch instance. The following options are available:
+运行中的 Elasticsearch 实例。以下选项可用：
 
 * link:https://hub.docker.com/_/elasticsearch/[Docker]
-* link:https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html#elasticsearch-install-packages[Self-Managed Elasticsearch]
+* link:https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html#elasticsearch-install-packages[自托管 Elasticsearch]
 * link:https://www.elastic.co/cloud/elasticsearch-service/signup?page=docs&placement=docs-body[Elastic Cloud]
 
-
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Elasticsearch Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` or Gradle `build.gradle` build files:
+Spring AI 为 Elasticsearch 向量存储提供了 Spring Boot 自动配置。
+要启用它，请在项目的 Maven `pom.xml` 或 Gradle `build.gradle` 构建文件中添加以下依赖：
 
 [tabs]
 ======
@@ -48,7 +47,7 @@ dependencies {
 
 [NOTE]
 --
-For spring-boot versions pre 3.3.0 it's necessary to explicitly add the elasticsearch-java dependency with version > 8.13.3, otherwise the older version used will be incompatible with the queries performed:
+对于 spring-boot 3.3.0 之前的版本，需要显式添加版本 > 8.13.3 的 elasticsearch-java 依赖，否则使用的旧版本将与执行的查询不兼容：
 [tabs]
 ======
 Maven::
@@ -73,21 +72,21 @@ dependencies {
 ======
 --
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-The vector store implementation can initialize the requisite schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
-Alternatively you can opt-out the initialization and create the index manually using the Elasticsearch client, which can be useful if the index needs advanced mapping or additional configuration.
+向量存储实现可以为您初始化所需的模式，但您必须通过在适当的构造函数中指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
+或者，您可以选择退出初始化并使用 Elasticsearch 客户端手动创建索引，这在索引需要高级映射或额外配置时很有用。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+注意：这是一个破坏性更改！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-Please have a look at the list of <<elasticsearchvector-properties,configuration parameters>> for the vector store to learn about the default values and configuration options.
-These properties can be also set by configuring the `ElasticsearchVectorStoreOptions` bean.
+请查看向量存储的 <<elasticsearchvector-properties,配置参数>> 列表，了解默认值和配置选项。
+这些属性也可以通过配置 `ElasticsearchVectorStoreOptions` bean 来设置。
 
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分了解更多信息。
 
-Now you can auto-wire the `ElasticsearchVectorStore` as a vector store in your application.
+现在您可以在应用程序中将 `ElasticsearchVectorStore` 作为向量存储自动装配。
 
 [source,java]
 ----
@@ -100,26 +99,26 @@ List <Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to Elasticsearch
+// 将文档添加到 Elasticsearch
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
 [[elasticsearchvector-properties]]
-=== Configuration Properties
+=== 配置属性
 
-To connect to Elasticsearch and use the `ElasticsearchVectorStore`, you need to provide access details for your instance.
-A simple configuration can either be provided via Spring Boot's `application.yml`,
+要连接到 Elasticsearch 并使用 `ElasticsearchVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [source,yaml]
 ----
 spring:
   elasticsearch:
-    uris: <elasticsearch instance URIs>
-    username: <elasticsearch username>
-    password: <elasticsearch password>
+    uris: <elasticsearch 实例 URI>
+    username: <elasticsearch 用户名>
+    password: <elasticsearch 密码>
   ai:
     vectorstore:
       elasticsearch:
@@ -129,49 +128,49 @@ spring:
         similarity: cosine
 ----
 
-The Spring Boot properties starting with `spring.elasticsearch.*` are used to configure the Elasticsearch client:
+以 `spring.elasticsearch.*` 开头的 Spring Boot 属性用于配置 Elasticsearch 客户端：
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
+|属性 | 描述 | 默认值
 
-| `spring.elasticsearch.connection-timeout` | Connection timeout used when communicating with Elasticsearch. | `1s`
-| `spring.elasticsearch.password` | Password for authentication with Elasticsearch. | -
-| `spring.elasticsearch.username` | Username for authentication with Elasticsearch.| -
-| `spring.elasticsearch.uris` | Comma-separated list of the Elasticsearch instances to use. | `http://localhost:9200`
-| `spring.elasticsearch.path-prefix` | Prefix added to the path of every request sent to Elasticsearch. | -
-| `spring.elasticsearch.restclient.sniffer.delay-after-failure` | Delay of a sniff execution scheduled after a failure.| `1m`
-| `spring.elasticsearch.restclient.sniffer.interval` | Interval between consecutive ordinary sniff executions. | `5m`
-| `spring.elasticsearch.restclient.ssl.bundle` | SSL bundle name. | -
-| `spring.elasticsearch.socket-keep-alive` | Whether to enable socket keep alive between client and Elasticsearch. | `false`
-| `spring.elasticsearch.socket-timeout` | Socket timeout used when communicating with Elasticsearch. | `30s`
+| `spring.elasticsearch.connection-timeout` | 与 Elasticsearch 通信时使用的连接超时。 | `1s`
+| `spring.elasticsearch.password` | 用于 Elasticsearch 身份验证的密码。 | -
+| `spring.elasticsearch.username` | 用于 Elasticsearch 身份验证的用户名。| -
+| `spring.elasticsearch.uris` | 要使用的 Elasticsearch 实例的逗号分隔列表。 | `http://localhost:9200`
+| `spring.elasticsearch.path-prefix` | 添加到发送到 Elasticsearch 的每个请求路径的前缀。 | -
+| `spring.elasticsearch.restclient.sniffer.delay-after-failure` | 失败后计划的嗅探执行的延迟。| `1m`
+| `spring.elasticsearch.restclient.sniffer.interval` | 连续普通嗅探执行之间的间隔。 | `5m`
+| `spring.elasticsearch.restclient.ssl.bundle` | SSL bundle 名称。 | -
+| `spring.elasticsearch.socket-keep-alive` | 是否在客户端和 Elasticsearch 之间启用套接字保持活动。 | `false`
+| `spring.elasticsearch.socket-timeout` | 与 Elasticsearch 通信时使用的套接字超时。 | `30s`
 |===
 
-Properties starting with `spring.ai.vectorstore.elasticsearch.*` are used to configure the `ElasticsearchVectorStore`:
+以 `spring.ai.vectorstore.elasticsearch.*` 开头的属性用于配置 `ElasticsearchVectorStore`：
 
 [cols="2,5,1",stripes=even]
 |===
-|Property | Description | Default Value
+|属性 | 描述 | 默认值
 
-|`spring.ai.vectorstore.elasticsearch.initialize-schema`| Whether to initialize the required schema | `false`
-|`spring.ai.vectorstore.elasticsearch.index-name` | The name of the index to store the vectors | `spring-ai-document-index`
-|`spring.ai.vectorstore.elasticsearch.dimensions` | The number of dimensions in the vector | `1536`
-|`spring.ai.vectorstore.elasticsearch.similarity` | The similarity function to use | `cosine`
+|`spring.ai.vectorstore.elasticsearch.initialize-schema`| 是否初始化所需的模式 | `false`
+|`spring.ai.vectorstore.elasticsearch.index-name` | 存储向量的索引名称 | `spring-ai-document-index`
+|`spring.ai.vectorstore.elasticsearch.dimensions` | 向量中的维度数 | `1536`
+|`spring.ai.vectorstore.elasticsearch.similarity` | 要使用的相似性函数 | `cosine`
 |===
 
-The following similarity functions are available:
+以下相似性函数可用：
 
-* `cosine` - Default, suitable for most use cases. Measures cosine similarity between vectors.
-* `l2_norm` - Euclidean distance between vectors. Lower values indicate higher similarity.
-* `dot_product` - Best performance for normalized vectors (e.g., OpenAI embeddings).
+* `cosine` - 默认值，适用于大多数用例。测量向量之间的余弦相似度。
+* `l2_norm` - 向量之间的欧几里得距离。较低的值表示较高的相似度。
+* `dot_product` - 对于归一化向量（例如，OpenAI 嵌入）性能最佳。
 
-More details about each in the https://www.elastic.co/guide/en/elasticsearch/reference/master/dense-vector.html#dense-vector-params[Elasticsearch Documentation] on dense vectors.
+有关每个函数的更多详细信息，请参阅 https://www.elastic.co/guide/en/elasticsearch/reference/master/dense-vector.html#dense-vector-params[Elasticsearch 文档] 中的密集向量部分。
 
-== Metadata Filtering
+== 元数据过滤
 
-You can leverage the generic, portable xref:api/vectordbs.adoc#metadata-filters[metadata filters] with Elasticsearch as well.
+您也可以利用通用的、可移植的 xref:api/vectordbs.adoc#metadata-filters[元数据过滤器] 与 Elasticsearch。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -182,7 +181,7 @@ vectorStore.similaritySearch(SearchRequest.builder()
         .filterExpression("author in ['john', 'jill'] && 'article_type' == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -197,25 +196,25 @@ vectorStore.similaritySearch(SearchRequest.builder()
                 b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: Those (portable) filter expressions get automatically converted into the proprietary Elasticsearch link:https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html[Query string query].
+注意：这些（可移植的）过滤表达式会自动转换为专有的 Elasticsearch link:https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html[查询字符串查询]。
 
-For example, this portable filter expression:
+例如，这个可移植的过滤表达式：
 
 [source,sql]
 ----
 author in ['john', 'jill'] && 'article_type' == 'blog'
 ----
 
-is converted into the proprietary Elasticsearch filter format:
+被转换为专有的 Elasticsearch 过滤器格式：
 
 [source,text]
 ----
 (metadata.author:john OR jill) AND metadata.article_type:blog
 ----
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the Elasticsearch vector store. For this you need to add the `spring-ai-elasticsearch-store` to your project:
+不使用 Spring Boot 自动配置，您可以手动配置 Elasticsearch 向量存储。为此，您需要在项目中添加 `spring-ai-elasticsearch-store`：
 
 [source,xml]
 ----
@@ -225,7 +224,7 @@ Instead of using the Spring Boot auto-configuration, you can manually configure 
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -234,8 +233,8 @@ dependencies {
 }
 ----
 
-Create an Elasticsearch `RestClient` bean.
-Read the link:https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/java-rest-low-usage-initialization.html[Elasticsearch Documentation] for more in-depth information about the configuration of a custom RestClient.
+创建 Elasticsearch `RestClient` bean。
+阅读 link:https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/java-rest-low-usage-initialization.html[Elasticsearch 文档] 了解更多关于自定义 RestClient 配置的信息。
 
 [source,java]
 ----
@@ -249,34 +248,34 @@ public RestClient restClient() {
 }
 ----
 
-Then create the `ElasticsearchVectorStore` bean using the builder pattern:
+然后使用构建器模式创建 `ElasticsearchVectorStore` bean：
 
 [source,java]
 ----
 @Bean
 public VectorStore vectorStore(RestClient restClient, EmbeddingModel embeddingModel) {
     ElasticsearchVectorStoreOptions options = new ElasticsearchVectorStoreOptions();
-    options.setIndexName("custom-index");    // Optional: defaults to "spring-ai-document-index"
-    options.setSimilarity(COSINE);           // Optional: defaults to COSINE
-    options.setDimensions(1536);             // Optional: defaults to model dimensions or 1536
+    options.setIndexName("custom-index");    // 可选：默认为 "spring-ai-document-index"
+    options.setSimilarity(COSINE);           // 可选：默认为 COSINE
+    options.setDimensions(1536);             // 可选：默认为模型维度或 1536
 
     return ElasticsearchVectorStore.builder(restClient, embeddingModel)
-        .options(options)                     // Optional: use custom options
-        .initializeSchema(true)               // Optional: defaults to false
-        .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+        .options(options)                     // 可选：使用自定义选项
+        .initializeSchema(true)               // 可选：默认为 false
+        .batchingStrategy(new TokenCountBatchingStrategy()) // 可选：默认为 TokenCountBatchingStrategy
         .build();
 }
 
-// This can be any EmbeddingModel implementation
+// 这可以是任何 EmbeddingModel 实现
 @Bean
 public EmbeddingModel embeddingModel() {
     return new OpenAiEmbeddingModel(new OpenAiApi(System.getenv("OPENAI_API_KEY")));
 }
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Elasticsearch Vector Store implementation provides access to the underlying native Elasticsearch client (`ElasticsearchClient`) through the `getNativeClient()` method:
+Elasticsearch 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Elasticsearch 客户端（`ElasticsearchClient`）的访问：
 
 [source,java]
 ----
@@ -285,8 +284,8 @@ Optional<ElasticsearchClient> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     ElasticsearchClient client = nativeClient.get();
-    // Use the native client for Elasticsearch-specific operations
+    // 使用原生客户端进行 Elasticsearch 特定的操作
 }
 ----
 
-The native client gives you access to Elasticsearch-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口暴露的 Elasticsearch 特定功能和操作。

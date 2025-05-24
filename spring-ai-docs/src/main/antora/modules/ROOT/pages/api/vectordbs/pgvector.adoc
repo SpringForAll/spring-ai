@@ -1,18 +1,18 @@
 = PGvector
 
-This section walks you through setting up the PGvector `VectorStore` to store document embeddings and perform similarity searches.
+本节将指导您如何设置 PGvector `VectorStore` 来存储文档嵌入并执行相似性搜索。
 
-link:https://github.com/pgvector/pgvector[PGvector] is an open-source extension for PostgreSQL that enables storing and searching over machine learning-generated embeddings. It provides different capabilities that let users identify both exact and approximate nearest neighbors. It is designed to work seamlessly with other PostgreSQL features, including indexing and querying.
+link:https://github.com/pgvector/pgvector[PGvector] 是一个开源的 PostgreSQL 扩展，支持存储和搜索机器学习生成的嵌入。它提供了不同的功能，让用户能够识别精确和近似的最近邻。它设计为与其他 PostgreSQL 功能（包括索引和查询）无缝协作。
 
-== Prerequisites
+== 前提条件
 
-First you need access to PostgreSQL instance with enabled `vector`, `hstore` and `uuid-ossp` extensions.
+首先，您需要访问启用了 `vector`、`hstore` 和 `uuid-ossp` 扩展的 PostgreSQL 实例。
 
-TIP: You can run a PGvector database as a Spring Boot dev service via xref:api/docker-compose.adoc[Docker Compose] or xref:api/testcontainers.adoc[Testcontainers]. In alternative, the <<Run Postgres & PGVector DB locally,setup local Postgres/PGVector>> appendix shows how to set up a DB locally with a Docker container.
+提示：您可以通过 xref:api/docker-compose.adoc[Docker Compose] 或 xref:api/testcontainers.adoc[Testcontainers] 将 PGvector 数据库作为 Spring Boot 开发服务运行。或者，<<Run Postgres & PGVector DB locally,设置本地 Postgres/PGVector>> 附录展示了如何使用 Docker 容器在本地设置数据库。
 
-On startup, the `PgVectorStore` will attempt to install the required database extensions and create the required `vector_store` table with an index if not existing.
+在启动时，`PgVectorStore` 将尝试安装所需的数据库扩展，并在不存在时创建所需的带索引的 `vector_store` 表。
 
-Optionally, you can do this manually like so:
+可选地，您可以手动执行以下操作：
 
 [sql]
 ----
@@ -24,25 +24,25 @@ CREATE TABLE IF NOT EXISTS vector_store (
 	id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
 	content text,
 	metadata json,
-	embedding vector(1536) // 1536 is the default embedding dimension
+	embedding vector(1536) // 1536 是默认的嵌入维度
 );
 
 CREATE INDEX ON vector_store USING HNSW (embedding vector_cosine_ops);
 ----
 
-TIP: replace the `1536` with the actual embedding dimension if you are using a different dimension. PGvector supports at most 2000 dimensions for HNSW indexes.
+提示：如果您使用不同的维度，请将 `1536` 替换为实际的嵌入维度。PGvector 对 HNSW 索引最多支持 2000 个维度。
 
-Next, if required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `PgVectorStore`.
+接下来，如果需要，为 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 准备一个 API 密钥，用于生成存储在 `PgVectorStore` 中的嵌入。
 
-== Auto-Configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 的自动配置和启动器模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Then add the PgVectorStore boot starter dependency to your project:
+然后，将 PgVectorStore 启动器依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -52,7 +52,7 @@ Then add the PgVectorStore boot starter dependency to your project:
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -61,14 +61,14 @@ dependencies {
 }
 ----
 
-The vector store implementation can initialize the required schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+向量存储实现可以为您初始化所需的模式，但您必须通过指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
 
-NOTE: This is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+注意：这是一个破坏性更改！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-The Vector Store also requires an `EmbeddingModel` instance to calculate embeddings for the documents.
-You can pick one of the available xref:api/embeddings.adoc#available-implementations[EmbeddingModel Implementations].
+向量存储还需要一个 `EmbeddingModel` 实例来计算文档的嵌入。
+您可以选择一个可用的 xref:api/embeddings.adoc#available-implementations[EmbeddingModel 实现]。
 
-For example, to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel], add the following dependency to your project:
+例如，要使用 xref:api/embeddings/openai-embeddings.adoc[OpenAI EmbeddingModel]，请将以下依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -78,7 +78,7 @@ For example, to use the xref:api/embeddings/openai-embeddings.adoc[OpenAI Embedd
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中：
 
 [source,groovy]
 ----
@@ -87,11 +87,11 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
-Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
+请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
-To connect to and configure the `PgVectorStore`, you need to provide access details for your instance.
-A simple configuration can be provided via Spring Boot's `application.yml`.
+要连接到并配置 `PgVectorStore`，您需要提供实例的访问详细信息。
+可以通过 Spring Boot 的 `application.yml` 提供简单配置：
 
 [yml]
 ----
@@ -106,16 +106,16 @@ spring:
 		index-type: HNSW
 		distance-type: COSINE_DISTANCE
 		dimensions: 1536
-		max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
+		max-document-batch-size: 10000 # 可选：每批最大文档数
 ----
 
-TIP: If you run PGvector as a Spring Boot dev service via link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.docker-compose[Docker Compose]
-or link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.testcontainers[Testcontainers],
-you don't need to configure URL, username and password since they are autoconfigured by Spring Boot.
+提示：如果您通过 link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.docker-compose[Docker Compose]
+或 link:https://docs.spring.io/spring-boot/reference/features/dev-services.html#features.dev-services.testcontainers[Testcontainers]
+将 PGvector 作为 Spring Boot 开发服务运行，则不需要配置 URL、用户名和密码，因为它们由 Spring Boot 自动配置。
 
-TIP: Check the list of xref:#pgvector-properties[configuration parameters] to learn about the default values and configuration options.
+提示：查看 xref:#pgvector-properties[配置参数] 列表，了解默认值和配置选项。
 
-Now you can auto-wire the `VectorStore` in your application and use it
+现在您可以在应用程序中自动装配 `VectorStore` 并使用它：
 
 [source,java]
 ----
@@ -128,42 +128,42 @@ List<Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents to PGVector
+// 将文档添加到 PGVector
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
 [[pgvector-properties]]
-=== Configuration properties
+=== 配置属性
 
-You can use the following properties in your Spring Boot configuration to customize the PGVector vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 PGVector 向量存储。
 
 [cols="2,5,1",stripes=even]
 |===
-|Property| Description | Default value
+|属性| 描述 | 默认值
 
-|`spring.ai.vectorstore.pgvector.index-type`|  Nearest neighbor search index type. Options are `NONE` - exact nearest neighbor search, `IVFFlat` - index divides vectors into lists, and then searches a subset of those lists that are closest to the query vector. It has faster build times and uses less memory than HNSW, but has lower query performance (in terms of speed-recall tradeoff). `HNSW` - creates a multilayer graph. It has slower build times and uses more memory than IVFFlat, but has better query performance (in terms of speed-recall tradeoff). There's no training step like IVFFlat, so the index can be created without any data in the table.| HNSW
-|`spring.ai.vectorstore.pgvector.distance-type`| Search distance type. Defaults to `COSINE_DISTANCE`. But if vectors are normalized to length 1, you can use `EUCLIDEAN_DISTANCE` or `NEGATIVE_INNER_PRODUCT` for best performance.| COSINE_DISTANCE
-|`spring.ai.vectorstore.pgvector.dimensions`| Embeddings dimension. If not specified explicitly the PgVectorStore will retrieve the dimensions form the provided `EmbeddingModel`. Dimensions are set to the embedding column the on table creation. If you change the dimensions your would have to re-create the vector_store table as well. | -
-|`spring.ai.vectorstore.pgvector.remove-existing-vector-store-table` | Deletes the existing `vector_store` table on start up.  | false
-|`spring.ai.vectorstore.pgvector.initialize-schema` | Whether to initialize the required schema | false
-|`spring.ai.vectorstore.pgvector.schema-name` | Vector store schema name | `public`
-|`spring.ai.vectorstore.pgvector.table-name` | Vector store table name | `vector_store`
-|`spring.ai.vectorstore.pgvector.schema-validation` | Enables schema and table name validation to ensure they are valid and existing objects. | false
-|`spring.ai.vectorstore.pgvector.max-document-batch-size` | Maximum number of documents to process in a single batch. | 10000
+|`spring.ai.vectorstore.pgvector.index-type`|  最近邻搜索索引类型。选项有 `NONE` - 精确最近邻搜索，`IVFFlat` - 索引将向量分成列表，然后搜索最接近查询向量的那些列表的子集。它比 HNSW 有更快的构建时间和更少的内存使用，但查询性能较低（在速度-召回权衡方面）。`HNSW` - 创建多层图。它比 IVFFlat 有更慢的构建时间和更多的内存使用，但有更好的查询性能（在速度-召回权衡方面）。与 IVFFlat 不同，没有训练步骤，因此可以在表中没有任何数据的情况下创建索引。| HNSW
+|`spring.ai.vectorstore.pgvector.distance-type`| 搜索距离类型。默认为 `COSINE_DISTANCE`。但如果向量已归一化为长度 1，您可以使用 `EUCLIDEAN_DISTANCE` 或 `NEGATIVE_INNER_PRODUCT` 获得最佳性能。| COSINE_DISTANCE
+|`spring.ai.vectorstore.pgvector.dimensions`| 嵌入维度。如果未明确指定，PgVectorStore 将从提供的 `EmbeddingModel` 中检索维度。维度在表创建时设置到嵌入列。如果您更改维度，您也需要重新创建 vector_store 表。 | -
+|`spring.ai.vectorstore.pgvector.remove-existing-vector-store-table` | 在启动时删除现有的 `vector_store` 表。  | false
+|`spring.ai.vectorstore.pgvector.initialize-schema` | 是否初始化所需的模式 | false
+|`spring.ai.vectorstore.pgvector.schema-name` | 向量存储模式名称 | `public`
+|`spring.ai.vectorstore.pgvector.table-name` | 向量存储表名称 | `vector_store`
+|`spring.ai.vectorstore.pgvector.schema-validation` | 启用模式和表名验证，以确保它们是有效和现有的对象。 | false
+|`spring.ai.vectorstore.pgvector.max-document-batch-size` | 单批处理的最大文档数。 | 10000
 
 |===
 
-TIP: If you configure a custom schema and/or table name, consider enabling schema validation by setting `spring.ai.vectorstore.pgvector.schema-validation=true`. 
-This ensures the correctness of the names and reduces the risk of SQL injection attacks.
+提示：如果您配置了自定义模式和/或表名，请考虑通过设置 `spring.ai.vectorstore.pgvector.schema-validation=true` 启用模式验证。
+这确保了名称的正确性，并降低了 SQL 注入攻击的风险。
 
-== Metadata filtering
+== 元数据过滤
 
-You can leverage the generic, portable link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[metadata filters] with the PgVector store.
+您也可以利用通用的、可移植的 link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[元数据过滤器] 与 PgVector 存储。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -175,7 +175,7 @@ vectorStore.similaritySearch(
     .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -190,12 +190,12 @@ vectorStore.similaritySearch(SearchRequest.builder()
         b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: These filter expressions are converted into PostgreSQL JSON path expressions for efficient metadata filtering.
+注意：这些过滤表达式被转换为 PostgreSQL JSON 路径表达式，用于高效的元数据过滤。
 
-== Manual Configuration
+== 手动配置
 
-Instead of using the Spring Boot auto-configuration, you can manually configure the `PgVectorStore`.
-For this you need to add the PostgreSQL connection and `JdbcTemplate` auto-configuration dependencies to your project:
+除了使用 Spring Boot 自动配置外，您还可以手动配置 `PgVectorStore`。
+为此，您需要将 PostgreSQL 连接和 `JdbcTemplate` 自动配置依赖项添加到您的项目中：
 
 [source,xml]
 ----
@@ -216,41 +216,41 @@ For this you need to add the PostgreSQL connection and `JdbcTemplate` auto-confi
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-To configure PgVector in your application, you can use the following setup:
+要在应用程序中配置 PgVector，您可以使用以下设置：
 
 [source,java]
 ----
 @Bean
 public VectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
     return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-        .dimensions(1536)                    // Optional: defaults to model dimensions or 1536
-        .distanceType(COSINE_DISTANCE)       // Optional: defaults to COSINE_DISTANCE
-        .indexType(HNSW)                     // Optional: defaults to HNSW
-        .initializeSchema(true)              // Optional: defaults to false
-        .schemaName("public")                // Optional: defaults to "public"
-        .vectorTableName("vector_store")     // Optional: defaults to "vector_store"
-        .maxDocumentBatchSize(10000)         // Optional: defaults to 10000
+        .dimensions(1536)                    // 可选：默认为模型维度或 1536
+        .distanceType(COSINE_DISTANCE)       // 可选：默认为 COSINE_DISTANCE
+        .indexType(HNSW)                     // 可选：默认为 HNSW
+        .initializeSchema(true)              // 可选：默认为 false
+        .schemaName("public")                // 可选：默认为 "public"
+        .vectorTableName("vector_store")     // 可选：默认为 "vector_store"
+        .maxDocumentBatchSize(10000)         // 可选：默认为 10000
         .build();
 }
 ----
 
-== Run Postgres & PGVector DB locally
+== 在本地运行 Postgres & PGVector DB
 
 ----
 docker run -it --rm --name postgres -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres pgvector/pgvector
 ----
 
-You can connect to this server like this:
+您可以使用以下命令连接到服务器：
 
 ----
 psql -U postgres -h localhost -p 5432
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The PGVector Store implementation provides access to the underlying native JDBC client (`JdbcTemplate`) through the `getNativeClient()` method:
+PGVector 存储实现通过 `getNativeClient()` 方法提供对底层原生 JDBC 客户端（`JdbcTemplate`）的访问：
 
 [source,java]
 ----
@@ -259,8 +259,8 @@ Optional<JdbcTemplate> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     JdbcTemplate jdbc = nativeClient.get();
-    // Use the native client for PostgreSQL-specific operations
+    // 使用原生客户端进行 PostgreSQL 特定的操作
 }
 ----
 
-The native client gives you access to PostgreSQL-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口暴露的 PostgreSQL 特定功能和操作。

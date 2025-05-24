@@ -1,21 +1,21 @@
-= Using Chat/Embedding Response Usage
+= 使用聊天/嵌入响应使用量
 
-== Overview
-Spring AI has enhanced its Model Usage handling by introducing `getNativeUsage()` method in the Usage interface and providing a `DefaultUsage` implementation.
-This change simplifies how different AI models can track and report their usage metrics while maintaining consistency across the framework.
+== 概述
+Spring AI 通过在 Usage 接口中引入 `getNativeUsage()` 方法并提供 `DefaultUsage` 实现，增强了其模型使用量处理功能。
+这一变化简化了不同 AI 模型跟踪和报告其使用指标的方式，同时保持了整个框架的一致性。
 
-== Key Changes
+== 主要变更
 
-=== Usage Interface Enhancement
-The `Usage` interface now includes a new method:
+=== Usage 接口增强
+`Usage` 接口现在包含一个新方法：
 ```java
 Object getNativeUsage();
 ```
-This method allows access to the model-specific native usage data, enabling more detailed usage tracking when needed.
+此方法允许访问模型特定的原生使用数据，在需要时实现更详细的使用量跟踪。
 
-=== Using with ChatModel
+=== 与 ChatModel 一起使用
 
-Here's a complete example showing how to track usage with OpenAI's ChatModel:
+以下是一个完整的示例，展示如何使用 OpenAI 的 ChatModel 跟踪使用量：
 
 ```java
 @SpringBootConfiguration
@@ -47,76 +47,76 @@ public class ChatService {
     }
 
     public void demonstrateUsage() {
-        // Create a chat prompt
-        Prompt prompt = new Prompt("What is the weather like today?");
+        // 创建聊天提示
+        Prompt prompt = new Prompt("今天天气怎么样？");
 
-        // Get the chat response
+        // 获取聊天响应
         ChatResponse response = this.chatModel.call(prompt);
 
-        // Access the usage information
+        // 访问使用量信息
         Usage usage = response.getMetadata().getUsage();
 
-        // Get standard usage metrics
-        System.out.println("Prompt Tokens: " + usage.getPromptTokens());
-        System.out.println("Completion Tokens: " + usage.getCompletionTokens());
-        System.out.println("Total Tokens: " + usage.getTotalTokens());
+        // 获取标准使用量指标
+        System.out.println("提示词令牌数: " + usage.getPromptTokens());
+        System.out.println("完成令牌数: " + usage.getCompletionTokens());
+        System.out.println("总令牌数: " + usage.getTotalTokens());
 
-        // Access native OpenAI usage data with detailed token information
+        // 访问原生 OpenAI 使用数据，包含详细的令牌信息
         if (usage.getNativeUsage() instanceof org.springframework.ai.openai.api.OpenAiApi.Usage) {
             org.springframework.ai.openai.api.OpenAiApi.Usage nativeUsage =
                 (org.springframework.ai.openai.api.OpenAiApi.Usage) usage.getNativeUsage();
 
-            // Detailed prompt token information
-            System.out.println("Prompt Tokens Details:");
-            System.out.println("- Audio Tokens: " + nativeUsage.promptTokensDetails().audioTokens());
-            System.out.println("- Cached Tokens: " + nativeUsage.promptTokensDetails().cachedTokens());
+            // 详细的提示词令牌信息
+            System.out.println("提示词令牌详情:");
+            System.out.println("- 音频令牌: " + nativeUsage.promptTokensDetails().audioTokens());
+            System.out.println("- 缓存令牌: " + nativeUsage.promptTokensDetails().cachedTokens());
 
-            // Detailed completion token information
-            System.out.println("Completion Tokens Details:");
-            System.out.println("- Reasoning Tokens: " + nativeUsage.completionTokenDetails().reasoningTokens());
-            System.out.println("- Accepted Prediction Tokens: " + nativeUsage.completionTokenDetails().acceptedPredictionTokens());
-            System.out.println("- Audio Tokens: " + nativeUsage.completionTokenDetails().audioTokens());
-            System.out.println("- Rejected Prediction Tokens: " + nativeUsage.completionTokenDetails().rejectedPredictionTokens());
+            // 详细的完成令牌信息
+            System.out.println("完成令牌详情:");
+            System.out.println("- 推理令牌: " + nativeUsage.completionTokenDetails().reasoningTokens());
+            System.out.println("- 接受的预测令牌: " + nativeUsage.completionTokenDetails().acceptedPredictionTokens());
+            System.out.println("- 音频令牌: " + nativeUsage.completionTokenDetails().audioTokens());
+            System.out.println("- 拒绝的预测令牌: " + nativeUsage.completionTokenDetails().rejectedPredictionTokens());
         }
     }
 }
 ```
 
-=== Using with ChatClient
+=== 与 ChatClient 一起使用
 
-If you are using the `ChatClient`, you can access the usage information using the `ChatResponse` object:
+如果你使用 `ChatClient`，你可以通过 `ChatResponse` 对象访问使用量信息：
 
 ```java
-// Create a chat prompt
-Prompt prompt = new Prompt("What is the weather like today?");
+// 创建聊天提示
+Prompt prompt = new Prompt("今天天气怎么样？");
 
-// Create a chat client
+// 创建聊天客户端
 ChatClient chatClient = ChatClient.create(chatModel);
 
-// Get the chat response
+// 获取聊天响应
 ChatResponse response = chatClient.prompt(prompt)
         .call()
         .chatResponse();
 
-// Access the usage information
+// 访问使用量信息
 Usage usage = response.getMetadata().getUsage();
 ```
 
-== Benefits
+== 优势
 
-**Standardization**: Provides a consistent way to handle usage across different AI models
-**Flexibility**: Supports model-specific usage data through the native usage feature
-**Simplification**: Reduces boilerplate code with the default implementation
-**Extensibility**: Easy to extend for specific model requirements while maintaining compatibility
+**标准化**：提供了一种跨不同 AI 模型处理使用量的一致方式
+**灵活性**：通过原生使用量功能支持模型特定的使用数据
+**简化**：通过默认实现减少了样板代码
+**可扩展性**：易于针对特定模型需求进行扩展，同时保持兼容性
 
-=== Type Safety Considerations
+=== 类型安全注意事项
 
-When working with native usage data, consider type casting carefully:
+在处理原生使用数据时，请谨慎考虑类型转换：
 ```java
-// Safe way to access native usage
+// 安全访问原生使用量的方式
 if (usage.getNativeUsage() instanceof org.springframework.ai.openai.api.OpenAiApi.Usage) {
     org.springframework.ai.openai.api.OpenAiApi.Usage nativeUsage =
         (org.springframework.ai.openai.api.OpenAiApi.Usage) usage.getNativeUsage();
-    // Work with native usage data
+    // 处理原生使用量数据
 }
 ```

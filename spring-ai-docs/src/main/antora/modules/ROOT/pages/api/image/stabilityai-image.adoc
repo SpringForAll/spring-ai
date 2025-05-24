@@ -1,25 +1,25 @@
-= Stability AI Image Generation
+= Stability AI 图像生成
 
-Spring AI supports Stability AI's https://platform.stability.ai/docs/api-reference#tag/v1generation[text to image generation model].
+Spring AI 支持 Stability AI 的 https://platform.stability.ai/docs/api-reference#tag/v1generation[文本到图像生成模型]。
 
-== Prerequisites
+== 前提条件
 
-You will need to create an API key with Stability AI to access their AI models. Follow their https://platform.stability.ai/docs/getting-started/authentication[Getting Started documentation] to obtain your API key.
+您需要创建一个 API 密钥来访问 Stability AI 的 AI 模型。按照他们的 https://platform.stability.ai/docs/getting-started/authentication[入门文档] 获取您的 API 密钥。
 
-The Spring AI project defines a configuration property named `spring.ai.stabilityai.api-key` that you should set to the value of the `API Key` obtained from Stability AI.
+Spring AI 项目定义了一个名为 `spring.ai.stabilityai.api-key` 的配置属性，您应该将其设置为从 Stability AI 获取的 `API Key` 值。
 
-You can set this configuration property in your `application.properties` file:
+您可以在 `application.properties` 文件中设置此配置属性：
 
 [source,properties]
 ----
 spring.ai.stabilityai.api-key=<your-stabilityai-api-key>
 ----
 
-For enhanced security when handling sensitive information like API keys, you can use Spring Expression Language (SpEL) to reference a custom environment variable:
+为了在处理 API 密钥等敏感信息时增强安全性，您可以使用 Spring 表达式语言 (SpEL) 引用自定义环境变量：
 
 [source,yaml]
 ----
-# In application.yml
+# 在 application.yml 中
 spring:
   ai:
     stabilityai:
@@ -28,28 +28,28 @@ spring:
 
 [source,bash]
 ----
-# In your environment or .env file
+# 在您的环境或 .env 文件中
 export STABILITYAI_API_KEY=<your-stabilityai-api-key>
 ----
 
-You can also set this configuration programmatically in your application code:
+您也可以在应用程序代码中以编程方式设置此配置：
 
 [source,java]
 ----
-// Retrieve API key from a secure source or environment variable
+// 从安全源或环境变量中获取 API 密钥
 String apiKey = System.getenv("STABILITYAI_API_KEY");
 ----
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参考 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Stability AI Image Generation Client.
-To enable it add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Stability AI 图像生成客户端提供 Spring Boot 自动配置。
+要启用它，请将以下依赖项添加到项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -59,7 +59,7 @@ To enable it add the following dependency to your project's Maven `pom.xml` file
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -68,64 +68,60 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参考 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
+=== 图像生成属性
 
-=== Image Generation Properties
-
-The prefix `spring.ai.stabilityai` is used as the property prefix that lets you connect to Stability AI.
+前缀 `spring.ai.stabilityai` 是允许您连接到 Stability AI 的属性前缀。
 
 [cols="3,5,1"]
 |====
-| Property | Description | Default
-
-| spring.ai.stabilityai.base-url   | The URL to connect to |  https://api.stability.ai/v1
-| spring.ai.stabilityai.api-key    | The API Key           |  -
+| 属性 | 描述 | 默认值
+| spring.ai.stabilityai.base-url | 连接 URL | https://api.stability.ai/v1
+| spring.ai.stabilityai.api-key | API 密钥 | -
 |====
 
 [NOTE]
 ====
-Enabling and disabling of the image auto-configurations are now configured via top level properties with the prefix `spring.ai.model.image`.
+图像自动配置的启用和禁用现在通过前缀为 `spring.ai.model.image` 的顶级属性进行配置。
 
-To enable, spring.ai.model.image=stabilityai (It is enabled by default)
+要启用，spring.ai.model.image=stabilityai（默认启用）
 
-To disable, spring.ai.model.image=none (or any value which doesn't match stabilityai)
+要禁用，spring.ai.model.image=none（或任何不匹配 stabilityai 的值）
 
-This change is done to allow configuration of multiple models.
+此更改是为了允许多个模型的配置。
 ====
 
-The prefix `spring.ai.stabilityai.image` is the property prefix that lets you configure the `ImageModel` implementation for Stability AI.
+前缀 `spring.ai.stabilityai.image` 是允许您配置 Stability AI 的 `ImageModel` 实现的属性前缀。
 
 [cols="2,5,1"]
 |====
-| Property | Description | Default
-
-| spring.ai.stabilityai.image.enabled (Removed and no longer valid) | Enable Stability AI image model.  | true
-| spring.ai.model.image | Enable Stability AI image model.  | stabilityai
-| spring.ai.stabilityai.image.base-url              | Optional overrides the spring.ai.openai.base-url to provide a specific url |  `https://api.stability.ai/v1`
-| spring.ai.stabilityai.image.api-key              | Optional overrides the spring.ai.openai.api-key to provide a specific api-key |  -
-| spring.ai.stabilityai.image.option.n               | The number of images to be generated. Must be between 1 and 10.                                                            | 1
-| spring.ai.stabilityai.image.option.model                 | The engine/model to use in Stability AI. The model is passed in the URL as a path parameter.          | `stable-diffusion-v1-6`
-| spring.ai.stabilityai.image.option.width                 | Width of the image to generate, in pixels, in an increment divisible by 64. Engine-specific dimension validation applies. | 512
-| spring.ai.stabilityai.image.option.height               | Height of the image to generate, in pixels, in an increment divisible by 64. Engine-specific dimension validation applies.| 512
-| spring.ai.stabilityai.image.option.responseFormat        | The format in which the generated images are returned. Must be "application/json" or "image/png".                         | -
-| spring.ai.stabilityai.image.option.cfg_scale             | The strictness level of the diffusion process adherence to the prompt text. Range: 0 to 35.                               | 7
-| spring.ai.stabilityai.image.option.clip_guidance_preset  | Pass in a style preset to guide the image model towards a particular style. This list of style presets is subject to change. | `NONE`
-| spring.ai.stabilityai.image.option.sampler               | Which sampler to use for the diffusion process. If this value is omitted, an appropriate sampler will be automatically selected. | -
-| spring.ai.stabilityai.image.option.seed                  | Random noise seed (omit this option or use 0 for a random seed). Valid range: 0 to 4294967295.                             | 0
-| spring.ai.stabilityai.image.option.steps                 | Number of diffusion steps to run. Valid range: 10 to 50.                                                                   | 30
-| spring.ai.stabilityai.image.option.style_preset          | Pass in a style preset to guide the image model towards a particular style. This list of style presets is subject to change. | -
+| 属性 | 描述 | 默认值
+| spring.ai.stabilityai.image.enabled（已移除且不再有效） | 启用 Stability AI 图像模型。 | true
+| spring.ai.model.image | 启用 Stability AI 图像模型。 | stabilityai
+| spring.ai.stabilityai.image.base-url | 可选覆盖 spring.ai.openai.base-url 以提供特定的 url | `https://api.stability.ai/v1`
+| spring.ai.stabilityai.image.api-key | 可选覆盖 spring.ai.openai.api-key 以提供特定的 api-key | -
+| spring.ai.stabilityai.image.option.n | 要生成的图像数量。必须在 1 到 10 之间。 | 1
+| spring.ai.stabilityai.image.option.model | Stability AI 中使用的引擎/模型。模型作为路径参数在 URL 中传递。 | `stable-diffusion-v1-6`
+| spring.ai.stabilityai.image.option.width | 要生成的图像宽度，以像素为单位，必须是 64 的倍数。应用引擎特定的尺寸验证。 | 512
+| spring.ai.stabilityai.image.option.height | 要生成的图像高度，以像素为单位，必须是 64 的倍数。应用引擎特定的尺寸验证。 | 512
+| spring.ai.stabilityai.image.option.responseFormat | 返回生成图像的格式。必须是 "application/json" 或 "image/png"。 | -
+| spring.ai.stabilityai.image.option.cfg_scale | 扩散过程对提示文本的严格程度。范围：0 到 35。 | 7
+| spring.ai.stabilityai.image.option.clip_guidance_preset | 传入样式预设以引导图像模型朝向特定样式。此样式预设列表可能会更改。 | `NONE`
+| spring.ai.stabilityai.image.option.sampler | 用于扩散过程的采样器。如果省略此值，将自动选择适当的采样器。 | -
+| spring.ai.stabilityai.image.option.seed | 随机噪声种子（省略此选项或使用 0 表示随机种子）。有效范围：0 到 4294967295。 | 0
+| spring.ai.stabilityai.image.option.steps | 要运行的扩散步骤数。有效范围：10 到 50。 | 30
+| spring.ai.stabilityai.image.option.style_preset | 传入样式预设以引导图像模型朝向特定样式。此样式预设列表可能会更改。 | -
 |====
 
+== 运行时选项 [[image-options]]
 
-== Runtime Options [[image-options]]
+https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-stabilityai/src/main/java/org/springframework/ai/stabilityai/api/StabilityAiImageOptions.java[StabilityAiImageOptions.java] 提供模型配置，例如要使用的模型、样式、尺寸等。
 
-The https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-stabilityai/src/main/java/org/springframework/ai/stabilityai/api/StabilityAiImageOptions.java[StabilityAiImageOptions.java] provides model configurations, such as the model to use, the style, the size, etc.
+在启动时，可以通过 `StabilityAiImageModel(StabilityAiApi stabilityAiApi, StabilityAiImageOptions options)` 构造函数配置默认选项。或者，使用前面描述的 `spring.ai.openai.image.options.*` 属性。
 
-On start-up, the default options can be configured with the `StabilityAiImageModel(StabilityAiApi stabilityAiApi, StabilityAiImageOptions options)` constructor. Alternatively, use the `spring.ai.openai.image.options.*` properties described previously.
-
-At runtime, you can override the default options by adding new, request specific, options to the `ImagePrompt` call.
-For example to override the Stability AI specific options such as quality and the number of images to create, use the following code example:
+在运行时，您可以通过向 `ImagePrompt` 调用添加新的、特定于请求的选项来覆盖默认选项。
+例如，要覆盖 Stability AI 特定选项，如质量和要创建的图像数量，请使用以下代码示例：
 
 [source,java]
 ----
@@ -140,4 +136,4 @@ ImageResponse response = stabilityaiImageModel.call(
 );
 ----
 
-TIP: In addition to the model specific https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-stabilityai/src/main/java/org/springframework/ai/stabilityai/api/StabilityAiImageOptions.java[StabilityAiImageOptions] you can use a portable https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] instance, created with the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()].
+提示：除了模型特定的 https://github.com/spring-projects/spring-ai/blob/main/models/spring-ai-stabilityai/src/main/java/org/springframework/ai/stabilityai/api/StabilityAiImageOptions.java[StabilityAiImageOptions] 之外，您还可以使用可移植的 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptions.java[ImageOptions] 实例，该实例使用 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/image/ImageOptionsBuilder.java[ImageOptionsBuilder#builder()] 创建。

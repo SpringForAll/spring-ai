@@ -1,131 +1,128 @@
 [[upgrade-notes]]
-= Upgrade Notes
+= 升级说明
 
 [[upgrading-to-1-0-0-snapshot]]
-== Upgrading to 1.0.0-SNAPSHOT
+== 升级到 1.0.0-SNAPSHOT
 
-=== Overview
-The 1.0.0-SNAPSHOT version includes significant changes to artifact IDs, package names, and module structure. This section provides guidance specific to using the SNAPSHOT version.
+=== 概述
+1.0.0-SNAPSHOT 版本包含对构件 ID、包名和模块结构的重大更改。本节提供特定于使用 SNAPSHOT 版本的指导。
 
-=== Add Snapshot Repositories
+=== 添加快照仓库
 
-To use the 1.0.0-SNAPSHOT version, you need to add the snapshot repositories to your build file.
-For detailed instructions, refer to the xref:getting-started.adoc#snapshots-add-snapshot-repositories[Snapshots - Add Snapshot Repositories] section in the Getting Started guide.
+要使用 1.0.0-SNAPSHOT 版本，您需要在构建文件中添加快照仓库。
+有关详细说明，请参阅入门指南中的 xref:getting-started.adoc#snapshots-add-snapshot-repositories[快照 - 添加快照仓库]部分。
 
-=== Update Dependency Management
+=== 更新依赖管理
 
-Update your Spring AI BOM version to `1.0.0-SNAPSHOT` in your build configuration.
-For detailed instructions on configuring dependency management, refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section in the Getting Started guide.
+在构建配置中将 Spring AI BOM 版本更新为 `1.0.0-SNAPSHOT`。
+有关配置依赖管理的详细说明，请参阅入门指南中的 xref:getting-started.adoc#dependency-management[依赖管理]部分。
 
-=== Artifact ID, Package, and Module Changes
-The 1.0.0-SNAPSHOT includes changes to artifact IDs, package names, and module structure.
+=== 构件 ID、包和模块更改
+1.0.0-SNAPSHOT 包含对构件 ID、包名和模块结构的更改。
 
-For details, refer to:
-- xref:upgrade-notes.adoc#common-artifact-id-changes[Common Artifact ID Changes]
-- xref:upgrade-notes.adoc#common-package-changes[Common Package Changes]
-- xref:upgrade-notes.adoc#common-module-structure[Common Module Structure]
-
+有关详细信息，请参阅：
+- xref:upgrade-notes.adoc#common-artifact-id-changes[通用构件 ID 更改]
+- xref:upgrade-notes.adoc#common-package-changes[通用包更改]
+- xref:upgrade-notes.adoc#common-module-structure[通用模块结构]
 
 [[upgrading-to-1-0-0-RC1]]
-== Upgrading to 1.0.0-RC1
+== 升级到 1.0.0-RC1
 
-You can automate the upgrade process to 1.0.0-RC1 using an OpenRewrite recipe.
-This recipe helps apply many of the necessary code changes for this version.
-Find the recipe and usage instructions at https://github.com/arconia-io/arconia-migrations/blob/main/docs/spring-ai.md[Arconia Spring AI Migrations].
+您可以使用 OpenRewrite 配方自动完成升级到 1.0.0-RC1 的过程。
+此配方有助于应用此版本所需的许多代码更改。
+配方及使用说明可在 https://github.com/arconia-io/arconia-migrations/blob/main/docs/spring-ai.md[Arconia Spring AI Migrations] 找到。
 
-=== Breaking Changes
+=== 重大更改
 
+==== 聊天客户端和顾问
 
-==== Chat Client and Advisors
+影响终端用户代码的主要更改包括：
 
-The main changes that impact end user code are:
+* 在 `VectorStoreChatMemoryAdvisor` 中：
+** 常量 `CHAT_MEMORY_RETRIEVE_SIZE_KEY` 已重命名为 `TOP_K`。
+** 常量 `DEFAULT_CHAT_MEMORY_RESPONSE_SIZE`（值：100）已重命名为 `DEFAULT_TOP_K`，新默认值为 20。
 
-* In `VectorStoreChatMemoryAdvisor`:
-** The constant `CHAT_MEMORY_RETRIEVE_SIZE_KEY` has been renamed to `TOP_K`.
-** The constant `DEFAULT_CHAT_MEMORY_RESPONSE_SIZE` (value: 100) has been renamed to `DEFAULT_TOP_K` with a new default value of 20.
+* 常量 `CHAT_MEMORY_CONVERSATION_ID_KEY` 已重命名为 `CONVERSATION_ID`，并从 `AbstractChatMemoryAdvisor` 移动到 `ChatMemory` 接口。更新您的导入以使用 `org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID`。
 
-* The constant `CHAT_MEMORY_CONVERSATION_ID_KEY` has been renamed to `CONVERSATION_ID` and moved from `AbstractChatMemoryAdvisor` to the `ChatMemory` interface. Update your imports to use `org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID`.
+===== 顾问中的自包含模板
 
-===== Self-contained Templates in Advisors
+执行提示增强的内置顾问已更新为使用自包含模板。目标是每个顾问都能独立执行模板操作，不影响或受其他顾问的模板和提示决策影响。
 
-The built-in advisors that perform prompt augmentation have been updated to use self-contained templates. The goal is for each advisor to be able to perform templating operations without affecting nor being affected by templating and prompt decisions in other advisors.
+*如果您为以下顾问提供了自定义模板，您需要更新它们以确保包含所有预期的占位符。*
 
-*If you were providing custom templates for the following advisors, you'll need to update them to ensure all expected placeholders are included.*
+* `QuestionAnswerAdvisor` 需要一个包含以下占位符的模板（参见 xref:api/retrieval-augmented-generation.adoc#_questionansweradvisor[更多详情]）：
+** 一个 `query` 占位符，用于接收用户问题。
+** 一个 `question_answer_context` 占位符，用于接收检索到的上下文。
+* `PromptChatMemoryAdvisor` 需要一个包含以下占位符的模板（参见 xref:api/chat-memory.adoc#_promptchatmemoryadvisor[更多详情]）：
+** 一个 `instructions` 占位符，用于接收原始系统消息。
+** 一个 `memory` 占位符，用于接收检索到的会话记忆。
+* `VectorStoreChatMemoryAdvisor` 需要一个包含以下占位符的模板（参见 xref:api/chat-memory.adoc#_vectorstorechatmemoryadvisor[更多详情]）：
+** 一个 `instructions` 占位符，用于接收原始系统消息。
+** 一个 `long_term_memory` 占位符，用于接收检索到的会话记忆。
 
-* The `QuestionAnswerAdvisor` expects a template with the following placeholders (see xref:api/retrieval-augmented-generation.adoc#_questionansweradvisor[more details]):
-** a `query` placeholder to receive the user question.
-** a `question_answer_context` placeholder to receive the retrieved context.
-* The `PromptChatMemoryAdvisor` expects a template with the following placeholders (see xref:api/chat-memory.adoc#_promptchatmemoryadvisor[more details]):
-** an `instructions` placeholder to receive the original system message.
-** a `memory` placeholder to receive the retrieved conversation memory.
-* The `VectorStoreChatMemoryAdvisor` expects a template with the following placeholders (see xref:api/chat-memory.adoc#_vectorstorechatmemoryadvisor[more details]):
-** an `instructions` placeholder to receive the original system message.
-** a `long_term_memory` placeholder to receive the retrieved conversation memory.
-
-==== Observability
-* Refactored content observation to use logging instead of tracing (https://github.com/spring-projects/spring-ai/commit/ca843e85887aa1da6300c77550c379c103500897[ca843e8])
-  ** Replaced content observation filters with logging handlers
-  ** Renamed configuration properties to better reflect their purpose:
+==== 可观察性
+* 重构内容观察以使用日志记录而非追踪（https://github.com/spring-projects/spring-ai/commit/ca843e85887aa1da6300c77550c379c103500897[ca843e8]）
+  ** 用日志处理程序替换内容观察过滤器
+  ** 重命名配置属性以更好地反映其用途：
     *** `include-prompt` → `log-prompt`
     *** `include-completion` → `log-completion`
     *** `include-query-response` → `log-query-response`
-  ** Added `TracingAwareLoggingObservationHandler` for trace-aware logging
-  ** Replaced `micrometer-tracing-bridge-otel` with `micrometer-tracing`
-  ** Removed event-based tracing in favor of direct logging
-  ** Removed direct dependency on the OTel SDK
-  ** Renamed `includePrompt` to `logPrompt` in observation properties (in `ChatClientBuilderProperties`, `ChatObservationProperties`, and `ImageObservationProperties`)
+  ** 添加了 `TracingAwareLoggingObservationHandler` 以支持追踪感知日志记录
+  ** 用 `micrometer-tracing` 替换 `micrometer-tracing-bridge-otel`
+  ** 移除基于事件的追踪，转而使用直接日志记录
+  ** 移除对 OTel SDK 的直接依赖
+  ** 在观察属性中将 `includePrompt` 重命名为 `logPrompt`（在 `ChatClientBuilderProperties`、`ChatObservationProperties` 和 `ImageObservationProperties` 中）
 
-==== Chat Memory Repository Module and Autoconfiguration Renaming
+==== 聊天记忆存储模块和自动配置重命名
 
-We've standardized the naming pattern for chat memory components by adding the repository suffix throughout the codebase. This change affects Cassandra, JDBC, and Neo4j implementations, impacting artifact IDs, Java package names, and class names for clarity.
+我们通过在整个代码库中添加存储库后缀，标准化了聊天记忆组件的命名模式。此更改影响了 Cassandra、JDBC 和 Neo4j 实现，涉及构件 ID、Java 包名和类名，以提高清晰度。
 
-==== Artifact IDs
-All memory-related artifacts now follow a consistent pattern:
+==== 构件 ID
+所有与记忆相关的构件现在遵循一致的模式：
 
 * `spring-ai-model-chat-memory-*` → `spring-ai-model-chat-memory-repository-*`
 * `spring-ai-autoconfigure-model-chat-memory-*` → `spring-ai-autoconfigure-model-chat-memory-repository-*`
 * `spring-ai-starter-model-chat-memory-*` → `spring-ai-starter-model-chat-memory-repository-*`
 
-==== Java Packages
+==== Java 包
 
-* Package paths now include `.repository.` segment
-* Example: `org.springframework.ai.chat.memory.jdbc` → `org.springframework.ai.chat.memory.repository.jdbc`
+* 包路径现在包含 `.repository.` 段
+* 示例：`org.springframework.ai.chat.memory.jdbc` → `org.springframework.ai.chat.memory.repository.jdbc`
 
-==== Configuration Classes
+==== 配置类
 
-* Main autoconfiguration classes now use the `Repository` suffix
-* Example: `JdbcChatMemoryAutoConfiguration` → `JdbcChatMemoryRepositoryAutoConfiguration`
+* 主要自动配置类现在使用 `Repository` 后缀
+* 示例：`JdbcChatMemoryAutoConfiguration` → `JdbcChatMemoryRepositoryAutoConfiguration`
 
-==== Properties
+==== 属性
 
-* Configuration properties renamed from `spring.ai.chat.memory.<storage>...` to `spring.ai.chat.memory.repository.<storage>...`
+* 配置属性从 `spring.ai.chat.memory.<storage>...` 重命名为 `spring.ai.chat.memory.repository.<storage>...`
 
+**所需迁移：**
+- 更新 Maven/Gradle 依赖以使用新的构件 ID。
+- 更新使用旧包名或类名的任何导入、类引用或配置。
 
-**Migration Required:**
-- Update your Maven/Gradle dependencies to use the new artifact IDs.
-- Update any imports, class references, or configuration that used the old package or class names.
+==== 消息聚合器重构
 
-==== Message Aggregator Refactoring
+===== 更改
 
-===== Changes
+* `MessageAggregator` 类已从 `spring-ai-client-chat` 模块中的 `org.springframework.ai.chat.model` 包移动到 `spring-ai-model` 模块（包名保持不变）
+* `aggregateChatClientResponse` 方法已从 `MessageAggregator` 中移除，并移动到 `org.springframework.ai.chat.client` 包中的新类 `ChatClientMessageAggregator`
 
-* `MessageAggregator` class has been moved from `org.springframework.ai.chat.model` package in the `spring-ai-client-chat` module to the `spring-ai-model` module (same package name)
-* The `aggregateChatClientResponse` method has been removed from `MessageAggregator` and moved to a new class `ChatClientMessageAggregator` in the `org.springframework.ai.chat.client` package
+===== 迁移指南
 
-===== Migration Guide
-
-If you were directly using the `aggregateChatClientResponse` method from `MessageAggregator`, you need to use the new `ChatClientMessageAggregator` class instead:
+如果您直接使用了 `MessageAggregator` 的 `aggregateChatClientResponse` 方法，您需要改为使用新的 `ChatClientMessageAggregator` 类：
 
 [source,java]
 ----
-// Before
+// 之前
 new MessageAggregator().aggregateChatClientResponse(chatClientResponses, aggregationHandler);
 
-// After
+// 之后
 new ChatClientMessageAggregator().aggregateChatClientResponse(chatClientResponses, aggregationHandler);
 ----
 
-Don't forget to add the appropriate import:
+别忘了添加相应的导入：
 
 [source,java]
 ----
@@ -133,261 +130,261 @@ import org.springframework.ai.chat.client.ChatClientMessageAggregator;
 ----
 
 ==== Watson
-The Watson AI model was removed as it was based on the older text generation that is considered outdated as there is a new chat generation model available.
-Hopefully Watson will reappear in a future version of Spring AI
+Watson AI 模型已被移除，因为它基于较旧的文本生成技术，现已被认为过时，因为有新的聊天生成模型可用。
+希望 Watson 在 Spring AI 的未来版本中重新出现。
 
-==== MoonShot and QianFan
+==== MoonShot 和 QianFan
 
-Moonshot and Qianfan have been removed since they are not accessible from outside China.  These have been moved to the Spring AI Community repository.
+Moonshot 和 Qianfan 已被移除，因为它们在中国以外无法访问。这些已被移动到 Spring AI 社区存储库。
 
-==== Removed Vector Store
-* Removed HanaDB vector store autoconfiguration (https://github.com/spring-projects/spring-ai/commit/f3b46244942c5072c2e2fa89e62cde71c61bbf25[f3b4624])
+==== 移除的向量存储
+* 移除 HanaDB 向量存储自动配置（https://github.com/spring-projects/spring-ai/commit/f3b46244942c5072c2e2fa89e62cde71c61bbf25[f3b4624]）
 
-==== Memory Management
-* Removed CassandraChatMemory implementation (https://github.com/spring-projects/spring-ai/commit/11e3c8f9a6636d77f203968b83625d3e5694c408[11e3c8f])
-* Simplified chat memory advisor hierarchy and removed deprecated API (https://github.com/spring-projects/spring-ai/commit/848a3fd31fadd07c9ba77f6dc30425389d095e9a[848a3fd])
-* Removed deprecations in JdbcChatMemory (https://github.com/spring-projects/spring-ai/commit/356a68f15eea07a040bd27c66442472fc55e6475[356a68f])
-* Refactored chat memory repository artifacts for clarity (https://github.com/spring-projects/spring-ai/commit/2d517eec5cd7ce5f88149b876ed57a06ad353e11[2d517ee])
-* Refactored chat memory repository autoconfigurations and Spring Boot starters for clarity (https://github.com/spring-projects/spring-ai/commit/f6dba1bf083d847cdc07888ba62746683e3d61bb[f6dba1b])
+==== 记忆管理
+* 移除 CassandraChatMemory 实现（https://github.com/spring-projects/spring-ai/commit/11e3c8f9a6636d77f203968b83625d3e5694c408[11e3c8f]）
+* 简化聊天记忆顾问层次结构并移除已弃用的 API（https://github.com/spring-projects/spring-ai/commit/848a3fd31fadd07c9ba77f6dc30425389d095e9a[848a3fd]）
+* 移除 JdbcChatMemory 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/356a68f15eea07a040bd27c66442472fc55e6475[356a68f]）
+* 重构聊天记忆存储库构件以提高清晰度（https://github.com/spring-projects/spring-ai/commit/2d517eec5cd7ce5f88149b876ed57a06ad353e11[2d517ee]）
+* 重构聊天记忆存储库自动配置和 Spring Boot 启动器以提高清晰度（https://github.com/spring-projects/spring-ai/commit/f6dba1bf083d847cdc07888ba62746683e3d61bb[f6dba1b]）
 
-==== Message and Template APIs
-* Removed deprecated UserMessage constructors (https://github.com/spring-projects/spring-ai/commit/06edee406978d172a1f87f4c7b255282f9d55e4c[06edee4])
-* Removed deprecated PromptTemplate constructors (https://github.com/spring-projects/spring-ai/commit/722c77e812f3f3ea40cf2258056fcf1578b15c62[722c77e])
-* Removed deprecated methods from Media (https://github.com/spring-projects/spring-ai/commit/228ef10bfbfe279d7d09f2a7ba166db873372118[228ef10])
-* Refactored StTemplateRenderer: renamed supportStFunctions to validateStFunctions (https://github.com/spring-projects/spring-ai/commit/0e15197298c0848b78a746f3d740191e6a6aee7a[0e15197])
-* Removed left over TemplateRender interface after moving it (https://github.com/spring-projects/spring-ai/commit/52675d854ccecbc702cec24c4f070520eca64938[52675d8])
+==== 消息和模板 API
+* 移除已弃用的 UserMessage 构造函数（https://github.com/spring-projects/spring-ai/commit/06edee406978d172a1f87f4c7b255282f9d55e4c[06edee4]）
+* 移除已弃用的 PromptTemplate 构造函数（https://github.com/spring-projects/spring-ai/commit/722c77e812f3f3ea40cf2258056fcf1578b15c62[722c77e]）
+* 移除 Media 中的已弃用方法（https://github.com/spring-projects/spring-ai/commit/228ef10bfbfe279d7d09f2a7ba166db873372118[228ef10]）
+* 重构 StTemplateRenderer：将 supportStFunctions 重命名为 validateStFunctions（https://github.com/spring-projects/spring-ai/commit/0e15197298c0848b78a746f3d740191e6a6aee7a[0e15197]）
+* 移除移动后的剩余 TemplateRender 接口（https://github.com/spring-projects/spring-ai/commit/52675d854ccecbc702cec24c4f070520eca64938[52675d8]）
 
-==== Additional Client API Changes
-* Removed deprecations in ChatClient and Advisors (https://github.com/spring-projects/spring-ai/commit/4fe74d886e26d52abf6f2f5545264d422a0be4b2[4fe74d8])
-* Removed deprecations from OllamaApi and AnthropicApi (https://github.com/spring-projects/spring-ai/commit/46be8987d6bc385bf74b9296aa4308c7a8658d2f[46be898])
+==== 其他客户端 API 更改
+* 移除 ChatClient 和 Advisors 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/4fe74d886e26d52abf6f2f5545264d422a0be4b2[4fe74d8]）
+* 移除 OllamaApi 和 AnthropicApi 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/46be8987d6bc385bf74b9296aa4308c7a8658d2f[46be898]）
 
-==== Package Structure Changes
-* Removed inter-package dependency cycles in spring-ai-model (https://github.com/spring-projects/spring-ai/commit/ebfa5b9b2cc2ab0d20e25dc6128c4b1c9c327f89[ebfa5b9])
-* Moved MessageAggregator to spring-ai-model module (https://github.com/spring-projects/spring-ai/commit/54e5c07428909ceec248e3bbd71e2df4b0812e49[54e5c07])
+==== 包结构更改
+* 移除 spring-ai-model 中的包间依赖循环（https://github.com/spring-projects/spring-ai/commit/ebfa5b9b2cc2ab0d20e25dc6128c4b1c9c327f89[ebfa5b9]）
+* 将 MessageAggregator 移动到 spring-ai-model 模块（https://github.com/spring-projects/spring-ai/commit/54e5c07428909ceec248e3bbd71e2df4b0812e49[54e5c07]）
 
-==== Dependencies
-* Removed unused json-path dependency in spring-ai-openai (https://github.com/spring-projects/spring-ai/commit/9de13d1b2fdb67219dc7afbf319ade789784f2b9[9de13d1])
+==== 依赖
+* 移除 spring-ai-openai 中未使用的 json-path 依赖（https://github.com/spring-projects/spring-ai/commit/9de13d1b2fdb67219dc7afbf319ade789784f2b9[9de13d1]）
 
-=== Behavior Changes
+=== 行为更改
 
 ==== Azure OpenAI
-* Added Entra ID identity management for Azure OpenAI with clean autoconfiguration (https://github.com/spring-projects/spring-ai/commit/3dc86d33ce90ebd68ec3997a0eb4704ab7774e99[3dc86d3])
+* 为 Azure OpenAI 添加了 Entra ID 身份管理，并提供清晰的自动配置（https://github.com/spring-projects/spring-ai/commit/3dc86d33ce90ebd68ec3997a0eb4704ab7774e99[3dc86d3]）
 
-=== General Cleanup
-* Removed all code deprecations (https://github.com/spring-projects/spring-ai/commit/76bee8ceb2854839f93a6c52876f50bb24219355[76bee8c]) and (https://github.com/spring-projects/spring-ai/commit/b6ce7f3e4a7aafe6b9031043f63813dde6e73605[b6ce7f3])
+=== 常规清理
+* 移除所有代码弃用项（https://github.com/spring-projects/spring-ai/commit/76bee8ceb2854839f93a6c52876f50bb24219355[76bee8c]）和（https://github.com/spring-projects/spring-ai/commit/b6ce7f3e4a7aafe6b9031043f63813dde6e73605[b6ce7f3]）
 
 [[upgrading-to-1-0-0-m8]]
-== Upgrading to 1.0.0-M8
+== 升级到 1.0.0-M8
 
-You can automate the upgrade process to 1.0.0-M8 using an OpenRewrite recipe.
-This recipe helps apply many of the necessary code changes for this version.
-Find the recipe and usage instructions at https://github.com/arconia-io/arconia-migrations/blob/main/docs/spring-ai.md[Arconia Spring AI Migrations].
+您可以使用 OpenRewrite 配方自动完成升级到 1.0.0-M8 的过程。
+此配方有助于应用此版本所需的许多代码更改。
+配方及使用说明可在 https://github.com/arconia-io/arconia-migrations/blob/main/docs/spring-ai.md[Arconia Spring AI Migrations] 找到。
 
-=== Breaking Changes
+=== 重大更改
 
-When upgrading from Spring AI 1.0 M7 to 1.0 M8, users who previously registered tool callbacks are encountering breaking changes that cause tool calling functionality to silently fail. This is specifically impacting code that used the deprecated `tools()` method.
+从 Spring AI 1.0 M7 升级到 1.0 M8 时，之前注册工具回调的用户会遇到重大更改，导致工具调用功能无声失败。这特别影响使用已弃用的 `tools()` 方法的代码。
 
-==== Example
+==== 示例
 
-Here's an example of code that worked in M7 but no longer functions as expected in M8:
+以下是在 M7 中有效但在 M8 中不再按预期工作的代码示例：
 
 [source,java]
 ----
-// This worked in M7 but silently fails in M8
+// 在 M7 中有效，但在 M8 中无声失败
 ChatClient chatClient = new OpenAiChatClient(api)
     .tools(List.of(
-        new Tool("get_current_weather", "Get the current weather in a given location", 
-            new ToolSpecification.ToolParameter("location", "The city and state, e.g. San Francisco, CA", true))
+        new Tool("get_current_weather", "获取指定位置的当前天气", 
+            new ToolSpecification.ToolParameter("location", "城市和州，例如旧金山，加州", true))
     ))
     .toolCallbacks(List.of(
         new ToolCallback("get_current_weather", (toolName, params) -> {
-            // Weather retrieval logic
+            // 天气检索逻辑
             return Map.of("temperature", 72, "unit", "fahrenheit", "description", "Sunny");
         })
     ));
 ----
 
-==== Solution
+==== 解决方案
 
-The solution is to use the `toolSpecifications()` method instead of the deprecated `tools()` method:
+解决方案是使用 `toolSpecifications()` 方法替代已弃用的 `tools()` 方法：
 
 [source,java]
 ----
-// This works in M8
+// 在 M8 中有效
 ChatClient chatClient = new OpenAiChatClient(api)
     .toolSpecifications(List.of(
-        new Tool("get_current_weather", "Get the current weather in a given location", 
-            new ToolSpecification.ToolParameter("location", "The city and state, e.g. San Francisco, CA", true))
+        new Tool("get_current_weather", "获取指定位置的当前天气", 
+            new ToolSpecification.ToolParameter("location", "城市和州，例如旧金山，加州", true))
     ))
     .toolCallbacks(List.of(
         new ToolCallback("get_current_weather", (toolName, params) -> {
-            // Weather retrieval logic
+            // 天气检索逻辑
             return Map.of("temperature", 72, "unit", "fahrenheit", "description", "Sunny");
         })
     ));
 ----
 
-=== Removed Implementations and APIs
+=== 移除的实现和 API
 
-==== Memory Management
-* Removed CassandraChatMemory implementation (https://github.com/spring-projects/spring-ai/commit/11e3c8f9a6636d77f203968b83625d3e5694c408[11e3c8f])
-* Simplified chat memory advisor hierarchy and removed deprecated API (https://github.com/spring-projects/spring-ai/commit/848a3fd31fadd07c9ba77f6dc30425389d095e9a[848a3fd])
-* Removed deprecations in JdbcChatMemory (https://github.com/spring-projects/spring-ai/commit/356a68f15eea07a040bd27c66442472fc55e6475[356a68f])
-* Refactored chat memory repository artifacts for clarity (https://github.com/spring-projects/spring-ai/commit/2d517eec5cd7ce5f88149b876ed57a06ad353e11[2d517ee])
-* Refactored chat memory repository autoconfigurations and Spring Boot starters for clarity (https://github.com/spring-projects/spring-ai/commit/f6dba1bf083d847cdc07888ba62746683e3d61bb[f6dba1b])
+==== 记忆管理
+* 移除 CassandraChatMemory 实现（https://github.com/spring-projects/spring-ai/commit/11e3c8f9a6636d77f203968b83625d3e5694c408[11e3c8f]）
+* 简化聊天记忆顾问层次结构并移除已弃用的 API（https://github.com/spring-projects/spring-ai/commit/848a3fd31fadd07c9ba77f6dc30425389d095e9a[848a3fd]）
+* 移除 JdbcChatMemory 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/356a68f15eea07a040bd27c66442472fc55e6475[356a68f]）
+* 重构聊天记忆存储库构件以提高清晰度（https://github.com/spring-projects/spring-ai/commit/2d517eec5cd7ce5f88149b876ed57a06ad353e11[2d517ee]）
+* 重构聊天记忆存储库自动配置和 Spring Boot 启动器以提高清晰度（https://github.com/spring-projects/spring-ai/commit/f6dba1bf083d847cdc07888ba62746683e3d61bb[f6dba1b]）
 
-==== Client APIs
-* Removed deprecations in ChatClient and Advisors (https://github.com/spring-projects/spring-ai/commit/4fe74d886e26d52abf6f2f5545264d422a0be4b2[4fe74d8])
-* Breaking changes to chatclient tool calling (https://github.com/spring-projects/spring-ai/commit/5b7849de088b3c93c7ec894fcaddc85a611a8572[5b7849d])
-* Removed deprecations from OllamaApi and AnthropicApi (https://github.com/spring-projects/spring-ai/commit/46be8987d6bc385bf74b9296aa4308c7a8658d2f[46be898])
+==== 客户端 API
+* 移除 ChatClient 和 Advisors 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/4fe74d886e26d52abf6f2f5545264d422a0be4b2[4fe74d8]）
+* 聊天客户端工具调用的重大更改（https://github.com/spring-projects/spring-ai/commit/5b7849de088b3c93c7ec894fcaddc85a611a8572[5b7849d]）
+* 移除 OllamaApi 和 AnthropicApi 中的已弃用项（https://github.com/spring-projects/spring-ai/commit/46be8987d6bc385bf74b9296aa4308c7a8658d2f[46be898]）
 
-==== Message and Template APIs
-* Removed deprecated UserMessage constructors (https://github.com/spring-projects/spring-ai/commit/06edee406978d172a1f87f4c7b255282f9d55e4c[06edee4])
-* Removed deprecated PromptTemplate constructors (https://github.com/spring-projects/spring-ai/commit/722c77e812f3f3ea40cf2258056fcf1578b15c62[722c77e])
-* Removed deprecated methods from Media (https://github.com/spring-projects/spring-ai/commit/228ef10bfbfe279d7d09f2a7ba166db873372118[228ef10])
-* Refactored StTemplateRenderer: renamed supportStFunctions to validateStFunctions (https://github.com/spring-projects/spring-ai/commit/0e15197298c0848b78a746f3d740191e6a6aee7a[0e15197])
-* Removed left over TemplateRender interface after moving it (https://github.com/spring-projects/spring-ai/commit/52675d854ccecbc702cec24c4f070520eca64938[52675d8])
+==== 消息和模板 API
+* 移除已弃用的 UserMessage 构造函数（https://github.com/spring-projects/spring-ai/commit/06edee406978d172a1f87f4c7b255282f9d55e4c[06edee4]）
+* 移除已弃用的 PromptTemplate 构造函数（https://github.com/spring-projects/spring-ai/commit/722c77e812f3f3ea40cf2258056fcf1578b15c62[722c77e]）
+* 移除 Media 中的已弃用方法（https://github.com/spring-projects/spring-ai/commit/228ef10bfbfe279d7d09f2a7ba166db873372118[228ef10]）
+* 重构 StTemplateRenderer：将 supportStFunctions 重命名为 validateStFunctions（https://github.com/spring-projects/spring-ai/commit/0e15197298c0848b78a746f3d740191e6a6aee7a[0e15197]）
+* 移除移动后的剩余 TemplateRender 接口（https://github.com/spring-projects/spring-ai/commit/52675d854ccecbc702cec24c4f070520eca64938[52675d8]）
 
-==== Model Implementations
-* Removed Watson text generation model (https://github.com/spring-projects/spring-ai/commit/9e71b163e315199fe7b46495d87a0828a807b88f[9e71b16])
-* Removed Qianfan code (https://github.com/spring-projects/spring-ai/commit/bfcaad7b5495c5927a62b44169e8713e044c2497[bfcaad7])
-* Removed HanaDB vector store autoconfiguration (https://github.com/spring-projects/spring-ai/commit/f3b46244942c5072c2e2fa89e62cde71c61bbf25[f3b4624])
-* Removed deepseek options from OpenAiApi (https://github.com/spring-projects/spring-ai/commit/59b36d14dab72d76f2f3d49ce9385a69faaabbba[59b36d1])
+==== 模型实现
+* 移除 Watson 文本生成模型（https://github.com/spring-projects/spring-ai/commit/9e71b163e315199fe7b46495d87a0828a807b88f[9e71b16]）
+* 移除 Qianfan 代码（https://github.com/spring-projects/spring-ai/commit/bfcaad7b5495c5927a62b44169e8713e044c2497[bfcaad7]）
+* 移除 HanaDB 向量存储自动配置（https://github.com/spring-projects/spring-ai/commit/f3b46244942c5072c2e2fa89e62cde71c61bbf25[f3b4624]）
+* 从 OpenAiApi 中移除 deepseek 选项（https://github.com/spring-projects/spring-ai/commit/59b36d14dab72d76f2f3d49ce9385a69faaabbba[59b36d1]）
 
-==== Package Structure Changes
-* Removed inter-package dependency cycles in spring-ai-model (https://github.com/spring-projects/spring-ai/commit/ebfa5b9b2cc2ab0d20e25dc6128c4b1c9c327f89[ebfa5b9])
-* Moved MessageAggregator to spring-ai-model module (https://github.com/spring-projects/spring-ai/commit/54e5c07428909ceec248e3bbd71e2df4b0812e49[54e5c07])
+==== 包结构更改
+* 移除 spring-ai-model 中的包间依赖循环（https://github.com/spring-projects/spring-ai/commit/ebfa5b9b2cc2ab0d20e25dc6128c4b1c9c327f89[ebfa5b9]）
+* 将 MessageAggregator 移动到 spring-ai-model 模块（https://github.com/spring-projects/spring-ai/commit/54e5c07428909ceec248e3bbd71e2df4b0812e49[54e5c07]）
 
-==== Dependencies
-* Removed unused json-path dependency in spring-ai-openai (https://github.com/spring-projects/spring-ai/commit/9de13d1b2fdb67219dc7afbf319ade789784f2b9[9de13d1])
+==== 依赖
+* 移除 spring-ai-openai 中未使用的 json-path 依赖（https://github.com/spring-projects/spring-ai/commit/9de13d1b2fdb67219dc7afbf319ade789784f2b9[9de13d1]）
 
-=== Behavior Changes
+=== 行为更改
 
-==== Observability
-* Refactored content observation to use logging instead of tracing (https://github.com/spring-projects/spring-ai/commit/ca843e85887aa1da6300c77550c379c103500897[ca843e8])
-  ** Replaced content observation filters with logging handlers
-  ** Renamed configuration properties to better reflect their purpose:
+==== 可观察性
+* 重构内容观察以使用日志记录而非追踪（https://github.com/spring-projects/spring-ai/commit/ca843e85887aa1da6300c77550c379c103500897[ca843e8]）
+  ** 用日志处理程序替换内容观察过滤器
+  ** 重命名配置属性以更好地反映其用途：
     *** `include-prompt` → `log-prompt`
     *** `include-completion` → `log-completion`
     *** `include-query-response` → `log-query-response`
-  ** Added `TracingAwareLoggingObservationHandler` for trace-aware logging
-  ** Replaced `micrometer-tracing-bridge-otel` with `micrometer-tracing`
-  ** Removed event-based tracing in favor of direct logging
-  ** Removed direct dependency on the OTel SDK
-  ** Renamed `includePrompt` to `logPrompt` in observation properties (in `ChatClientBuilderProperties`, `ChatObservationProperties`, and `ImageObservationProperties`)
+  ** 添加了 `TracingAwareLoggingObservationHandler` 以支持追踪感知日志记录
+  ** 用 `micrometer-tracing` 替换 `micrometer-tracing-bridge-otel`
+  ** 移除基于事件的追踪，转而使用直接日志记录
+  ** 移除对 OTel SDK 的直接依赖
+  ** 在观察属性中将 `includePrompt` 重命名为 `logPrompt`（在 `ChatClientBuilderProperties`、`ChatObservationProperties` 和 `ImageObservationProperties` 中）
 
 ==== Azure OpenAI
-* Added Entra ID identity management for Azure OpenAI with clean autoconfiguration (https://github.com/spring-projects/spring-ai/commit/3dc86d33ce90ebd68ec3997a0eb4704ab7774e99[3dc86d3])
+* 为 Azure OpenAI 添加了 Entra ID 身份管理，并提供清晰的自动配置（https://github.com/spring-projects/spring-ai/commit/3dc86d33ce90ebd68ec3997a0eb4704ab7774e99[3dc86d3]）
 
-=== General Cleanup
-* Removed all deprecations from 1.0.0-M8 (https://github.com/spring-projects/spring-ai/commit/76bee8ceb2854839f93a6c52876f50bb24219355[76bee8c])
-* General deprecation cleanup (https://github.com/spring-projects/spring-ai/commit/b6ce7f3e4a7aafe6b9031043f63813dde6e73605[b6ce7f3])
+=== 常规清理
+* 从 1.0.0-M8 移除所有弃用项（https://github.com/spring-projects/spring-ai/commit/76bee8ceb2854839f93a6c52876f50bb24219355[76bee8c]）
+* 常规弃用清理（https://github.com/spring-projects/spring-ai/commit/b6ce7f3e4a7aafe6b9031043f63813dde6e73605[b6ce7f3]）
 
 [[upgrading-to-1-0-0-m7]]
-== Upgrading to 1.0.0-M7
+== 升级到 1.0.0-M7
 
-=== Overview of Changes
-Spring AI 1.0.0-M7 is the last milestone release before the RC1 and GA releases. It introduces several important changes to artifact IDs, package names, and module structure that will be maintained in the final release.
+=== 更改概述
+Spring AI 1.0.0-M7 是 RC1 和 GA 发布前的最后一个里程碑版本。它引入了将在最终版本中保留的构件 ID、包名和模块结构的几个重要更改。
 
-=== Artifact ID, Package, and Module Changes
-The 1.0.0-M7 includes the same structural changes as 1.0.0-SNAPSHOT.
+=== 构件 ID、包和模块更改
+1.0.0-M7 包含与 1.0.0-SNAPSHOT 相同的结构更改。
 
-For details, refer to:
-- xref:upgrade-notes.adoc#common-artifact-id-changes[Common Artifact ID Changes]
-- xref:upgrade-notes.adoc#common-package-changes[Common Package Changes]
-- xref:upgrade-notes.adoc#common-module-structure[Common Module Structure]
+有关详情，请参阅：
+- xref:upgrade-notes.adoc#common-artifact-id-changes[通用构件 ID 更改]
+- xref:upgrade-notes.adoc#common-package-changes[通用包更改]
+- xref:upgrade-notes.adoc#common-module-structure[通用模块结构]
 
-=== MCP Java SDK Upgrade to 0.9.0
+=== MCP Java SDK 升级到 0.9.0
 
-Spring AI 1.0.0-M7 now uses MCP Java SDK version 0.9.0, which includes significant changes from previous versions. If you're using MCP in your applications, you'll need to update your code to accommodate these changes.
+Spring AI 1.0.0-M7 现在使用 MCP Java SDK 版本 0.9.0，其中包括与之前版本的重大更改。如果您的应用程序中使用 MCP，您需要更新代码以适应这些更改。
 
-Key changes include:
+主要更改包括：
 
-==== Interface Renaming
+==== 接口重命名
 
 * `ClientMcpTransport` → `McpClientTransport`
 * `ServerMcpTransport` → `McpServerTransport`
-* `DefaultMcpSession` → `McpClientSession` or `McpServerSession`
-* All `*Registration` classes → `*Specification` classes
+* `DefaultMcpSession` → `McpClientSession` 或 `McpServerSession`
+* 所有 `*Registration` 类 → `*Specification` 类
 
-==== Server Creation Changes
+==== 服务器创建更改
 
-* Use `McpServerTransportProvider` instead of `ServerMcpTransport`
+* 使用 `McpServerTransportProvider` 替代 `ServerMcpTransport`
 
 [source,java]
 ----
-// Before
+// 之前
 ServerMcpTransport transport = new WebFluxSseServerTransport(objectMapper, "/mcp/message");
 var server = McpServer.sync(transport)
     .serverInfo("my-server", "1.0.0")
     .build();
 
-// After
+// 之后
 McpServerTransportProvider transportProvider = new WebFluxSseServerTransportProvider(objectMapper, "/mcp/message");
 var server = McpServer.sync(transportProvider)
     .serverInfo("my-server", "1.0.0")
     .build();
 ----
 
-==== Handler Signature Changes
+==== 处理程序签名更改
 
-All handlers now receive an `exchange` parameter as their first argument:
+所有处理程序现在将 `exchange` 参数作为第一个参数：
 
 [source,java]
 ----
-// Before
+// 之前
 .tool(calculatorTool, args -> new CallToolResult("Result: " + calculate(args)))
 
-// After
+// 之后
 .tool(calculatorTool, (exchange, args) -> new CallToolResult("Result: " + calculate(args)))
 ----
 
-==== Client Interaction via Exchange
+==== 通过 Exchange 进行客户端交互
 
-Methods previously available on the server are now accessed through the exchange object:
+之前在服务器上可用的方法现在通过 exchange 对象访问：
 
 [source,java]
 ----
-// Before
+// 之前
 ClientCapabilities capabilities = server.getClientCapabilities();
 CreateMessageResult result = server.createMessage(new CreateMessageRequest(...));
 
-// After
+// 之后
 ClientCapabilities capabilities = exchange.getClientCapabilities();
 CreateMessageResult result = exchange.createMessage(new CreateMessageRequest(...));
 ----
 
-==== Roots Change Handlers
+==== 根变更处理程序
 
 [source,java]
 ----
-// Before
+// 之前
 .rootsChangeConsumers(List.of(
     roots -> System.out.println("Roots changed: " + roots)
 ))
 
-// After
+// 之后
 .rootsChangeHandlers(List.of(
     (exchange, roots) -> System.out.println("Roots changed: " + roots)
 ))
 ----
 
-For a complete guide to migrating MCP code, refer to the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-docs/src/main/antora/modules/ROOT/pages/mcp-migration.adoc[MCP Migration Guide].
+有关迁移 MCP 代码的完整指南，请参阅 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-docs/src/main/antora/modules/ROOT/pages/mcp-migration.adoc[MCP 迁移指南]。
 
-=== Enabling/Disabling Model Auto-Configuration
+=== 启用/禁用模型自动配置
 
-The previous configuration properties for enabling/disabling model auto-configuration have been removed:
+之前用于启用/禁用模型自动配置的配置属性已被移除：
 
 * `spring.ai.<provider>.chat.enabled`
 * `spring.ai.<provider>.embedding.enabled`
 * `spring.ai.<provider>.image.enabled`
 * `spring.ai.<provider>.moderation.enabled`
 
-By default, if a model provider (e.g., OpenAI, Ollama) is found on the classpath, its corresponding auto-configuration for relevant model types (chat, embedding, etc.) is enabled. If multiple providers for the same model type are present (e.g., both `spring-ai-openai-spring-boot-starter` and `spring-ai-ollama-spring-boot-starter`), you can use the following properties to select *which* provider's auto-configuration should be active, effectively disabling the others for that specific model type.
+默认情况下，如果在类路径中找到模型提供者（例如，OpenAI、Ollama），则会启用其对应的相关模型类型（聊天、嵌入等）的自动配置。如果存在多个相同模型类型的提供者（例如，同时存在 `spring-ai-openai spring-boot-starter` 和 `spring-ai-ollama spring-boot-starter`），您可以使用以下属性选择哪个提供者的自动配置应保持活动状态，从而有效禁用其他提供者的特定模型类型的自动配置。
 
-To disable auto-configuration for a specific model type entirely, even if only one provider is present, set the corresponding property to a value that does not match any provider on the classpath (e.g., `none` or `disabled`).
+要完全禁用特定模型类型的自动配置，即使只有一个提供者在类路径中，也可以通过将相应属性设置为与类路径上任何提供者不匹配的值（例如，`none` 或 `disabled`）。
 
-You can refer to the https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/model/SpringAIModels.java[`SpringAIModels`] enumeration for a list of well-known provider values.
+您可以参考 https://github.com/spring-projects/spring-ai/blob/main/spring-ai-model/src/main/java/org/springframework/ai/model/SpringAIModels.java[`SpringAIModels`] 枚举以获取知名提供者值的列表。
 
 * `spring.ai.model.audio.speech=<model-provider|none>`
 * `spring.ai.model.audio.transcription=<model-provider|none>`
@@ -398,31 +395,31 @@ You can refer to the https://github.com/spring-projects/spring-ai/blob/main/spri
 * `spring.ai.model.image=<model-provider|none>`
 * `spring.ai.model.moderation=<model-provider|none>`
 
-=== Automating upgrading using AI
+=== 使用 AI 自动升级
 
-You can automate the upgrade process to 1.0.0-M7 using the Claude Code CLI tool with a provided prompt:
+您可以使用 Claude Code CLI 工具和提供的提示自动完成升级到 1.0.0-M7 的过程：
 
-1. Download the https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview[Claude Code CLI tool]
-2. Copy the prompt from the https://github.com/spring-projects/spring-ai/blob/main/src/prompts/update-to-m7.txt[update-to-m7.txt] file
-3. Paste the prompt into the Claude Code CLI
-4. The AI will analyze your project and make the necessary changes
+1. 下载 https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview[Claude Code CLI 工具]
+2. 从 https://github.com/spring-projects/spring-ai/blob/main/src/prompts/update-to-m7.txt[update-to-m7.txt] 文件中复制提示
+3. 将提示粘贴到 Claude Code CLI 中
+4. AI 将分析您的项目并进行必要的更改
 
-NOTE: The automated upgrade prompt currently handles artifact ID changes, package relocations, and module structure changes, but does not yet include automatic changes for upgrading to MCP 0.9.0. If you're using MCP, you'll need to manually update your code following the guidance in the xref:upgrade-notes.adoc#mcp-java-sdk-upgrade-to-0-9-0[MCP Java SDK Upgrade] section.
+注意：自动升级提示当前处理构件 ID 更改、包重定位和模块结构更改，但尚未包括升级到 MCP 0.9.0 的自动更改。如果您使用 MCP，您需要按照 xref:upgrade-notes.adoc#mcp-java-sdk-upgrade-to-0-9-0[MCP Java SDK 升级] 部分的指导手动更新代码。
 
 [[common-sections]]
-== Common Changes Across Versions
+== 跨版本的通用更改
 
 [[common-artifact-id-changes]]
-=== Artifact ID Changes
+=== 构件 ID 更改
 
-The naming pattern for Spring AI starter artifacts has changed.
-You'll need to update your dependencies according to the following patterns:
+Spring AI 启动器构件的命名模式已更改。
+您需要根据以下模式更新依赖：
 
-* Model starters: `spring-ai-\{model\}-spring-boot-starter` → `spring-ai-starter-model-\{model\}`
-* Vector Store starters: `spring-ai-\{store\}-store-spring-boot-starter` → `spring-ai-starter-vector-store-\{store\}`
-* MCP starters: `spring-ai-mcp-\{type\}-spring-boot-starter` → `spring-ai-starter-mcp-\{type\}`
+* 模型启动器：`spring-ai-\{model\}-spring-boot-starter` → `spring-ai-starter-model-\{model\}`
+* 向量存储启动器：`spring-ai-\{store\}-store spring-boot-starter` → `spring-ai-starter-vector-store-\{store\}`
+* MCP 启动器：`spring-ai-mcp-\{type\}-spring-boot-starter` → `spring-ai-starter-mcp-\{type\}`
 
-==== Examples
+==== 示例
 
 [tabs]
 ======
@@ -430,13 +427,13 @@ Maven::
 +
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-<!-- BEFORE -->
+<!-- 之前 -->
 <dependency>
     <groupId>org.springframework.ai</groupId>
     <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
 </dependency>
 
-<!-- AFTER -->
+<!-- 之后 -->
 <dependency>
     <groupId>org.springframework.ai</groupId>
     <artifactId>spring-ai-starter-model-openai</artifactId>
@@ -447,27 +444,27 @@ Gradle::
 +
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
-// BEFORE
+// 之前
 implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-implementation 'org.springframework.ai:spring-ai-redis-store-spring-boot-starter'
+implementation 'org.springframework.ai:spring-ai-redis-store spring-boot-starter'
 
-// AFTER
+// 之后
 implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 implementation 'org.springframework.ai:spring-ai-starter-vector-store-redis'
 ----
 ======
 
-==== Changes to Spring AI Autoconfiguration Artifacts
+==== Spring AI 自动配置构件更改
 
-The Spring AI autoconfiguration has changed from a single monolithic artifact to individual autoconfiguration artifacts per model, vector store, and other components.
-This change was made to minimize the impact of different versions of dependent libraries conflicting, such as Google Protocol Buffers, Google RPC, and others.
-By separating autoconfiguration into component-specific artifacts, you can avoid pulling in unnecessary dependencies and reduce the risk of version conflicts in your application.
+Spring AI 自动配置已从单一整体构件更改为每个模型、向量存储和其他组件的单独自动配置构件。
+此更改旨在最大程度地减少不同版本的依赖库冲突的影响，例如 Google Protocol Buffers、Google RPC 等。
+通过将自动配置分离为特定于组件的构件，您可以避免引入不必要的依赖，并减少应用程序中版本冲突的风险。
 
-The original monolithic artifact is no longer available:
+原始的整体构件不再可用：
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-<!-- NO LONGER AVAILABLE -->
+<!-- 不再可用 -->
 <dependency>
     <groupId>org.springframework.ai</groupId>
     <artifactId>spring-ai-spring-boot-autoconfigure</artifactId>
@@ -475,17 +472,17 @@ The original monolithic artifact is no longer available:
 </dependency>
 ----
 
-Instead, each component now has its own autoconfiguration artifact following these patterns:
+现在，每个组件都有自己的自动配置构件，遵循以下模式：
 
-* Model autoconfiguration: `spring-ai-autoconfigure-model-\{model\}`
-* Vector Store autoconfiguration: `spring-ai-autoconfigure-vector-store-\{store\}`
-* MCP autoconfiguration: `spring-ai-autoconfigure-mcp-\{type\}`
+* 模型自动配置：`spring-ai-autoconfigure-model-\{model\}`
+* 向量存储自动配置：`spring-ai-autoconfigure-vector-store-\{store\}`
+* MCP 自动配置：`spring-ai-autoconfigure-mcp-\{type\}`
 
-==== Examples of New Autoconfiguration Artifacts
+==== 新自动配置构件示例
 
 [tabs]
 ======
-Models::
+模型::
 +
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -505,7 +502,7 @@ Models::
 </dependency>
 ----
 
-Vector Stores::
+向量存储::
 +
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -541,136 +538,137 @@ MCP::
 ----
 ======
 
-NOTE: In most cases, you won't need to explicitly add these autoconfiguration dependencies.
-They are included transitively when using the corresponding starter dependencies.
+注意：在大多数情况下，您无需显式添加这些自动配置依赖。
+在使用相应的启动器依赖时，它们会通过传递方式包含。
 
 [[common-package-changes]]
-=== Package Name Changes
+=== 包名更改
 
-Your IDE should assist with refactoring to the new package locations.
+您的 IDE 应能协助重构到新包位置。
 
-* `KeywordMetadataEnricher` and `SummaryMetadataEnricher` have moved from `org.springframework.ai.transformer` to `org.springframework.ai.chat.transformer`.
-* `Content`, `MediaContent`, and `Media` have moved from `org.springframework.ai.model` to `org.springframework.ai.content`.
+* `KeywordMetadataEnricher` 和 `SummaryMetadataEnricher` 已从 `org.springframework.ai.transformer` 移动到 `org.springframework.ai.chat.transformer`。
+* `Content`、`MediaContent` 和 `Media` 已从 `org.springframework.ai.model` 移动到 `org.springframework.ai.content`。
 
 [[common-module-structure]]
-=== Module Structure
+=== 模块结构
 
-The project has undergone significant changes to its module and artifact structure. Previously, `spring-ai-core` contained all central interfaces, but this has now been split into specialized domain modules to reduce unnecessary dependencies in your applications.
+项目对其模块和构件结构进行了重大更改。之前，`spring-ai-core` 包含所有核心接口，但现在已拆分为专门的领域模块，以减少应用程序中的不必要依赖。
 
-image::spring-ai-dependencies.png[Spring AI Dependencies, width=1000, align="center"]
+image::spring-ai-dependencies.png[Spring AI 依赖关系, width=1000, align="center"]
 
 ==== spring-ai-commons
 
-Base module with no dependencies on other Spring AI modules. Contains:
-- Core domain models (`Document`, `TextSplitter`)
-- JSON utilities and resource handling
-- Structured logging and observability support
+基础模块，不依赖其他 Spring AI 模块。包含：
+- 核心领域模型（`Document`、`TextSplitter`）
+- JSON 实用工具和资源处理
+- 结构化日志和可观察性支持
 
 ==== spring-ai-model
 
-Provides AI capability abstractions:
-- Interfaces like `ChatModel`, `EmbeddingModel`, and `ImageModel`
-- Message types and prompt templates
-- Function-calling framework (`ToolDefinition`, `ToolCallback`)
-- Content filtering and observation support
+提供 AI 能力抽象：
+- 接口，如 `ChatModel`、`EmbeddingModel` 和 `ImageModel`
+- 消息类型和提示模板
+- 函数调用框架（`ToolDefinition`、`ToolCallback`）
+- 内容过滤和观察支持
 
 ==== spring-ai-vector-store
 
-Unified vector database abstraction:
-- `VectorStore` interface for similarity search
-- Advanced filtering with SQL-like expressions
-- `SimpleVectorStore` for in-memory usage
-- Batching support for embeddings
+统一的向量数据库抽象：
+- 用于相似性搜索的 `VectorStore` 接口
+- 支持类 SQL 表达式的先进过滤
+- 用于内存使用的 `SimpleVectorStore`
+- 支持批量嵌入
 
 ==== spring-ai-client-chat
 
-High-level conversational AI APIs:
-- `ChatClient` interface
-- Conversation persistence via `ChatMemory`
-- Response conversion with `OutputConverter`
-- Advisor-based interception
-- Synchronous and reactive streaming support
+高级对话 AI API：
+- `ChatClient` 接口
+- 通过 `ChatMemory` 实现会话持久化
+- 使用 `OutputConverter` 进行响应转换
+- 基于顾问的拦截
+- 支持同步和反应式流
 
 ==== spring-ai-advisors-vector-store
 
-Bridges chat with vector stores for RAG:
-- `QuestionAnswerAdvisor`: injects context into prompts
-- `VectorStoreChatMemoryAdvisor`: stores/retrieves conversation history
+将聊天与向量存储连接以实现 RAG：
+- `QuestionAnswerAdvisor`：将上下文注入提示
+- `VectorStoreChatMemoryAdvisor`：存储/检索会话历史
 
 ==== spring-ai-model-chat-memory-cassandra
 
-Apache Cassandra persistence for `ChatMemory`:
-- `CassandraChatMemory` implementation
-- Type-safe CQL with Cassandra's QueryBuilder
+用于 `ChatMemory` 的 Apache Cassandra 持久化：
+- `CassandraChatMemory` 实现
+- 使用 Cassandra 的 QueryBuilder 进行类型安全的 CQL
+
 ==== spring-ai-model-chat-memory-neo4j
 
-Neo4j graph database persistence for chat conversations.
+用于聊天会话的 Neo4j 图数据库持久化。
 
 ==== spring-ai-rag
 
-Comprehensive framework for Retrieval Augmented Generation:
-- Modular architecture for RAG pipelines
-- `RetrievalAugmentationAdvisor` as main entry point
-- Functional programming principles with composable components
+检索增强生成（RAG）的综合框架：
+- RAG 管道的模块化架构
+- `RetrievalAugmentationAdvisor` 作为主要入口点
+- 基于函数式编程原则的可组合组件
 
-=== Dependency Structure
+=== 依赖结构
 
-The dependency hierarchy can be summarized as:
+依赖层次结构可以总结为：
 
-* `spring-ai-commons` (foundation)
-* `spring-ai-model` (depends on commons)
-* `spring-ai-vector-store` and `spring-ai-client-chat` (both depend on model)
-* `spring-ai-advisors-vector-store` and `spring-ai-rag` (depend on both client-chat and vector-store)
-* `spring-ai-model-chat-memory-*` modules (depend on client-chat)
+* `spring-ai-commons`（基础）
+* `spring-ai-model`（依赖 commons）
+* `spring-ai-vector-store` 和 `spring-ai-client-chat`（两者均依赖 model）
+* `spring-ai-advisors-vector-store` 和 `spring-ai-rag`（依赖 client-chat 和 vector-store）
+* `spring-ai-model-chat-memory-*` 模块（依赖 client-chat）
 
 [[common-toolcontext-changes]]
-=== ToolContext Changes
+=== ToolContext 更改
 
-The `ToolContext` class has been enhanced to support both explicit and implicit tool resolution. Tools can now be:
+`ToolContext` 类已增强以支持显式和隐式工具解析。现在工具可以是：
 
-1. **Explicitly Included**: Tools that are explicitly requested in the prompt and included in the call to the model.
-2. **Implicitly Available**: Tools that are made available for runtime dynamic resolution, but never included in any call to the model unless explicitly requested.
+1. **显式包含**：在提示中显式请求并包含在模型调用中的工具。
+2. **隐式可用**：可用于运行时动态解析的工具，但除非显式请求，否则从不包含在模型调用中。
 
-Starting with 1.0.0-M7, tools are only included in the call to the model if they are explicitly requested in the prompt or explicitly included in the call.
+从 1.0.0-M7 开始，工具只有在提示中显式请求或显式包含在调用中时才会被包含在模型调用中。
 
-Additionally, the `ToolContext` class has now been marked as final and cannot be extended anymore. It was never supposed to be subclassed. You can add all the contextual data you need when instantiating a `ToolContext`, in the form of a `Map<String, Object>`. For more information, check the [documentation](https://docs.spring.io/spring-ai/reference/api/tools.html#_tool_context).
+此外，`ToolContext` 类现已被标记为 final，不再能被扩展。它从未打算被子类化。您可以在实例化 `ToolContext` 时添加所需的所有上下文数据，格式为 `Map<String, Object>`。有关更多信息，请查看[文档](https://docs.spring.io/spring-ai/reference/api/tools.html#_tool_context)。
 
 [[upgrading-to-1-0-0-m6]]
-== Upgrading to 1.0.0-M6
+== 升级到 1.0.0-M6
 
-=== Changes to Usage Interface and DefaultUsage Implementation
+=== 使用接口和 DefaultUsage 实现更改
 
-The `Usage` interface and its default implementation `DefaultUsage` have undergone the following changes:
+`Usage` 接口及其默认实现 `DefaultUsage` 经历了以下更改：
 
-1. Method Rename:
-* `getGenerationTokens()` is now `getCompletionTokens()`
+1. 方法重命名：
+* `getGenerationTokens()` 现在为 `getCompletionTokens()`
 
-2. Type Changes:
-* All token count fields in `DefaultUsage` changed from `Long` to `Integer`:
+2. 类型更改：
+* `DefaultUsage` 中的所有令牌计数字段从 `Long` 更改为 `Integer`：
 ** `promptTokens`
-** `completionTokens` (formerly `generationTokens`)
+** `completionTokens`（原为 `generationTokens`）
 ** `totalTokens`
 
-==== Required Actions
+==== 所需操作
 
-* Replace all calls to `getGenerationTokens()` with `getCompletionTokens()`
+* 将所有对 `getGenerationTokens()` 的调用替换为 `getCompletionTokens()`
 
-* Update `DefaultUsage` constructor calls:
+* 更新 `DefaultUsage` 构造函数调用：
 [source,java]
 ----
-// Old (M5)
+// 旧版（M5）
 new DefaultUsage(Long promptTokens, Long generationTokens, Long totalTokens)
 
-// New (M6)
+// 新版（M6）
 new DefaultUsage(Integer promptTokens, Integer completionTokens, Integer totalTokens)
 ----
 
-NOTE: For more information on handling Usage, refer xref:api/usage-handling.adoc[here]
+注意：有关处理 Usage 的更多信息，请参阅 xref:api/usage-handling.adoc[此处]
 
-==== JSON Ser/Deser changes
-While M6 maintains backward compatibility for JSON deserialization of the `generationTokens` field, this field will be removed in M7. Any persisted JSON documents using the old field name should be updated to use `completionTokens`.
+==== JSON 序列化/反序列化更改
+虽然 M6 保持了对 `generationTokens` 字段的 JSON 反序列化的向后兼容性，但此字段将在 M7 中移除。使用旧字段名的任何持久化 JSON 文档应更新为使用 `completionTokens`。
 
-Example of the new JSON format:
+新的 JSON 格式示例：
 [source,json]
 ----
 {
@@ -680,133 +678,123 @@ Example of the new JSON format:
 }
 ----
 
-=== Changes to usage of FunctionCallingOptions for tool calling
+=== FunctionCallingOptions 用于工具调用的更改
 
-Each `ChatModel` instance, at construction time, accepts an optional `ChatOptions` or `FunctionCallingOptions` instance
-that can be used to configure default tools used for calling the model.
+每个 `ChatModel` 实例在构建时接受一个可选的 `ChatOptions` 或 `FunctionCallingOptions` 实例，可用于配置调用模型时使用的默认工具。
 
-Before 1.0.0-M6:
+在 1.0.0-M6 之前：
 
-- any tool passed via the `functions()` method of the default `FunctionCallingOptions` instance was included in
-each call to the model from that `ChatModel` instance, possibly overwritten by runtime options.
-- any tool passed via the `functionCallbacks()` method of the default `FunctionCallingOptions` instance was only
-made available for runtime dynamic resolution (see xref:api/tools.adoc#_tool_resolution[Tool Resolution]), but never
-included in any call to the model unless explicitly requested.
+- 通过默认 `FunctionCallingOptions` 实例的 `functions()` 方法传递的任何工具都会包含在该 `ChatModel` 实例的每次模型调用中，可能会被运行时选项覆盖。
+- 通过默认 `FunctionCallingOptions` 实例的 `functionCallbacks()` 方法传递的任何工具仅用于运行时动态解析（参见 xref:api/tools.adoc#_tool_resolution[工具解析]），除非显式请求，否则从不包含在模型调用中。
 
-Starting 1.0.0-M6:
+从 1.0.0-M6 开始：
 
-- any tool passed via the `functions()` method or the `functionCallbacks()` of the default `FunctionCallingOptions`
-instance is now handled in the same way: it is included in each call to the model from that `ChatModel` instance,
-possibly overwritten by runtime options. With that, there is consistency in the way tools are included in calls
-to the model and prevents any confusion due to a difference in behavior between `functionCallbacks()` and all the other options.
+- 通过默认 `FunctionCallingOptions` 的 `functions()` 方法或 `functionCallbacks()` 方法传递的任何工具现在以相同方式处理：它们包含在该 `ChatModel` 实例的每次模型调用中，可能会被运行时选项覆盖。这确保了工具包含在模型调用中的方式一致，避免了因 `functionCallbacks()` 与其他选项的行为差异而引起的混淆。
 
-If you want to make a tool available for runtime dynamic resolution and include it in a chat request to the model only
-when explicitly requested, you can use one of the strategies described in xref:api/tools.adoc#_tool_resolution[Tool Resolution].
+如果您希望使工具可用于运行时动态解析，并且仅在显式请求时包含在模型的聊天请求中，您可以使用 xref:api/tools.adoc#_tool_resolution[工具解析] 中描述的一种策略。
 
-NOTE: 1.0.0-M6 introduced new APIs for handling tool calling. Backward compatibility is maintained for the old APIs across
-all scenarios, except the one described above. The old APIs are still available, but they are deprecated
-and will be removed in 1.0.0-M7.
+注意：1.0.0-M6 引入了处理工具调用的新 API。旧 API 在所有场景下保持向后兼容性，除了上述情况。旧 API 仍然可用，但已弃用，并将在 1.0.0-M7 中移除。
 
-=== Removal of deprecated Amazon Bedrock chat models
+=== 移除已弃用的 Amazon Bedrock 聊天模型
 
-Starting 1.0.0-M6, Spring AI transitioned to using Amazon Bedrock's Converse API for all Chat conversation implementations in Spring AI.
-All the Amazon Bedrock Chat models are removed except the Embedding models for Cohere and Titan.
+从 1.0.0-M6 开始，Spring AI 过渡到使用 Amazon Bedrock 的 Converse API 实现 Spring AI 中的所有聊天会话实现。
+除 Cohere 和 Titan 的嵌入模型外，所有 Amazon Bedrock 聊天模型均已移除。
 
-NOTE: Refer to xref:api/chat/bedrock-converse.adoc[Bedrock Converse] documentation for using the chat models.
+注意：有关使用聊天模型的更多信息，请参阅 xref:api/chat/bedrock-converse.adoc[Bedrock Converse] 文档。
 
-=== Changes to use Spring Boot 3.4.2 for dependency management
+=== 使用 Spring Boot 3.4.2 进行依赖管理
 
-Spring AI updates to use Spring Boot 3.4.2 for the dependency management. You can refer https://github.com/spring-projects/spring-boot/blob/v3.4.2/spring-boot-project/spring-boot-dependencies/build.gradle[here] for the dependencies managed by Spring Boot 3.4.2
+Spring AI 更新为使用 Spring Boot 3.4.2 进行依赖管理。您可以参考 https://github.com/spring-projects/spring-boot/blob/v3.4.2/spring-boot-project/spring-boot-dependencies/build.gradle[此处] 查看 Spring Boot 3.4.2 管理的依赖。
 
-==== Required Actions
+==== 所需操作
 
-* If you are upgrading to Spring Boot 3.4.2, please make sure to refer to https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes#upgrading-from-spring-boot-33[this] documentation for the changes required to configure the REST Client. Notably, if you don’t have an HTTP client library on the classpath, this will likely result in the use of `JdkClientHttpRequestFactory` where `SimpleClientHttpRequestFactory` would have been used previously. To switch to use `SimpleClientHttpRequestFactory`, you need to set `spring.http.client.factory=simple`.
-* If you are using a different version of Spring Boot (say Spring Boot 3.3.x) and need a specific version of a dependency, you can override it in your build configuration.
+* 如果您升级到 Spring Boot 3.4.2，请确保参考 https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes#upgrading-from spring-boot-33[此文档] 查看配置 REST 客户端所需的更改。特别是，如果类路径中没有 HTTP 客户端库，可能会导致使用 `JdkClientHttpRequestFactory`，而之前可能使用的是 `SimpleClientHttpRequestFactory`。要切换到使用 `SimpleClientHttpRequestFactory`，需要设置 `spring.http.client.factory=simple`。
+* 如果您使用的是其他版本的 Spring Boot（例如 Spring Boot 3.3.x）并且需要特定版本的依赖，可以在构建配置中覆盖它。
 
-=== Vector Store API changes
+=== 向量存储 API 更改
 
-In version 1.0.0-M6, the `delete` method in the `VectorStore` interface has been modified to be a void operation instead of returning an `Optional<Boolean>`.
-If your code previously checked the return value of the delete operation, you'll need to remove this check.
-The operation now throws an exception if the deletion fails, providing more direct error handling.
+在 1.0.0-M6 版本中，`VectorStore` 接口中的 `delete` 方法已修改为 void 操作，而不是返回 `Optional<Boolean>`。
+如果您的代码之前检查了删除操作的返回值，您需要移除此检查。
+现在，如果删除失败，该操作将抛出异常，提供更直接的错误处理。
 
-==== Before 1.0.0-M6:
+==== 1.0.0-M6 之前：
 [source,java]
 ----
 Optional<Boolean> result = vectorStore.delete(ids);
 if (result.isPresent() && result.get()) {
-    // handle successful deletion
+    // 处理成功删除
 }
 ----
 
-==== In 1.0.0-M6 and later:
+==== 1.0.0-M6 及之后：
 [source,java]
 ----
 vectorStore.delete(ids);
-// deletion successful if no exception is thrown
+// 如果没有抛出异常，删除成功
 ----
 
-== Upgrading to 1.0.0.M5
+== 升级到 1.0.0.M5
 
-* Vector Builders have been refactored for consistency.
-* Current VectorStore implementation constructors have been deprecated, use the builder pattern.
-* VectorStore implementation packages have been moved into unique package names, avoiding conflicts across artifact.  For example `org.springframework.ai.vectorstore` to `org.springframework.ai.pgvector.vectorstore`.
+* 向量构建器已重构以保持一致性。
+* 当前向量存储实现构造函数已弃用，使用构建器模式。
+* 向量存储实现包已移动到唯一包名，避免跨构件的冲突。例如，从 `org.springframework.ai.vectorstore` 到 `org.springframework.ai.pgvector.vectorstore`。
 
-== Upgrading to 1.0.0.RC3
+== 升级到 1.0.0.RC3
 
-* The type of the portable chat options (`frequencyPenalty`, `presencePenalty`, `temperature`, `topP`) has been changed from `Float` to `Double`.
+* 可移植聊天选项（`frequencyPenalty`、`presencePenalty`、`temperature`、`topP`）的类型已从 `Float` 更改为 `Double`。
 
-== Upgrading to 1.0.0.M2
+== 升级到 1.0.0.M2
 
-* The configuration prefix for the Chroma Vector Store has been changes from `spring.ai.vectorstore.chroma.store` to `spring.ai.vectorstore.chroma` in order to align with the naming conventions of other vector stores.
+* Chroma 向量存储的配置前缀已从 `spring.ai.vectorstore.chroma.store` 更改为 `spring.ai.vectorstore.chroma`，以与其他向量存储的命名约定保持一致。
 
-* The default value of the `initialize-schema` property on vector stores capable of initializing a schema is now set to `false`.
-This implies that the applications now need to explicitly opt-in for schema initialization on supported vector stores, if the schema is expected to be created at application startup.
-Not all vector stores support this property.
-See the corresponding vector store documentation for more details.
-The following are the vector stores that currently don't support the `initialize-schema` property.
+* 能够初始化模式的向量存储的 `initialize-schema` 属性默认值现已设置为 `false`。
+这意味着应用程序现在需要显式选择在支持的向量存储上进行模式初始化，如果预期在应用程序启动时创建模式。
+并非所有向量存储都支持此属性。
+有关更多详细信息，请参阅相应的向量存储文档。
+以下是当前不支持 `initialize-schema` 属性的向量存储：
 
 1. Hana
 2. Pinecone
 3. Weaviate
 
-* In Bedrock Jurassic 2, the chat options `countPenalty`, `frequencyPenalty`, and `presencePenalty`
-have been renamed to `countPenaltyOptions`, `frequencyPenaltyOptions`, and `presencePenaltyOptions`.
-Furthermore, the type of the chat option `stopSequences` have been changed from `String[]` to `List<String>`.
+* 在 Bedrock Jurassic 2 中，聊天选项 `countPenalty`、`frequencyPenalty` 和 `presencePenalty`
+已重命名为 `countPenaltyOptions`、`frequencyPenaltyOptions` 和 `presencePenaltyOptions`。
+此外，聊天选项 `stopSequences` 的类型已从 `String[]` 更改为 `List<String>`。
 
-* In Azure OpenAI, the type of the chat options `frequencyPenalty` and `presencePenalty`
-has been changed from `Double` to `Float`, consistently with all the other implementations.
+* 在 Azure OpenAI 中，聊天选项 `frequencyPenalty` 和 `presencePenalty`
+的类型已从 `Double` 更改为 `Float`，与其他实现保持一致。
 
-== Upgrading to 1.0.0.M1
+== 升级到 1.0.0.M1
 
-On our march to release 1.0.0 M1 we have made several breaking changes.  Apologies, it is for the best!
+在我们迈向 1.0.0 M1 的过程中，我们进行了一些重大更改。抱歉，这是为了更好的结果！
 
-=== ChatClient changes
+=== ChatClient 更改
 
-A major change was made that took the 'old' `ChatClient` and moved the functionality into `ChatModel`.  The 'new' `ChatClient` now takes an instance of `ChatModel`. This was done to support a fluent API for creating and executing prompts in a style similar to other client classes in the Spring ecosystem, such as `RestClient`, `WebClient`, and `JdbcClient`.  Refer to the [JavaDoc](https://docs.spring.io/spring-ai/docs/api) for more information on the Fluent API, proper reference documentation is coming shortly.
+进行了重大更改，将“旧”`ChatClient` 的功能移动到 `ChatModel`。现在的“新”`ChatClient` 接受 `ChatModel` 实例。此更改是为了支持以类似于 Spring 生态系统中其他客户端类（如 `RestClient`、`WebClient` 和 `JdbcClient`）的流畅 API 创建和执行提示。请参阅 [JavaDoc](https://docs.spring.io/spring-ai/docs/api) 了解更多关于流畅 API 的信息，完整的参考文档即将推出。
 
-We renamed the 'old' `ModelClient` to `Model` and renamed implementing classes, for example `ImageClient` was renamed to `ImageModel`.  The `Model` implementation represents the portability layer that converts between the Spring AI API and the underlying AI Model API.
+我们将“旧”`ModelClient` 重命名为 `Model`，并重命名了实现类，例如 `ImageClient` 重命名为 `ImageModel`。`Model` 实现表示将 Spring AI API 与底层 AI 模型 API 转换的移植层。
 
-A new package `model` that contains interfaces and base classes to support creating AI Model Clients for any input/output data type combination. At the moment, the chat and image model packages implement this. We will be updating the embedding package to this new model soon.
+新的 `model` 包包含支持为任何输入/输出数据类型组合创建 AI 模型客户端的接口和基类。目前，聊天和图像模型包实现了这一点。我们将很快更新嵌入包以适应这个新模型。
 
-A new "portable options" design pattern. We wanted to provide as much portability in the `ModelCall` as possible across different chat based AI Models. There is a common set of generation options and then those that are specific to a model provider. A sort of "duck typing" approach is used. `ModelOptions` in the model package is a marker interface indicating implementations of this class will provide the options for a model. See `ImageOptions`, a subinterface that defines portable options across all text->image `ImageModel` implementations. Then `StabilityAiImageOptions` and `OpenAiImageOptions` provide the options specific to each model provider. All options classes are created via a fluent API builder, all can be passed into the portable `ImageModel` API. These option data types are used in autoconfiguration/configuration properties for the `ImageModel` implementations.
+新的“可移植选项”设计模式。我们希望在 `ModelCall` 中尽可能提供跨不同基于聊天的 AI 模型的可移植性。有一组通用的生成选项，以及特定于模型提供者的选项。采用了一种“鸭子类型”方法。`model` 包中的 `ModelOptions` 是一个标记接口，表明该类的实现将为模型提供选项。参见 `ImageOptions`，这是一个定义所有文本到图像 `ImageModel` 实现的可移植选项的子接口。然后 `StabilityAiImageOptions` 和 `OpenAiImageOptions` 提供特定于每个模型提供者的选项。所有选项类都通过流畅 API 构建器创建，均可传递到可移植的 `ImageModel` API 中。这些选项数据类型用于 `ImageModel` 实现的自动配置/配置属性。
 
-=== Artifact name changes
+=== 构件名称更改
 
-Renamed POM artifact names:
+重命名了 POM 构件名称：
 - spring-ai-qdrant -> spring-ai-qdrant-store
 - spring-ai-cassandra -> spring-ai-cassandra-store
 - spring-ai-pinecone -> spring-ai-pinecone-store
 - spring-ai-redis -> spring-ai-redis-store
 - spring-ai-qdrant -> spring-ai-qdrant-store
 - spring-ai-gemfire -> spring-ai-gemfire-store
-- spring-ai-azure-vector-store-spring-boot-starter -> spring-ai-azure-store-spring-boot-starter
-- spring-ai-redis-spring-boot-starter -> spring-ai-starter-vector-store-redis
+- spring-ai-azure-vector-store spring-boot-starter -> spring-ai-azure-store spring-boot-starter
+- spring-ai-redis spring-boot-starter -> spring-ai-starter-vector-store-redis
 
-== Upgrading to 0.8.1
+== 升级到 0.8.1
 
-Former `spring-ai-vertex-ai` has been renamed to `spring-ai-vertex-ai-palm2` and `spring-ai-vertex-ai-spring-boot-starter` has been renamed to `spring-ai-vertex-ai-palm2-spring-boot-starter`.
+之前的 `spring-ai-vertex-ai` 已重命名为 `spring-ai-vertex-ai-palm2`，`spring-ai-vertex-ai spring-boot-starter` 已重命名为 `spring-ai-vertex-ai-palm2 spring-boot-starter`。
 
-So, you need to change the dependency from
+因此，您需要将依赖从
 
 [source,xml]
 ----
@@ -816,7 +804,7 @@ So, you need to change the dependency from
 </dependency>
 ----
 
-To
+更改为
 
 [source,xml]
 ----
@@ -826,7 +814,7 @@ To
 </dependency>
 ----
 
-and the related Boot starter for the Palm2 model has changed from
+以及相关 Palm2 模型的 Boot 启动器从
 
 [source,xml]
 ----
@@ -836,87 +824,87 @@ and the related Boot starter for the Palm2 model has changed from
 </dependency>
 ----
 
-to
+更改为
 
 [source,xml]
 ----
 <dependency>
     <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-vertex-ai-palm2-spring-boot-starter</artifactId>
+    <artifactId>spring-ai-vertex-ai-palm2 spring-boot-starter</artifactId>
 </dependency>
 ----
 
-* Renamed Classes (01.03.2024)
+* 重命名类（2024年3月1日）
 
 ** VertexAiApi -> VertexAiPalm2Api
 ** VertexAiClientChat -> VertexAiPalm2ChatClient
 ** VertexAiEmbeddingClient -> VertexAiPalm2EmbeddingClient
 ** VertexAiChatOptions -> VertexAiPalm2ChatOptions
 
-== Upgrading to 0.8.0
+== 升级到 0.8.0
 
-=== January 24, 2024 Update
+=== 2024年1月24日更新
 
-* Moving the `prompt` and `messages` and `metadata` packages to subpackages of `org.springframework.ai.chat`
-* New functionality is *text to image* clients. Classes are `OpenAiImageModel` and `StabilityAiImageModel`. See the integration tests for usage, docs are coming soon.
-* A new package `model` that contains interfaces and base classes to support creating AI Model Clients for any input/output data type combination. At the moment, the chat and image model packages implement this. We will be updating the embedding package to this new model soon.
-* A new "portable options" design pattern. We wanted to provide as much portability in the `ModelCall` as possible across different chat based AI Models. There is a common set of generation options and then those that are specific to a model provider. A sort of "duck typing" approach is used. `ModelOptions` in the model package is a marker interface indicating implementations of this class will provide the options for a model. See `ImageOptions`, a subinterface that defines portable options across all text->image `ImageModel` implementations. Then `StabilityAiImageOptions` and `OpenAiImageOptions` provide the options specific to each model provider. All options classes are created via a fluent API builder, all can be passed into the portable `ImageModel` API. These option data types are used in autoconfiguration/configuration properties for the `ImageModel` implementations.
+* 将 `prompt`、`messages` 和 `metadata` 包移动到 `org.springframework.ai.chat` 的子包
+* 新功能是*文本到图像*客户端。类包括 `OpenAiImageModel` 和 `StabilityAiImageModel`。请参阅集成测试以了解用法，文档即将推出。
+* 新建 `model` 包，包含支持为任何输入/输出数据类型组合创建 AI 模型客户端的接口和基类。目前，聊天和图像模型包实现了这一点。我们将很快更新嵌入包以适应这个新模型。
+* 新的“可移植选项”设计模式。我们希望在 `ModelCall` 中尽可能提供跨不同基于聊天的 AI 模型的可移植性。有一组通用的生成选项，以及特定于模型提供者的选项。采用了一种“鸭子类型”方法。`model` 包中的 `ModelOptions` 是一个标记接口，表明该类的实现将为模型提供选项。参见 `ImageOptions`，这是一个定义所有文本到图像 `ImageModel` 实现的可移植选项的子接口。然后 `StabilityAiImageOptions` 和 `OpenAiImageOptions` 提供特定于每个模型提供者的选项。所有选项类都通过流畅 API 构建器创建，均可传递到可移植的 `ImageModel` API 中。这些选项数据类型用于 `ImageModel` 实现的自动配置/配置属性。
 
-=== January 13, 2024 Update
+=== 2024年1月13日更新
 
-The following OpenAi Autoconfiguration chat properties have changed
+以下 OpenAi 自动配置聊天属性已更改
 
-* from `spring.ai.openai.model` to `spring.ai.openai.chat.options.model`.
-* from `spring.ai.openai.temperature` to `spring.ai.openai.chat.options.temperature`.
+* 从 `spring.ai.openai.model` 到 `spring.ai.openai.chat.options.model`。
+* 从 `spring.ai.openai.temperature` 到 `spring.ai.openai.chat.options.temperature`。
 
-Find updated documentation about the OpenAi properties: https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html
+查看有关 OpenAi 属性的更新文档：https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html
 
-=== December 27, 2023 Update
+=== 2023年12月27日更新
 
-Merge SimplePersistentVectorStore and InMemoryVectorStore into SimpleVectorStore
-* Replace InMemoryVectorStore with SimpleVectorStore
+将 SimplePersistentVectorStore 和 InMemoryVectorStore 合并为 SimpleVectorStore
+* 用 SimpleVectorStore 替换 InMemoryVectorStore
 
-=== December 20, 2023 Update
+=== 2023年12月20日更新
 
-Refactor the Ollama client and related classes and package names
+重构 Ollama 客户端及相关类和包名
 
-* Replace the org.springframework.ai.ollama.client.OllamaClient by org.springframework.ai.ollama.OllamaModelCall.
-* The OllamaChatClient method signatures have changed.
-* Rename the org.springframework.ai.autoconfigure.ollama.OllamaProperties into org.springframework.ai.model.ollama.autoconfigure.OllamaChatProperties and change the suffix to: `spring.ai.ollama.chat`. Some of the properties have changed as well.
+* 用 org.springframework.ai.ollama.OllamaModelCall 替换 org.springframework.ai.ollama.client.OllamaClient。
+* OllamaChatClient 方法签名已更改。
+* 将 org.springframework.ai.autoconfigure.ollama.OllamaProperties 重命名为 org.springframework.ai.model.ollama.autoconfigure.OllamaChatProperties，并将前缀更改为：`spring.ai.ollama.chat`。部分属性也已更改。
 
-=== December 19, 2023 Update
+=== 2023年12月19日更新
 
-Renaming of AiClient and related classes and package names
+重命名 AiClient 及相关类和包名
 
-* Rename AiClient to ChatClient
-* Rename AiResponse to ChatResponse
-* Rename AiStreamClient to StreamingChatClient
-* Rename package org.sf.ai.client to org.sf.ai.chat
+* 将 AiClient 重命名为 ChatClient
+* 将 AiResponse 重命名为 ChatResponse
+* 将 AiStreamClient 重命名为 StreamingChatClient
+* 将包 org.sf.ai.client 重命名为 org.sf.ai.chat
 
-Rename artifact ID of
+重命名构件 ID
 
-* `transformers-embedding` to `spring-ai-transformers`
+* `transformers-embedding` 到 `spring-ai-transformers`
 
-Moved Maven modules from top-level directory and `embedding-clients` subdirectory to all be under a single `models` directory.
+将 Maven 模块从顶级目录和 `embedding-clients` 子目录移动到单一 `models` 目录下。
 
 [WARNING]
 
-=== December 1, 2023
+=== 2023年12月1日
 
-We are transitioning the project's Group ID:
+我们正在转换项目的 Group ID：
 
-* *FROM*: `org.springframework.experimental.ai`
-* *TO*: `org.springframework.ai`
+* *从*：`org.springframework.experimental.ai`
+* *到*：`org.springframework.ai`
 
-Artifacts will still be hosted in the snapshot repository as shown below.
+构件仍将托管在如下所示的快照存储库中。
 
-The main branch will move to the version `0.8.0-SNAPSHOT`.
-It will be unstable for a week or two.
-Please use the 0.7.1-SNAPSHOT if you don't want to be on the bleeding edge.
+主分支将移动到版本 `0.8.0-SNAPSHOT`。
+它将在未来一两周内不稳定。
+如果您不想处于前沿，请使用 0.7.1-SNAPSHOT。
 
-You can access `0.7.1-SNAPSHOT` artifacts as before and still access https://markpollack.github.io/spring-ai-0.7.1/[0.7.1-SNAPSHOT Documentation].
+您可以继续访问 `0.7.1-SNAPSHOT` 构件，并访问 https://markpollack.github.io/spring-ai-0.7.1/[0.7.1-SNAPSHOT 文档]。
 
-=== 0.7.1-SNAPSHOT Dependencies
+=== 0.7.1-SNAPSHOT 依赖
 
 * Azure OpenAI
 +
@@ -924,7 +912,7 @@ You can access `0.7.1-SNAPSHOT` artifacts as before and still access https://mar
 ----
 <dependency>
     <groupId>org.springframework.experimental.ai</groupId>
-    <artifactId>spring-ai-azure-openai-spring-boot-starter</artifactId>
+    <artifactId>spring-ai-azure-openai spring-boot-starter</artifactId>
     <version>0.7.1-SNAPSHOT</version>
 </dependency>
 ----

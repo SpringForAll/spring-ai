@@ -1,46 +1,46 @@
 [[introduction]]
-= Introduction
+= 引言
 
-image::spring_ai_logo_with_text.svg[Integration Problem, width=300, align="left"]
+image::spring_ai_logo_with_text.svg[集成问题, width=300, align="left"]
 
-The `Spring AI` project aims to streamline the development of applications that incorporate artificial intelligence functionality without unnecessary complexity.
+`Spring AI` 项目旨在简化包含人工智能功能的应用程序的开发，避免不必要的复杂性。
 
-The project draws inspiration from notable Python projects, such as LangChain and LlamaIndex, but Spring AI is not a direct port of those projects.
-The project was founded with the belief that the next wave of Generative AI applications will not be only for Python developers but will be ubiquitous across many programming languages.
+该项目的灵感来源于著名的 Python 项目，如 LangChain 和 LlamaIndex，但 Spring AI 并非这些项目的直接移植。
+该项目坚信，下一波生成式人工智能应用程序将不仅仅面向 Python 开发人员，而是将普及到多种编程语言中。
 
-NOTE: Spring AI addresses the fundamental challenge of AI integration: `Connecting your enterprise Data and APIs with AI Models`.
+注意：Spring AI 解决了人工智能集成的基本挑战：`将您的企业数据和 API 与人工智能模型连接起来`。
 
-image::spring-ai-integration-diagram-3.svg[Interactive,500,opts=interactive]
+image::spring-ai-integration-diagram-3.svg[交互式,500,opts=interactive]
 
-Spring AI provides abstractions that serve as the foundation for developing AI applications.
-These abstractions have multiple implementations, enabling easy component swapping with minimal code changes.
+Spring AI 提供了作为开发人工智能应用程序基础的抽象。
+这些抽象有多种实现，从而能够以最少的代码更改轻松替换组件。
 
-Spring AI provides the following features:
+Spring AI 提供以下功能：
 
-* Portable API support across AI providers for Chat, text-to-image, and Embedding models. Both synchronous and streaming API options are supported. Access to model-specific features is also available.
-* Support for all major xref:api/index.adoc[AI Model providers] such as Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama. Supported model types include:
-** xref:api/chatmodel.adoc[Chat Completion]
-** xref:api/embeddings.adoc[Embedding]
-** xref:api/imageclient.adoc[Text to Image]
-** xref:api/audio/transcriptions.adoc[Audio Transcription]
-** xref:api/audio/speech.adoc[Text to Speech]
-** xref:api/moderation[Moderation]
-* xref:api/structured-output-converter.adoc[Structured Outputs] - Mapping of AI Model output to POJOs.
-* Support for all major xref:api/vectordbs.adoc[Vector Database providers] such as Apache Cassandra, Azure Cosmos DB, Azure Vector Search, Chroma, Elasticsearch, GemFire, MariaDB, Milvus, MongoDB Atlas, Neo4j, OpenSearch, Oracle, PostgreSQL/PGVector, PineCone, Qdrant, Redis, SAP Hana, Typesense and Weaviate.
-* Portable API across Vector Store providers, including a novel SQL-like metadata filter API.
-* xref:api/tools.adoc[Tools/Function Calling] - Permits the model to request the execution of client-side tools and functions, thereby accessing necessary real-time information as required and taking action.
-* xref:observability/index.adoc[Observability] - Provides insights into AI-related operations.
-* Document ingestion xref:api/etl-pipeline.adoc[ETL framework] for Data Engineering.
-* xref:api/testing.adoc[AI Model Evaluation] - Utilities to help evaluate generated content and protect against hallucinated response.
-* Spring Boot Auto Configuration and Starters for AI Models and Vector Stores.
-* xref:api/chatclient.adoc[ChatClient API] - Fluent API for communicating with AI Chat Models, idiomatically similar to the WebClient and RestClient APIs.
-* xref:api/advisors.adoc[Advisors API] - Encapsulates recurring Generative AI patterns, transforms data sent to and from Language Models (LLMs), and provides portability across various models and use cases.
-* Support for xref:api/chatclient.adoc#_chat_memory[Chat Conversation Memory] and xref:api/chatclient.adoc#_retrieval_augmented_generation[Retrieval Augmented Generation (RAG)].
+* 跨 AI 提供商的聊天、文本到图像和嵌入模型的便携式 API 支持。支持同步和流式 API 选项。也提供对模型特定功能的访问。
+* 支持所有主要的 xref:api/index.adoc[AI 模型提供商]，例如 Anthropic、OpenAI、Microsoft、Amazon、Google 和 Ollama。支持的模型类型包括：
+** xref:api/chatmodel.adoc[聊天补全]
+** xref:api/embeddings.adoc[嵌入]
+** xref:api/imageclient.adoc[文本到图像]
+** xref:api/audio/transcriptions.adoc[音频转录]
+** xref:api/audio/speech.adoc[文本到语音]
+** xref:api/moderation[内容审核]
+* xref:api/structured-output-converter.adoc[结构化输出] - 将 AI 模型输出映射到 POJO。
+* 支持所有主要的 xref:api/vectordbs.adoc[向量数据库提供商]，例如 Apache Cassandra、Azure Cosmos DB、Azure Vector Search、Chroma、Elasticsearch、GemFire、MariaDB、Milvus、MongoDB Atlas、Neo4j、OpenSearch、Oracle、PostgreSQL/PGVector、PineCone、Qdrant、Redis、SAP Hana、Typesense 和 Weaviate。
+* 跨向量存储提供商的便携式 API，包括新颖的类 SQL 元数据过滤 API。
+* xref:api/tools.adoc[工具/函数调用] - 允许模型请求执行客户端工具和函数，从而根据需要访问必要的实时信息并采取行动。
+* xref:observability/index.adoc[可观察性] - 提供对 AI 相关操作的洞察。
+* 用于数据工程的文档提取 xref:api/etl-pipeline.adoc[ETL 框架]。
+* xref:api/testing.adoc[AI 模型评估] - 帮助评估生成内容并防止幻觉响应的实用程序。
+* AI 模型和向量存储的 Spring Boot 自动配置和启动器。
+* xref:api/chatclient.adoc[ChatClient API] - 用于与 AI 聊天模型通信的流畅 API，在习惯用法上类似于 WebClient 和 RestClient API。
+* xref:api/advisors.adoc[Advisors API] - 封装了重复出现的生成式 AI 模式，转换进出语言模型 (LLM) 的数据，并提供跨各种模型和用例的可移植性。
+* 支持 xref:api/chatclient.adoc#_chat_memory[聊天对话记忆] 和 xref:api/chatclient.adoc#_retrieval_augmented_generation[检索增强生成 (RAG)]。
 
-This feature set lets you implement common use cases, such as "`Q&A over your documentation`" or "`Chat with your documentation.`"
+此功能集使您可以实现常见的用例，例如“`文档问答`”或“`与您的文档聊天`”。
 
 
-The xref:concepts.adoc[concepts section] provides a high-level overview of AI concepts and their representation in Spring AI.
+xref:concepts.adoc[概念部分] 提供了 AI 概念及其在 Spring AI 中表示的高级概述。
 
-The xref:getting-started.adoc[Getting Started] section shows you how to create your first AI application.
-Subsequent sections delve into each component and common use cases with a code-focused approach.
+xref:getting-started.adoc[入门部分] 向您展示了如何创建您的第一个 AI 应用程序。
+后续部分将深入探讨每个组件和常见用例，并采用以代码为中心的方法。

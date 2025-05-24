@@ -1,56 +1,55 @@
-= Azure AI Service
+= Azure AI 服务
 
-This section will walk you through setting up the `AzureVectorStore` to store document embeddings and perform similarity searches using the Azure AI Search Service.
+本节将指导您如何设置 `AzureVectorStore` 来使用 Azure AI 搜索服务存储文档嵌入并执行相似性搜索。
 
-link:https://azure.microsoft.com/en-us/products/ai-services/ai-search/[Azure AI Search] is a versatile cloud-hosted cloud information retrieval system that is part of Microsoft's larger AI platform. Among other features, it allows users to query information using vector-based storage and retrieval.
+link:https://azure.microsoft.com/en-us/products/ai-services/ai-search/[Azure AI Search] 是一个多功能云托管云信息检索系统，是微软更大的 AI 平台的一部分。在其他功能中，它允许用户使用基于向量的存储和检索来查询信息。
 
-== Prerequisites
+== 先决条件
 
-1. Azure Subscription: You will need an link:https://azure.microsoft.com/en-us/free/[Azure subscription] to use any Azure service.
-2. Azure AI Search Service: Create an link:https://portal.azure.com/#create/Microsoft.Search[AI Search service]. Once the service is created, obtain the admin apiKey from the `Keys` section under `Settings` and retrieve the endpoint from the `Url` field under the `Overview` section.
-3. (Optional) Azure OpenAI Service: Create an Azure link:https://portal.azure.com/#create/Microsoft.AIServicesOpenAI[OpenAI service]. **NOTE:** You may have to fill out a separate form to gain access to Azure Open AI services. Once the service is created, obtain the endpoint and apiKey from the `Keys and Endpoint` section under `Resource Management`.
+1. Azure 订阅：您需要 link:https://azure.microsoft.com/en-us/free/[Azure 订阅] 才能使用任何 Azure 服务。
+2. Azure AI 搜索服务：创建一个 link:https://portal.azure.com/#create/Microsoft.Search[AI 搜索服务]。创建服务后，从 `设置` 下的 `密钥` 部分获取管理员 apiKey，并从 `概述` 部分下的 `Url` 字段获取端点。
+3. （可选）Azure OpenAI 服务：创建一个 Azure link:https://portal.azure.com/#create/Microsoft.AIServicesOpenAI[OpenAI 服务]。**注意：** 您可能需要填写单独的表格才能获得 Azure Open AI 服务的访问权限。创建服务后，从 `资源管理` 下的 `密钥和端点` 部分获取端点和 apiKey。
 
-== Configuration
+== 配置
 
-On startup, the `AzureVectorStore` can  attempt to create a new index within your AI Search service instance if you've opted in by setting the relevant `initialize-schema` `boolean` property to `true` in the constructor or, if using Spring Boot, setting `...initialize-schema=true`  in your `application.properties` file.
+在启动时，如果您通过设置相关的 `initialize-schema` `boolean` 属性为 `true` 来选择加入，`AzureVectorStore` 可以尝试在您的 AI 搜索服务实例中创建新索引，或者如果使用 Spring Boot，在您的 `application.properties` 文件中设置 `...initialize-schema=true`。
 
+注意：这是一个重大变更！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+或者，您可以手动创建索引。
 
-Alternatively, you can create the index manually.
+要设置 AzureVectorStore，您需要从上述先决条件中获取的设置以及您的索引名称：
 
-To set up an AzureVectorStore, you will need the settings retrieved from the prerequisites above along with your index name:
+* Azure AI 搜索端点
+* Azure AI 搜索密钥
+* （可选）Azure OpenAI API 端点
+* （可选）Azure OpenAI API 密钥
 
-* Azure AI Search Endpoint
-* Azure AI Search Key
-* (optional) Azure OpenAI API Endpoint
-* (optional) Azure OpenAI API Key
-
-You can provide these values as OS environment variables.
+您可以将这些值作为操作系统环境变量提供。
 
 [source,bash]
 ----
-export AZURE_AI_SEARCH_API_KEY=<My AI Search API Key>
-export AZURE_AI_SEARCH_ENDPOINT=<My AI Search Index>
-export OPENAI_API_KEY=<My Azure AI API Key> (Optional)
+export AZURE_AI_SEARCH_API_KEY=<我的 AI 搜索 API 密钥>
+export AZURE_AI_SEARCH_ENDPOINT=<我的 AI 搜索索引>
+export OPENAI_API_KEY=<我的 Azure AI API 密钥>（可选）
 ----
 
 [NOTE]
 ====
-You can replace Azure Open AI implementation with any valid OpenAI implementation that supports the Embeddings interface. For example, you could use Spring AI's Open AI or `TransformersEmbedding` implementations for embeddings instead of the Azure implementation.
+您可以用任何支持 Embeddings 接口的有效 OpenAI 实现替换 Azure Open AI 实现。例如，您可以使用 Spring AI 的 Open AI 或 `TransformersEmbedding` 实现来替代 Azure 实现。
 ====
 
-== Dependencies
+== 依赖项
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Add these dependencies to your project:
+将这些依赖项添加到您的项目中：
 
-=== 1. Select an Embeddings interface implementation. You can choose between:
+=== 1. 选择一个 Embeddings 接口实现。您可以选择：
 
 [tabs]
 ======
@@ -74,7 +73,7 @@ Azure AI Embedding::
 </dependency>
 ----
 
-Local Sentence Transformers Embedding::
+本地 Sentence Transformers Embedding::
 +
 [source,xml]
 ----
@@ -85,7 +84,7 @@ Local Sentence Transformers Embedding::
 ----
 ======
 
-=== 2. Azure (AI Search) Vector Store
+=== 2. Azure（AI 搜索）向量存储
 
 [source,xml]
 ----
@@ -95,15 +94,15 @@ Local Sentence Transformers Embedding::
 </dependency>
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-== Configuration Properties
+== 配置属性
 
-You can use the following properties in your Spring Boot configuration to customize the Azure vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义 Azure 向量存储。
 
 [stripes=even]
 |===
-|Property|Default value
+|属性|默认值
 
 |`spring.ai.vectorstore.azure.url`|
 |`spring.ai.vectorstore.azure.api-key`|
@@ -116,10 +115,9 @@ You can use the following properties in your Spring Boot configuration to custom
 |`spring.ai.vectorstore.azure.index-name`|spring-ai-document-index
 |===
 
+== 示例代码
 
-== Sample Code
-
-To configure an Azure `SearchIndexClient` in your application, you can use the following code:
+要在您的应用程序中配置 Azure `SearchIndexClient`，您可以使用以下代码：
 
 [source,java]
 ----
@@ -131,7 +129,7 @@ public SearchIndexClient searchIndexClient() {
 }
 ----
 
-To create a vector store, you can use the following code by injecting the `SearchIndexClient` bean created in the above sample along with an `EmbeddingModel` provided by the Spring AI library that implements the desired Embeddings interface.
+要创建向量存储，您可以通过注入上面示例中创建的 `SearchIndexClient` bean 以及由 Spring AI 库提供的实现所需 Embeddings 接口的 `EmbeddingModel` 来使用以下代码。
 
 [source,java]
 ----
@@ -140,8 +138,7 @@ public VectorStore vectorStore(SearchIndexClient searchIndexClient, EmbeddingMod
 
   return AzureVectorStore.builder(searchIndexClient, embeddingModel)
     .initializeSchema(true)
-    // Define the metadata fields to be used
-    // in the similarity search filters.
+    // 定义要在相似性搜索过滤器中使用的元数据字段
     .filterMetadataFields(List.of(MetadataField.text("country"), MetadataField.int64("year"),
             MetadataField.date("activationDate")))
     .defaultTopK(5)
@@ -153,12 +150,12 @@ public VectorStore vectorStore(SearchIndexClient searchIndexClient, EmbeddingMod
 
 [NOTE]
 ====
-You must list explicitly all metadata field names and types for any metadata key used in the filter expression. The list above registers filterable metadata fields: `country` of type `TEXT`, `year` of type `INT64`, and `active` of type `BOOLEAN`.
+您必须明确列出过滤表达式中使用的任何元数据键的字段名称和类型。上面的列表注册了可过滤的元数据字段：类型为 `TEXT` 的 `country`、类型为 `INT64` 的 `year` 和类型为 `BOOLEAN` 的 `active`。
 
-If the filterable metadata fields are expanded with new entries, you have to (re)upload/update the documents with this metadata.
+如果可过滤的元数据字段扩展了新条目，您必须（重新）上传/更新具有此元数据的文档。
 ====
 
-In your main code, create some documents:
+在您的主代码中，创建一些文档：
 
 [source,java]
 ----
@@ -168,14 +165,14 @@ List<Document> documents = List.of(
 	new Document("You walk forward facing the past and you turn back toward the future.", Map.of("country", "NL", "year", 2023)));
 ----
 
-Add the documents to your vector store:
+将文档添加到您的向量存储：
 
 [source,java]
 ----
 vectorStore.add(documents);
 ----
 
-And finally, retrieve documents similar to a query:
+最后，检索与查询相似的文档：
 
 [source,java]
 ----
@@ -185,13 +182,13 @@ List<Document> results = vectorStore.similaritySearch(
       .topK(5).build());
 ----
 
-If all goes well, you should retrieve the document containing the text "Spring AI rocks!!".
+如果一切顺利，您应该检索到包含文本 "Spring AI rocks!!" 的文档。
 
-=== Metadata filtering
+=== 元数据过滤
 
-You can leverage the generic, portable link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[metadata filters] with AzureVectorStore as well.
+您也可以利用 AzureVectorStore 的通用、可移植的 link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[元数据过滤器]。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -203,7 +200,7 @@ vectorStore.similaritySearch(
       .filterExpression("country in ['UK', 'NL'] && year >= 2020").build());
 ----
 
-or programmatically using the expression DSL:
+或使用表达式 DSL 以编程方式：
 
 [source,java]
 ----
@@ -219,23 +216,23 @@ vectorStore.similaritySearch(
          b.gte("year", 2020)).build()).build());
 ----
 
-The portable filter expressions get automatically converted into the proprietary Azure Search link:https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter[OData filters]. For example, the following portable filter expression:
+可移植的过滤器表达式会自动转换为专有的 Azure Search link:https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter[OData 过滤器]。例如，以下可移植过滤器表达式：
 
 [source,sql]
 ----
 country in ['UK', 'NL'] && year >= 2020
 ----
 
-is converted into the following Azure OData link:https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter[filter expression]:
+被转换为以下 Azure OData link:https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter[过滤器表达式]：
 
 [source,graphql]
 ----
 $filter search.in(meta_country, 'UK,NL', ',') and meta_year ge 2020
 ----
 
-== Accessing the Native Client
+== 访问原生客户端
 
-The Azure Vector Store implementation provides access to the underlying native Azure Search client (`SearchClient`) through the `getNativeClient()` method:
+Azure 向量存储实现通过 `getNativeClient()` 方法提供对底层原生 Azure Search 客户端（`SearchClient`）的访问：
 
 [source,java]
 ----
@@ -244,8 +241,8 @@ Optional<SearchClient> nativeClient = vectorStore.getNativeClient();
 
 if (nativeClient.isPresent()) {
     SearchClient client = nativeClient.get();
-    // Use the native client for Azure Search-specific operations
+    // 使用原生客户端进行 Azure Search 特定操作
 }
 ----
 
-The native client gives you access to Azure Search-specific features and operations that might not be exposed through the `VectorStore` interface.
+原生客户端让您可以访问可能未通过 `VectorStore` 接口公开的 Azure Search 特定功能和操作。

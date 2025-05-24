@@ -8,8 +8,8 @@ antora:
     - require: '@springio/antora-extensions'
       root_component_name: 'ai'
 site:
-  title: Spring AI Reference
-  url: https://docs.spring.io/spring-ai/reference
+  title: Spring AI Reference（中文版）
+  url: https://docs.spring4all.com/spring-ai/reference
   robots: allow
 git:
   ensure_git_suffix: false  
@@ -44,5 +44,5 @@ runtime:
     format: pretty
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.17/ui-bundle.zip
+    url: ./ui-bundle
     snapshot: true

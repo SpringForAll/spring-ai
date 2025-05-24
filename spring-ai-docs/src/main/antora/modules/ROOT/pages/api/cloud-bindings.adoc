@@ -1,16 +1,16 @@
 [[cloud-bindings]]
-= Cloud Bindings
+= 云绑定
 
-Spring AI provides support for cloud bindings based on the foundations in https://github.com/spring-cloud/spring-cloud-bindings[spring-cloud-bindings].
-This allows applications to specify a binding type for a provider and then express properties using a generic format.
-The spring-ai cloud bindings will process these properties and bind them to spring-ai native properties.
+Spring AI 基于 https://github.com/spring-cloud/spring-cloud-bindings[spring-cloud-bindings] 提供云绑定支持。
+这允许应用程序为提供商指定绑定类型，然后使用通用格式表达属性。
+spring-ai 云绑定将处理这些属性并将它们绑定到 spring-ai 原生属性。
 
-For example, when using `OpenAi`, the binding type is `openai`.
-Using the property `spring.ai.cloud.bindings.openai.enabled`, the binding processor can be enabled or disabled.
-By default, when specifying a binding type, this property will be enabled.
-Configuration for `api-key`, `uri`, `username`, `password`, etc. can be specified and spring-ai will map them to the corresponding properties in the supported system.
+例如，当使用 `OpenAi` 时，绑定类型为 `openai`。
+使用属性 `spring.ai.cloud.bindings.openai.enabled`，可以启用或禁用绑定处理器。
+默认情况下，当指定绑定类型时，此属性将被启用。
+可以指定 `api-key`、`uri`、`username`、`password` 等配置，spring-ai 会将它们映射到支持系统中的相应属性。
 
-To enable cloud binding support, include the following dependency in the application.
+要启用云绑定支持，请在应用程序中包含以下依赖项。
 
 [source,xml]
 ----
@@ -20,7 +20,7 @@ To enable cloud binding support, include the following dependency in the applica
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -29,15 +29,15 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-== Available Cloud Bindings
+== 可用的云绑定
 
-The following are the components for which the cloud binding support is currently available in the  `spring-ai-spring-clou-bindings` module:
+以下是 `spring-ai-spring-clou-bindings` 模块中当前可用的云绑定支持的组件：
 
 [cols="|,|"]
 |====
-| Service Type	 | Binding Type | Source Properties | Target Properties
+| 服务类型 | 绑定类型 | 源属性 | 目标属性
 | `Chroma Vector Store`
 | `chroma` | `uri`, `username`, `passwor` | `spring.ai.vectorstore.chroma.client.host`, `spring.ai.vectorstore.chroma.client.port`, `spring.ai.vectorstore.chroma.client.username`, `spring.ai.vectorstore.chroma.client.host.password`
 
@@ -54,5 +54,5 @@ The following are the components for which the cloud binding support is currentl
 | `weaviate` | `uri`, `api-key` | `spring.ai.vectorstore.weaviate.scheme`, `spring.ai.vectorstore.weaviate.host`, `spring.ai.vectorstore.weaviate.api-key`
 
 | `Tanzu GenAI`
-| `genai` | `uri`, `api-key`, `model-capabilities` (`chat` and `embedding`), `model-name` | `spring.ai.openai.chat.base-url`, , spring.ai.openai.chat.api-key`, `spring.ai.openai.chat.options.model`, `spring.ai.openai.embedding.base-url`, , spring.ai.openai.embedding.api-key`, `spring.ai.openai.embedding.options.model`
+| `genai` | `uri`, `api-key`, `model-capabilities` (`chat` 和 `embedding`), `model-name` | `spring.ai.openai.chat.base-url`, , spring.ai.openai.chat.api-key`, `spring.ai.openai.chat.options.model`, `spring.ai.openai.embedding.base-url`, , spring.ai.openai.embedding.api-key`, `spring.ai.openai.embedding.options.model`
 |====

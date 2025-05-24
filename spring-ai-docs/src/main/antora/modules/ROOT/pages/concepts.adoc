@@ -1,213 +1,162 @@
 [[concepts]]
-= AI Concepts
+= AI 概念
 
-This section describes core concepts that Spring AI uses. We recommend reading it closely to understand the ideas behind how Spring AI is implemented.
+本节描述了 Spring AI 使用的核心概念。我们建议您仔细阅读，以理解 Spring AI 实现背后的思想。
 
-== Models
+== 模型
 
-AI models are algorithms designed to process and generate information, often mimicking human cognitive functions.
-By learning patterns and insights from large datasets, these models can make predictions, text, images, or other outputs, enhancing various applications across industries.
+AI 模型是旨在处理和生成信息的算法，通常模仿人类的认知功能。
+通过从大型数据集中学习模式和洞察，这些模型可以进行预测、生成文本、图像或其他输出，从而增强各行各业的各种应用。
 
-There are many different types of AI models, each suited for a specific use case.
-While ChatGPT and its generative AI capabilities have captivated users through text input and output, many models and companies offer diverse inputs and outputs.
-Before ChatGPT, many people were fascinated by text-to-image generation models such as Midjourney and Stable Diffusion.
+有许多不同类型的 AI 模型，每种模型都适用于特定的用例。
+虽然 ChatGPT 及其生成式 AI 功能通过文本输入和输出吸引了用户，但许多模型和公司提供多样化的输入和输出。
+在 ChatGPT 之前，许多人着迷于文本到图像生成模型，例如 Midjourney 和 Stable Diffusion。
 
-The following table categorizes several models based on their input and output types:
+下表根据输入和输出类型对多种模型进行了分类：
 
-image::spring-ai-concepts-model-types.jpg[Model types, width=600, align="center"]
+image::spring-ai-concepts-model-types.jpg[模型类型, width=600, align="center"]
 
-Spring AI currently supports models that process input and output as language, image, and audio.
-The last row in the previous table, which accepts text as input and outputs numbers, is more commonly known as embedding text and represents the internal data structures used in an AI model.
-Spring AI has support for embeddings to enable more advanced use cases.
+Spring AI 目前支持处理语言、图像和音频输入输出的模型。上一表格最后一行，接受文本输入并输出数字，更常见的说法是文本嵌入，代表 AI 模型内部的数据结构。Spring AI 支持嵌入功能以实现更高级的用例。
 
-What sets models like GPT apart is their pre-trained nature, as indicated by the "P" in GPT—Chat Generative Pre-trained Transformer.
-This pre-training feature transforms AI into a general developer tool that does not require an extensive machine learning or model training background.
+像 GPT 这样的模型的独特之处在于其预训练特性，正如 GPT 中的 "P" 所示——Chat Generative Pre-trained Transformer。这一预训练特性使 AI 成为通用开发工具，无需深厚的机器学习或模型训练背景。
 
-== Prompts
+== 提示
 
-Prompts serve as the foundation for the language-based inputs that guide an AI model to produce specific outputs.
-For those familiar with ChatGPT, a prompt might seem like merely the text entered into a dialog box that is sent to the API.
-However, it encompasses much more than that.
-In many AI Models, the text for the prompt is not just a simple string.
+提示是基于语言的输入的基础，它指导 AI 模型产生特定的输出。
+对于熟悉 ChatGPT 的人来说，提示可能仅仅是输入到对话框中并发送到 API 的文本。
+然而，它包含的内容远不止于此。
+在许多 AI 模型中，提示的文本不仅仅是一个简单的字符串。
 
-ChatGPT's API has multiple text inputs within a prompt, with each text input being assigned a role.
-For example, there is the system role, which tells the model how to behave and sets the context for the interaction.
-There is also the user role, which is typically the input from the user.
+ChatGPT 的 API 在一个提示中有多个文本输入，每个文本输入都被分配了一个角色。例如，有 system 角色，用于告诉模型如何表现并设置交互的上下文。还有 user 角色，通常是用户的输入。
 
-Crafting effective prompts is both an art and a science.
-ChatGPT was designed for human conversations.
-This is quite a departure from using something like SQL to "ask a question".
-One must communicate with the AI model akin to conversing with another person.
+编写有效提示既是一门艺术，也是一门科学。ChatGPT 设计用于人类对话，这与使用 SQL "提问" 有很大不同。与 AI 模型交流更像是与另一个人对话。
 
-Such is the importance of this interaction style that the term "Prompt Engineering" has emerged as its own discipline.
-There is a burgeoning collection of techniques that improve the effectiveness of prompts.
-Investing time in crafting a prompt can drastically improve the resulting output.
+正因如此，“提示工程”成为了一个独立的学科。现在有大量提升提示有效性的技术。投入时间优化提示可以极大提升输出质量。
 
-Sharing prompts has become a communal practice, and there is active academic research being done on this subject.
-As an example of how counter-intuitive it can be to create an effective prompt (for example, contrasting with SQL), a https://arxiv.org/abs/2205.11916[recent research paper] found that one of the most effective prompts you can use starts with the phrase, "`Take a deep breath and work on this step by step.`"
-That should give you an indication of why language is so important.
-We do not yet fully understand how to make the most effective use of previous iterations of this technology, such as ChatGPT 3.5, let alone new versions that are being developed.
+分享提示已成为一种社区实践，并且有大量学术研究。例如，一项 https://arxiv.org/abs/2205.11916[最新论文] 发现最有效的提示之一是以“请深呼吸，逐步思考”开头。这说明了语言的重要性。我们尚未完全理解如何最有效地利用前几代技术（如 ChatGPT 3.5），更不用说正在开发的新版本了。
 
-=== Prompt Templates
+=== 提示模板
 
-Creating effective prompts involves establishing the context of the request and substituting parts of the request with values specific to the user's input.
+创建有效提示需要建立请求上下文，并用用户输入的特定值替换部分内容。
 
-This process uses traditional text-based template engines for prompt creation and management.
-Spring AI employs the OSS library https://www.stringtemplate.org/[StringTemplate] for this purpose.
+这个过程使用传统的基于文本的模板引擎来创建和管理提示。Spring AI 使用 OSS 库 https://www.stringtemplate.org/[StringTemplate] 实现这一功能。
 
-For instance, consider the simple prompt template:
+例如，简单的提示模板：
 
 ```
 Tell me a {adjective} joke about {content}.
 ```
 
-In Spring AI, prompt templates can be likened to the "View" in Spring MVC architecture.
-A model object, typically a `java.util.Map`, is provided to populate placeholders within the template.
-The "rendered" string becomes the content of the prompt supplied to the AI model.
+在 Spring AI 中，提示模板类似于 Spring MVC 架构中的 "View"。通常会提供一个 `java.util.Map` 类型的模型对象来填充模板中的占位符。"渲染" 后的字符串就是提供给 AI 模型的提示内容。
 
-There is considerable variability in the specific data format of the prompt sent to the model.
-Initially starting as simple strings, prompts have evolved to include multiple messages, where each string in each message represents a distinct role for the model.
+实际发送给模型的提示数据格式有很大差异。最初只是简单字符串，后来演变为包含多条消息，每条消息中的字符串代表模型的不同角色。
 
-== Embeddings
+== 嵌入
 
-Embeddings are numerical representations of text, images, or videos that capture relationships between inputs.
+嵌入是文本、图像或视频的数值表示，用于捕捉输入之间的关系。
 
-Embeddings work by converting text, image, and video into arrays of floating point numbers, called vectors.
-These vectors are designed to capture the meaning of the text, images, and videos.
-The length of the embedding array is called the vector's dimensionality.
+嵌入通过将文本、图像和视频转换为浮点数数组（向量）来工作。这些向量旨在捕捉文本、图像和视频的含义。嵌入数组的长度称为向量的维度。
 
-By calculating the numerical distance between the vector representations of two pieces of text, an application can determine the similarity between the objects used to generate the embedding vectors.
+通过计算两个文本的向量表示之间的数值距离，应用程序可以判断生成嵌入向量的对象之间的相似性。
 
-image::spring-ai-embeddings.jpg[Embeddings, width=900, align="center"]
+image::spring-ai-embeddings.jpg[嵌入, width=900, align="center"]
 
-As a Java developer exploring AI, it's not necessary to comprehend the intricate mathematical theories or the specific implementations behind these vector representations.
-A basic understanding of their role and function within AI systems suffices, particularly when you're integrating AI functionalities into your applications.
+作为 Java 开发者探索 AI，无需理解这些向量表示背后的复杂数学理论或具体实现。只需了解它们在 AI 系统中的作用和功能，尤其是在集成 AI 功能时。
 
-Embeddings are particularly relevant in practical applications like the Retrieval Augmented Generation (RAG) pattern.
-They enable the representation of data as points in a semantic space, which is akin to the 2-D space of Euclidean geometry, but in higher dimensions.
-This means just like how points on a plane in Euclidean geometry can be close or far based on their coordinates, in a semantic space, the proximity of points reflects the similarity in meaning.
-Sentences about similar topics are positioned closer in this multi-dimensional space, much like points lying close to each other on a graph.
-This proximity aids in tasks like text classification, semantic search, and even product recommendations, as it allows the AI to discern and group related concepts based on their "location" in this expanded semantic landscape.
+嵌入在诸如检索增强生成（RAG）等实际应用中尤为重要。它们使数据能够作为语义空间中的点进行表示，这类似于欧几里得几何的二维空间，但维度更高。这意味着，就像欧几里得几何中点的距离反映坐标的接近程度一样，在语义空间中，点的接近程度反映了含义的相似性。关于相似主题的句子会在这个多维空间中靠得更近，就像图上的点彼此接近一样。这种接近性有助于文本分类、语义搜索甚至产品推荐等任务，因为它允许 AI 根据“位置”来区分和分组相关概念。
 
-You can think of this semantic space as a vector.
+你可以将这个语义空间看作一个向量。
 
-== Tokens
+== Token
 
-Tokens serve as the building blocks of how an AI model works.
-On input, models convert words to tokens. On output, they convert tokens back to words.
+Token 是 AI 模型工作的基本单元。输入时，模型将单词转换为 token；输出时，再将 token 转换为单词。
 
-In English, one token roughly corresponds to 75% of a word. For reference, Shakespeare's complete works, totaling around 900,000 words, translate to approximately 1.2 million tokens.
+在英语中，一个 token 大约对应 0.75 个单词。例如，莎士比亚全集约 90 万词，对应约 120 万个 token。
 
-image::spring-ai-concepts-tokens.png[Tokens, width=600, align="center"]
+image::spring-ai-concepts-tokens.png[Token, width=600, align="center"]
 
-Perhaps more important is that Tokens = Money.
-In the context of hosted AI models, your charges are determined by the number of tokens used. Both input and output contribute to the overall token count.
+更重要的是，Token = 金钱。在托管 AI 模型的场景下，费用由 token 数量决定，输入和输出都会计入总 token 数。
 
-Also, models are subject to token limits, which restrict the amount of text processed in a single API call.
-This threshold is often referred to as the "context window". The model does not process any text that exceeds this limit.
+此外，模型有 token 限制，限制了单次 API 调用可处理的文本量，这通常称为“上下文窗口”。超出该限制的文本不会被模型处理。
 
-For instance, ChatGPT3 has a 4K token limit, while GPT4 offers varying options, such as 8K, 16K, and 32K.
-Anthropic's Claude AI model features a 100K token limit, and Meta's recent research yielded a 1M token limit model.
+例如，ChatGPT3 的 token 限制为 4K，GPT4 有 8K、16K、32K 等不同选项。Anthropic 的 Claude AI 模型有 10 万 token 限制，Meta 的最新研究模型甚至达到 100 万 token。
 
-To summarize the collected works of Shakespeare with GPT4, you need to devise software engineering strategies to chop up the data and present the data within the model's context window limits.
-The Spring AI project helps you with this task.
+如果要用 GPT4 总结莎士比亚全集，需要采用软件工程手段将数据切分，并在模型的上下文窗口内呈现。Spring AI 项目可帮助您完成这项任务。
 
-== Structured Output
+== 结构化输出
 
-The output of AI models traditionally arrives as a `java.lang.String`, even if you ask for the reply to be in JSON.
-It may be a correct JSON, but it is not a JSON data structure. It is just a string.
-Also, asking "`for JSON`" as part of the prompt is not 100% accurate.
+AI 模型的输出传统上是 `java.lang.String`，即使你要求返回 JSON，也只是字符串而不是 JSON 数据结构。并且在提示中要求“返回 JSON”并不总是 100% 有效。
 
-This intricacy has led to the emergence of a specialized field involving the creation of prompts to yield the intended output, followed by converting the resulting simple string into a usable data structure for application integration.
+这导致了一个专门领域的出现，即通过精心设计的提示获得期望输出，然后将结果字符串转换为可用的数据结构以便应用集成。
 
-image::structured-output-architecture.jpg[Structured Output Converter Architecture, width=800, align="center"]
+image::structured-output-architecture.jpg[结构化输出转换架构, width=800, align="center"]
 
-The xref:api/structured-output-converter.adoc#_structuredoutputconverter[Structured output conversion] employs meticulously crafted prompts, often necessitating multiple interactions with the model to achieve the desired formatting.
+xref:api/structured-output-converter.adoc#_structuredoutputconverter[结构化输出转换] 采用精心设计的提示，通常需要多次与模型交互以获得理想格式。
 
-== Bringing Your Data & APIs to the AI Model
+== 向 AI 模型引入你的数据和 API
 
-How can you equip the AI model with information on which it has not been trained?
+如何让 AI 模型获取其未训练过的信息？
 
-Note that the GPT 3.5/4.0 dataset extends only until September 2021.
-Consequently, the model says that it does not know the answer to questions that require knowledge beyond that date.
-An interesting bit of trivia is that this dataset is around 650GB.
+注意，GPT 3.5/4.0 的数据集只到 2021 年 9 月。因此，模型对之后的信息会说不知道。这个数据集大约有 650GB。
 
-Three techniques exist for customizing the AI model to incorporate your data:
+有三种方法可以让 AI 模型结合你的数据：
 
-* **Fine Tuning**: This traditional machine learning technique involves tailoring the model and changing its internal weighting.
-However, it is a challenging process for machine learning experts and extremely resource-intensive for models like GPT due to their size. Additionally, some models might not offer this option.
+* **微调（Fine Tuning）**：传统机器学习方法，通过调整模型内部权重来定制模型。但对于 GPT 这样的大模型，这一过程非常复杂且资源消耗极大，并且部分模型不支持微调。
 
-* **Prompt Stuffing**: A more practical alternative involves embedding your data within the prompt provided to the model. Given a model's token limits, techniques are required to present relevant data within the model's context window.
-This approach is colloquially referred to as "`stuffing the prompt.`"
-The Spring AI library helps you implement solutions based on the "`stuffing the prompt`" technique otherwise known as xref::concepts.adoc#concept-rag[Retrieval Augmented Generation (RAG)].
+* **提示填充（Prompt Stuffing）**：更实用的方法是将你的数据嵌入到提示中。由于模型有 token 限制，需要采用技术手段在上下文窗口内呈现相关数据。这种方式俗称“stuffing the prompt”。Spring AI 库帮助你实现基于“stuffing the prompt”的方案，也称为 xref::concepts.adoc#concept-rag[检索增强生成（RAG）]。
 
 image::spring-ai-prompt-stuffing.jpg[Prompt stuffing, width=700, align="center"]
 
-* **xref::concepts.adoc#concept-fc[Tool Calling]**: This technique allows registering tools (user-defined services) that connect the large language models to the APIs of external systems.
-Spring AI greatly simplifies code you need to write to support xref:api/tools.adoc[tool calling].
+* **xref::concepts.adoc#concept-fc[工具调用（Tool Calling）]**：该方法允许注册工具（用户自定义服务），将大语言模型与外部系统 API 连接。Spring AI 极大简化了工具调用相关代码。
 
 [[concept-rag]]
-=== Retrieval Augmented Generation
+=== 检索增强生成（RAG）
 
-A technique termed Retrieval Augmented Generation (RAG) has emerged to address the challenge of incorporating relevant data into prompts for accurate AI model responses.
+检索增强生成（RAG）技术用于将相关数据纳入提示，以提升 AI 回答的准确性。
 
-The approach involves a batch processing style programming model, where the job reads unstructured data from your documents, transforms it, and then writes it into a vector database.
-At a high level, this is an ETL (Extract, Transform and Load) pipeline.
-The vector database is used in the retrieval part of RAG technique.
+该方法采用批处理风格的编程模型，作业从文档中读取非结构化数据，转换后写入向量数据库。从高层看，这是一个 ETL（抽取、转换、加载）流程。向量数据库用于 RAG 技术中的检索环节。
 
-As part of loading the unstructured data into the vector database, one of the most important transformations is to split the original document into smaller pieces.
-The procedure of splitting the original document into smaller pieces has two important steps:
+在将非结构化数据加载到向量数据库时，最重要的转换之一是将原始文档拆分为更小的片段。拆分过程有两个关键步骤：
 
-. Split the document into parts while preserving the semantic boundaries of the content.
-For example, for a document with paragraphs and tables, one should avoid splitting the document in the middle of a paragraph or table.
-For code, avoid splitting the code in the middle of a method's implementation.
-. Split the document's parts further into parts whose size is a small percentage of the AI Model's token limit.
+. 在保留内容语义边界的前提下拆分文档。例如，带有段落和表格的文档应避免在段落或表格中间拆分；代码应避免在方法实现中间拆分。
+. 进一步将文档片段拆分为仅占 AI 模型 token 限制一小部分的更小片段。
 
-The next phase in RAG is processing user input.
-When a user's question is to be answered by an AI model, the question and all the "`similar`" document pieces are placed into the prompt that is sent to the AI model.
-This is the reason to use a vector database. It is very good at finding similar content.
+RAG 的下一阶段是处理用户输入。当用户提问时，问题和所有“相似”的文档片段会被放入发送给 AI 模型的提示中。这就是使用向量数据库的原因——它非常擅长查找相似内容。
 
 image::spring-ai-rag.jpg[Spring AI RAG, width=1000, align="center"]
 
-* The xref::api/etl-pipeline.adoc[ETL Pipeline] provides further information about orchestrating the flow of extracting data from data sources and storing it in a structured vector store, ensuring data is in the optimal format for retrieval when passing it to the AI model.
-* The xref::api/chatclient.adoc#_retrieval_augmented_generation[ChatClient - RAG] explains how to use the `QuestionAnswerAdvisor` to enable the RAG capability in your application.
+* xref::api/etl-pipeline.adoc[ETL 流水线] 介绍了如何编排数据提取、转换和存储到结构化向量库的流程，确保数据以最佳格式供 AI 检索。
+* xref::api/chatclient.adoc#_retrieval_augmented_generation[ChatClient - RAG] 介绍了如何使用 `QuestionAnswerAdvisor` 实现 RAG 能力。
 
 [[concept-fc]]
-=== Tool Calling
+=== 工具调用（Tool Calling）
 
-Large Language Models (LLMs) are frozen after training, leading to stale knowledge, and they are unable to access or modify external data.
+大语言模型（LLM）训练后被冻结，知识会过时，且无法访问或修改外部数据。
 
-The xref::api/tools.adoc[Tool Calling] mechanism addresses these shortcomings.
-It allows you to register your own services as tools to connect the large language models to the APIs of external systems.
-These systems can provide LLMs with real-time data and perform data processing actions on their behalf.
+xref::api/tools.adoc[工具调用] 机制解决了这些问题。它允许你注册自己的服务作为工具，将大语言模型与外部系统 API 连接。这些系统可以为 LLM 提供实时数据并代表其执行数据处理。
 
-Spring AI greatly simplifies code you need to write to support tool invocation.
-It handles the tool invocation conversation for you.
-You can provide your tool as a `@Tool`-annotated method and provide it in your prompt options to make it available to the model.
-Additionally, you can define and reference multiple tools in a single prompt.
+Spring AI 极大简化了工具调用相关代码。它会自动处理工具调用对话。你可以通过 `@Tool` 注解方法并在提示选项中提供，使其对模型可用。此外，可以在单个提示中定义和引用多个工具。
 
-image::tools/tool-calling-01.jpg[The main sequence of actions for tool calling, width=700, align="center"]
+image::tools/tool-calling-01.jpg[工具调用主流程, width=700, align="center"]
 
-1. When we want to make a tool available to the model, we include its definition in the chat request. Each tool definition comprises of a name, a description, and the schema of the input parameters.
-2. When the model decides to call a tool, it sends a response with the tool name and the input parameters modeled after the defined schema.
-3. The application is responsible for using the tool name to identify and execute the tool with the provided input parameters.
-4. The result of the tool call is processed by the application.
-5. The application sends the tool call result back to the model.
-6. The model generates the final response using the tool call result as additional context.
+1. 需要让模型可用某个工具时，在聊天请求中包含其定义。每个工具定义包括名称、描述和输入参数的 schema。
+2. 当模型决定调用工具时，会返回工具名和按 schema 构造的输入参数。
+3. 应用负责根据工具名识别并执行工具，并传入参数。
+4. 工具调用结果由应用处理。
+5. 应用将工具调用结果返回给模型。
+6. 模型用工具调用结果作为额外上下文生成最终回复。
 
-Follow the xref::api/tools.adoc[Tool Calling] documentation for further information on how to use this feature with different AI models.
+更多用法请参考 xref::api/tools.adoc[工具调用] 文档。
 
 [[concept-evaluating-ai-responses]]
-== Evaluating AI responses
+== 评估 AI 响应
 
-Effectively evaluating the output of an AI system in response to user requests is very important to ensuring the accuracy and usefulness of the final application.
-Several emerging techniques enable the use of the pre-trained model itself for this purpose.
+有效评估 AI 系统对用户请求的输出对于确保最终应用的准确性和实用性非常重要。现在有多种新技术可以利用预训练模型本身进行评估。
 
-This evaluation process involves analyzing whether the generated response aligns with the user's intent and the context of the query. Metrics such as relevance, coherence, and factual correctness are used to gauge the quality of the AI-generated response.
+评估过程包括分析生成的回复是否符合用户意图和查询上下文。相关性、一致性和事实正确性等指标用于衡量 AI 回复的质量。
 
-One approach involves presenting both the user's request and the AI model's response to the model, querying whether the response aligns with the provided data.
+一种方法是将用户请求和 AI 回复一并提交给模型，询问回复是否与数据一致。
 
-Furthermore, leveraging the information stored in the vector database as supplementary data can enhance the evaluation process, aiding in the determination of response relevance.
+此外，利用向量数据库中存储的信息作为补充数据，也有助于判断回复的相关性。
 
-The Spring AI project provides an `Evaluator` API which currently gives access to basic strategies to evaluate model responses.
-Follow the xref::api/testing.adoc[Evaluation Testing] documentation for further information.
+Spring AI 项目提供了 `Evaluator` API，目前支持基础的模型回复评估策略。更多信息请参考 xref::api/testing.adoc[评测测试] 文档。

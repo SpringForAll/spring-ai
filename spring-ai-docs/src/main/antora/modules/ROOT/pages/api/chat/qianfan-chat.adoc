@@ -1,5 +1,56 @@
-= QianFan Chat
+[[qianfan-chat]]
+= 千帆大模型
 
-This functionality has been moved to the Spring AI Community repository.
+千帆大模型是百度智能云提供的大语言模型服务。Spring AI 支持通过千帆大模型 API 访问这些模型。
 
-Please visit https://github.com/spring-ai-community/qianfan for the latest version.
+== 配置
+
+要使用千帆大模型，您需要添加以下依赖：
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-qianfan</artifactId>
+</dependency>
+----
+
+然后，您需要在 `application.properties` 中配置您的千帆 API 密钥：
+
+[source,properties]
+----
+spring.ai.qianfan.api-key=your-api-key
+spring.ai.qianfan.secret-key=your-secret-key
+----
+
+== 模型
+
+千帆大模型支持以下模型：
+
+* `ERNIE-Bot-4`：ERNIE-Bot-4 是百度最新的大语言模型，具有强大的自然语言理解和生成能力。
+* `ERNIE-Bot`：ERNIE-Bot 是百度的大语言模型，具有强大的自然语言理解和生成能力。
+* `ERNIE-Bot-turbo`：ERNIE-Bot-turbo 是 ERNIE-Bot 的轻量级版本，具有更快的响应速度。
+
+== 使用
+
+您可以使用 Spring AI 的 `ChatClient` 来访问千帆大模型：
+
+[source,java]
+----
+@Autowired
+private ChatClient chatClient;
+
+public void example() {
+    String response = chatClient.prompt("你好，请介绍一下你自己。")
+            .options(ChatOptions.builder()
+                    .model("ERNIE-Bot-4")
+                    .build())
+            .call()
+            .content();
+    System.out.println(response);
+}
+----
+
+== 更多信息
+
+有关千帆大模型的更多信息，请参阅 link:https://cloud.baidu.com/doc/WENXINWORKSHOP/index.html[千帆大模型文档]。

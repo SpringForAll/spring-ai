@@ -1,12 +1,12 @@
-= Migrating from FunctionCallback to ToolCallback API
+= 从 FunctionCallback 迁移到 ToolCallback API
 
-This guide helps you migrate from the deprecated `FunctionCallback` API to the new `ToolCallback` API in Spring AI. For more information about the new APIs, check out the xref:api/tools.adoc[Tools Calling] documentation.
+本指南帮助你从已弃用的 `FunctionCallback` API 迁移到 Spring AI 中的新 `ToolCallback` API。有关新 API 的更多信息，请查看 xref:api/tools.adoc[工具调用]文档。
 
-== Overview of Changes
+== 变更概述
 
-These changes are part of a broader effort to improve and extend the tool calling capabilities in Spring AI. Among the other things, the new API moves from "functions" to "tools" terminology to better align with industry conventions. This involves several API changes while maintaining backward compatibility through deprecated methods.
+这些变更是改进和扩展 Spring AI 中工具调用能力的更广泛努力的一部分。其中，新 API 从"函数"术语转向"工具"术语，以更好地符合行业惯例。这涉及几个 API 变更，同时通过已弃用的方法保持向后兼容性。
 
-== Key Changes
+== 主要变更
 
 1. `FunctionCallback` → `ToolCallback`
 2. `FunctionCallback.builder().function()` → `FunctionToolCallback.builder()`
@@ -17,11 +17,11 @@ These changes are part of a broader effort to improve and extend the tool callin
 7. `FunctionCallingOptions.builder().functions()` → `ToolCallingChatOptions.builder().toolNames()`
 8. `FunctionCallingOptions.builder().functionCallbacks()` → `ToolCallingChatOptions.builder().toolCallbacks()`
 
-== Migration Examples
+== 迁移示例
 
-=== 1. Basic Function Callback
+=== 1. 基本函数回调
 
-Before:
+之前：
 [source,java]
 ----
 FunctionCallback.builder()
@@ -31,7 +31,7 @@ FunctionCallback.builder()
     .build()
 ----
 
-After:
+之后：
 [source,java]
 ----
 FunctionToolCallback.builder("getCurrentWeather", new MockWeatherService())
@@ -40,9 +40,9 @@ FunctionToolCallback.builder("getCurrentWeather", new MockWeatherService())
     .build()
 ----
 
-=== 2. ChatClient Usage
+=== 2. ChatClient 使用
 
-Before:
+之前：
 [source,java]
 ----
 String response = ChatClient.create(chatModel)
@@ -57,7 +57,7 @@ String response = ChatClient.create(chatModel)
     .content();
 ----
 
-After:
+之后：
 [source,java]
 ----
 String response = ChatClient.create(chatModel)
@@ -71,9 +71,9 @@ String response = ChatClient.create(chatModel)
     .content();
 ----
 
-=== 3. Method-Based Function Callbacks
+=== 3. 基于方法的函数回调
 
-Before:
+之前：
 [source,java]
 ----
 FunctionCallback.builder()
@@ -83,7 +83,7 @@ FunctionCallback.builder()
     .build()
 ----
 
-After:
+之后：
 [source,java]
 ----
 var toolMethod = ReflectionUtils.findMethod(TestFunctionClass.class, "getWeatherInLocation");
@@ -96,7 +96,7 @@ MethodToolCallback.builder()
     .build()
 ----
 
-Or with the declarative approach:
+或者使用声明式方法：
 [source,java]
 ----
 class WeatherTools {
@@ -109,7 +109,7 @@ class WeatherTools {
 }
 ----
 
-And you can use the same `ChatClient#tools()` API to register method-based tool callbackes:
+你可以使用相同的 `ChatClient#tools()` API 来注册基于方法的工具回调：
 
 [source,java]
 ----
@@ -126,7 +126,7 @@ String response = ChatClient.create(chatModel)
     .content();
 ----
 
-Or with the declarative approach:
+或者使用声明式方法：
 
 [source,java]
 ----
@@ -138,9 +138,9 @@ String response = ChatClient.create(chatModel)
     .content();
 ----
 
-=== 4. Options Configuration
+=== 4. 选项配置
 
-Before:
+之前：
 [source,java]
 ----
 FunctionCallingOptions.builder()
@@ -149,7 +149,7 @@ FunctionCallingOptions.builder()
     .build()
 ----
 
-After:
+之后：
 [source,java]
 ----
 ToolCallingChatOptions.builder()
@@ -158,9 +158,9 @@ ToolCallingChatOptions.builder()
     .build()
 ----
 
-=== 5. Default Functions in ChatClient Builder
+=== 5. ChatClient Builder 中的默认函数
 
-Before:
+之前：
 [source,java]
 ----
 ChatClient.builder(chatModel)
@@ -172,7 +172,7 @@ ChatClient.builder(chatModel)
     .build()
 ----
 
-After:
+之后：
 [source,java]
 ----
 ChatClient.builder(chatModel)
@@ -183,9 +183,9 @@ ChatClient.builder(chatModel)
     .build()
 ----
 
-=== 6. Spring Bean Configuration
+=== 6. Spring Bean 配置
 
-Before:
+之前：
 [source,java]
 ----
 @Bean
@@ -198,7 +198,7 @@ public FunctionCallback weatherFunctionInfo() {
 }
 ----
 
-After:
+之后：
 [source,java]
 ----
 @Bean
@@ -210,13 +210,13 @@ public ToolCallback weatherFunctionInfo() {
 }
 ----
 
-== Breaking Changes
+== 破坏性变更
 
-1. The `method()` configuration in function callbacks has been replaced with a more explicit method tool configuration using `ToolDefinition` and `MethodToolCallback`.
+1. 函数回调中的 `method()` 配置已被替换为使用 `ToolDefinition` 和 `MethodToolCallback` 的更明确的方法工具配置。
 
-2. When using method-based callbacks, you now need to explicitly find the method using `ReflectionUtils` and provide it to the builder. Alternatively, you can use the declarative approach with the `@Tool` annotation.
+2. 使用基于方法的回调时，你现在需要显式地使用 `ReflectionUtils` 查找方法并将其提供给构建器。或者，你可以使用带有 `@Tool` 注解的声明式方法。
 
-3. For non-static methods, you must now provide both the method and the target object:
+3. 对于非静态方法，你现在必须同时提供方法和目标对象：
 [source,java]
 ----
 MethodToolCallback.builder()
@@ -228,19 +228,19 @@ MethodToolCallback.builder()
     .build()
 ----
 
-== Deprecated Methods
+== 已弃用的方法
 
-The following methods are deprecated and will be removed in a future release:
+以下方法已被弃用，将在未来版本中删除：
 
 - `ChatClient.Builder.defaultFunctions(String...)`
 - `ChatClient.Builder.defaultFunctions(FunctionCallback...)`
 - `ChatClient.RequestSpec.functions()`
 
-Use their `tools` counterparts instead.
+请使用它们的 `tools` 对应方法。
 
-== Declarative Specification with @Tool
+== 使用 @Tool 的声明式规范
 
-Now you can use the method-level annotation (`@Tool`) to register tools with Spring AI:
+现在你可以使用方法级注解（`@Tool`）来向 Spring AI 注册工具：
 
 [source,java]
 ----
@@ -260,13 +260,13 @@ String response = ChatClient.create(this.chatModel).prompt()
         .content();
 ----
 
-== Additional Notes
+== 其他说明
 
-1. The new API provides better separation between tool definition and implementation.
-2. Tool definitions can be reused across different implementations.
-3. The builder pattern has been simplified for common use cases.
-4. Better support for method-based tools with improved error handling.
+1. 新 API 提供了工具定义和实现之间更好的分离。
+2. 工具定义可以在不同的实现中重用。
+3. 构建器模式已针对常见用例进行了简化。
+4. 改进了对基于方法的工具的支持，并改进了错误处理。
 
-== Timeline
+== 时间线
 
-The deprecated methods will be maintained for backward compatibility in the current milestone version but will be removed in the next milestone release. It's recommended to migrate to the new API as soon as possible.
+已弃用的方法将在当前里程碑版本中保持向后兼容性，但将在下一个里程碑版本中删除。建议尽快迁移到新 API。

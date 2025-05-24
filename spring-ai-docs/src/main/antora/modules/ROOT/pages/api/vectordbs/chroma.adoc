@@ -1,28 +1,28 @@
 = Chroma
 
-This section will walk you through setting up the Chroma VectorStore to store document embeddings and perform similarity searches.
+本节将指导您如何设置 Chroma VectorStore 来存储文档嵌入并执行相似性搜索。
 
-link:https://docs.trychroma.com/[Chroma] is the open-source embedding database. It gives you the tools to store document embeddings, content, and metadata and to search through those embeddings, including metadata filtering.
+link:https://docs.trychroma.com/[Chroma] 是开源嵌入数据库。它为您提供了存储文档嵌入、内容和元数据的工具，以及搜索这些嵌入（包括元数据过滤）的功能。
 
-== Prerequisites
+== 先决条件
 
-1. Access to ChromeDB. The <<Run Chroma Locally, setup local ChromaDB>> appendix shows how to set up a DB locally with a Docker container.
+1. 访问 ChromeDB。<<Run Chroma Locally, 设置本地 ChromaDB>> 附录显示了如何使用 Docker 容器在本地设置数据库。
 
-2. `EmbeddingModel` instance to compute the document embeddings. Several options are available:
-- If required, an API key for the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] to generate the embeddings stored by the `ChromaVectorStore`.
+2. `EmbeddingModel` 实例用于计算文档嵌入。有多个选项可用：
+- 如果需要，xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 的 API 密钥用于生成由 `ChromaVectorStore` 存储的嵌入。
 
-On startup, the `ChromaVectorStore` creates the required collection if one is not provisioned already.
+在启动时，如果尚未配置，`ChromaVectorStore` 会创建所需的集合。
 
-== Auto-configuration
+== 自动配置
 
 [NOTE]
 ====
-There has been a significant change in the Spring AI auto-configuration, starter modules' artifact names.
-Please refer to the https://docs.spring.io/spring-ai/reference/upgrade-notes.html[upgrade notes] for more information.
+Spring AI 自动配置、starter 模块的构件名称发生了重大变化。
+请参阅 https://docs.spring.io/spring-ai/reference/upgrade-notes.html[升级说明] 了解更多信息。
 ====
 
-Spring AI provides Spring Boot auto-configuration for the Chroma Vector Store.
-To enable it, add the following dependency to your project's Maven `pom.xml` file:
+Spring AI 为 Chroma 向量存储提供 Spring Boot 自动配置。
+要启用它，将以下依赖项添加到您项目的 Maven `pom.xml` 文件中：
 
 [source, xml]
 ----
@@ -32,7 +32,7 @@ To enable it, add the following dependency to your project's Maven `pom.xml` fil
 </dependency>
 ----
 
-or to your Gradle `build.gradle` build file.
+或添加到您的 Gradle `build.gradle` 构建文件中。
 
 [source,groovy]
 ----
@@ -41,56 +41,52 @@ dependencies {
 }
 ----
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-TIP: Refer to the xref:getting-started.adoc#artifact-repositories[Artifact Repositories] section to add Maven Central and/or Snapshot Repositories to your build file.
+提示：请参阅 xref:getting-started.adoc#artifact-repositories[构件仓库] 部分，将 Maven Central 和/或 Snapshot 仓库添加到您的构建文件中。
 
+向量存储实现可以为您初始化所需的模式，但您必须通过在适当的构造函数中指定 `initializeSchema` 布尔值或在 `application.properties` 文件中设置 `...initialize-schema=true` 来选择加入。
 
-The vector store implementation can initialize the requisite schema for you, but you must opt-in by specifying the `initializeSchema` boolean in the appropriate constructor or by setting `...initialize-schema=true` in the `application.properties` file.
+注意：这是一个重大变更！在 Spring AI 的早期版本中，这种模式初始化是默认发生的。
 
-NOTE: this is a breaking change! In earlier versions of Spring AI, this schema initialization happened by default.
+此外，您还需要一个配置好的 `EmbeddingModel` bean。有关更多信息，请参阅 xref:api/embeddings.adoc#available-implementations[EmbeddingModel] 部分。
 
-
-
-
-Additionally, you will need a configured `EmbeddingModel` bean. Refer to the xref:api/embeddings.adoc#available-implementations[EmbeddingModel] section for more information.
-
-Here is an example of the needed bean:
+以下是所需 bean 的示例：
 
 [source,java]
 ----
 @Bean
 public EmbeddingModel embeddingModel() {
-    // Can be any other EmbeddingModel implementation.
+    // 可以是任何其他 EmbeddingModel 实现。
     return new OpenAiEmbeddingModel(OpenAiApi.builder().apiKey(System.getenv("OPENAI_API_KEY")).build());
 }
 ----
 
-To connect to Chroma you need to provide access details for your instance.
-A simple configuration can either be provided via Spring Boot's _application.properties_,
+要连接到 Chroma，您需要提供实例的访问详情。
+可以通过 Spring Boot 的 _application.properties_ 提供简单配置，
 
 [source,properties]
 ----
-# Chroma Vector Store connection properties
-spring.ai.vectorstore.chroma.client.host=<your Chroma instance host>
-spring.ai.vectorstore.chroma.client.port=<your Chroma instance port>
-spring.ai.vectorstore.chroma.client.key-token=<your access token (if configure)>
-spring.ai.vectorstore.chroma.client.username=<your username (if configure)>
-spring.ai.vectorstore.chroma.client.password=<your password (if configure)>
+# Chroma 向量存储连接属性
+spring.ai.vectorstore.chroma.client.host=<您的 Chroma 实例主机>
+spring.ai.vectorstore.chroma.client.port=<您的 Chroma 实例端口>
+spring.ai.vectorstore.chroma.client.key-token=<您的访问令牌（如果配置）>
+spring.ai.vectorstore.chroma.client.username=<您的用户名（如果配置）>
+spring.ai.vectorstore.chroma.client.password=<您的密码（如果配置）>
 
-# Chroma Vector Store collection properties
-spring.ai.vectorstore.chroma.initialize-schema=<true or false>
-spring.ai.vectorstore.chroma.collection-name=<your collection name>
+# Chroma 向量存储集合属性
+spring.ai.vectorstore.chroma.initialize-schema=<true 或 false>
+spring.ai.vectorstore.chroma.collection-name=<您的集合名称>
 
-# Chroma Vector Store configuration properties
+# Chroma 向量存储配置属性
 
-# OpenAI API key if the OpenAI auto-configuration is used.
+# 如果使用 OpenAI 自动配置，则为 OpenAI API 密钥。
 spring.ai.openai.api.key=<OpenAI Api-key>
 ----
 
-Please have a look at the list of xref:#_configuration_properties[configuration parameters] for the vector store to learn about the default values and configuration options.
+请查看向量存储的 xref:#_configuration_properties[配置参数] 列表，了解默认值和配置选项。
 
-Now you can auto-wire the Chroma Vector Store in your application and use it
+现在您可以在应用程序中自动装配 Chroma 向量存储并使用它
 
 [source,java]
 ----
@@ -103,42 +99,42 @@ List <Document> documents = List.of(
     new Document("The World is Big and Salvation Lurks Around the Corner"),
     new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 
-// Add the documents
+// 添加文档
 vectorStore.add(documents);
 
-// Retrieve documents similar to a query
+// 检索与查询相似的文档
 List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query("Spring").topK(5).build());
 ----
 
-=== Configuration properties
+=== 配置属性
 
-You can use the following properties in your Spring Boot configuration to customize the vector store.
+您可以在 Spring Boot 配置中使用以下属性来自定义向量存储。
 
 [stripes=even]
 |===
-|Property| Description | Default value
+|属性| 描述 | 默认值
 
-|`spring.ai.vectorstore.chroma.client.host`| Server connection host | http://localhost[http://localhost]
-|`spring.ai.vectorstore.chroma.client.port`| Server connection port | `8000`
-|`spring.ai.vectorstore.chroma.client.key-token`| Access token (if configured) | -
-|`spring.ai.vectorstore.chroma.client.username`| Access username (if configured) | -
-|`spring.ai.vectorstore.chroma.client.password`| Access password (if configured) | -
-|`spring.ai.vectorstore.chroma.collection-name`| Collection name | `SpringAiCollection`
-|`spring.ai.vectorstore.chroma.initialize-schema`| Whether to initialize the required schema  | `false`
+|`spring.ai.vectorstore.chroma.client.host`| 服务器连接主机 | http://localhost[http://localhost]
+|`spring.ai.vectorstore.chroma.client.port`| 服务器连接端口 | `8000`
+|`spring.ai.vectorstore.chroma.client.key-token`| 访问令牌（如果配置） | -
+|`spring.ai.vectorstore.chroma.client.username`| 访问用户名（如果配置） | -
+|`spring.ai.vectorstore.chroma.client.password`| 访问密码（如果配置） | -
+|`spring.ai.vectorstore.chroma.collection-name`| 集合名称 | `SpringAiCollection`
+|`spring.ai.vectorstore.chroma.initialize-schema`| 是否初始化所需的模式 | `false`
 |===
 
 [NOTE]
 ====
-For ChromaDB secured with link:https://docs.trychroma.com/usage-guide#static-api-token-authentication[Static API Token Authentication] use the `ChromaApi#withKeyToken(<Your Token Credentials>)` method to set your credentials. Check the `ChromaWhereIT` for an example.
+对于使用 link:https://docs.trychroma.com/usage-guide#static-api-token-authentication[静态 API 令牌身份验证] 保护的 ChromaDB，使用 `ChromaApi#withKeyToken(<您的令牌凭据>)` 方法设置您的凭据。查看 `ChromaWhereIT` 获取示例。
 
-For ChromaDB secured with link:https://docs.trychroma.com/usage-guide#basic-authentication[Basic Authentication] use the `ChromaApi#withBasicAuth(<your user>, <your password>)` method to set your credentials. Check the `BasicAuthChromaWhereIT` for an example.
+对于使用 link:https://docs.trychroma.com/usage-guide#basic-authentication[基本身份验证] 保护的 ChromaDB，使用 `ChromaApi#withBasicAuth(<您的用户>, <您的密码>)` 方法设置您的凭据。查看 `BasicAuthChromaWhereIT` 获取示例。
 ====
 
-== Metadata filtering
+== 元数据过滤
 
-You can leverage the generic, portable link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[metadata filters] with ChromaVector store as well.
+您也可以利用 ChromaVector 存储的通用、可移植的 link:https://docs.spring.io/spring-ai/reference/api/vectordbs.html#_metadata_filters[元数据过滤器]。
 
-For example, you can use either the text expression language:
+例如，您可以使用文本表达式语言：
 
 [source,java]
 ----
@@ -150,7 +146,7 @@ vectorStore.similaritySearch(
                             .filterExpression("author in ['john', 'jill'] && article_type == 'blog'").build());
 ----
 
-or programmatically using the `Filter.Expression` DSL:
+或使用 `Filter.Expression` DSL 以编程方式：
 
 [source,java]
 ----
@@ -165,15 +161,15 @@ vectorStore.similaritySearch(SearchRequest.builder()
                             b.eq("article_type", "blog")).build()).build());
 ----
 
-NOTE: Those (portable) filter expressions get automatically converted into the proprietary Chroma `where` link:https://docs.trychroma.com/usage-guide#using-where-filters[filter expressions].
+注意：这些（可移植的）过滤器表达式会自动转换为专有的 Chroma `where` link:https://docs.trychroma.com/usage-guide#using-where-filters[过滤器表达式]。
 
-For example, this portable filter expression:
+例如，这个可移植过滤器表达式：
 
 ```sql
 author in ['john', 'jill'] && article_type == 'blog'
 ```
 
-is converted into the proprietary Chroma format
+被转换为专有的 Chroma 格式
 
 ```json
 {"$and":[
@@ -182,13 +178,12 @@ is converted into the proprietary Chroma format
 }
 ```
 
+== 手动配置
 
-== Manual Configuration
+如果您更喜欢手动配置 Chroma 向量存储，可以通过在 Spring Boot 应用程序中创建 `ChromaVectorStore` bean 来实现。
 
-If you prefer to configure the Chroma Vector Store manually, you can do so by creating a `ChromaVectorStore` bean in your Spring Boot application.
-
-Add these dependencies to your project:
-* Chroma VectorStore.
+将这些依赖项添加到您的项目中：
+* Chroma VectorStore。
 
 [source,xml]
 ----
@@ -198,7 +193,7 @@ Add these dependencies to your project:
 </dependency>
 ----
 
-* OpenAI: Required for calculating embeddings. You can use any other embedding model implementation.
+* OpenAI：用于计算嵌入。您可以使用任何其他嵌入模型实现。
 
 [source,xml]
 ----
@@ -208,12 +203,11 @@ Add these dependencies to your project:
 </dependency>
 ----
 
+提示：请参阅 xref:getting-started.adoc#dependency-management[依赖管理] 部分，将 Spring AI BOM 添加到您的构建文件中。
 
-TIP: Refer to the xref:getting-started.adoc#dependency-management[Dependency Management] section to add the Spring AI BOM to your build file.
+=== 示例代码
 
-=== Sample Code
-
-Create a `RestClient.Builder` instance with proper ChromaDB authorization configurations and Use it to create a `ChromaApi` instance:
+创建具有适当 ChromaDB 授权配置的 `RestClient.Builder` 实例，并使用它创建 `ChromaApi` 实例：
 
 [source,java]
 ----
@@ -231,7 +225,7 @@ public ChromaApi chromaApi(RestClient.Builder restClientBuilder) {
 }
 ----
 
-Integrate with OpenAI's embeddings by adding the Spring Boot OpenAI starter to your project. This provides you with an implementation of the Embeddings client:
+通过将 Spring Boot OpenAI starter 添加到您的项目中来集成 OpenAI 的嵌入。这为您提供了 Embeddings 客户端的实现：
 
 [source,java]
 ----
@@ -244,7 +238,7 @@ public VectorStore chromaVectorStore(EmbeddingModel embeddingModel, ChromaApi ch
 }
 ----
 
-In your main code, create some documents:
+在您的主代码中，创建一些文档：
 
 [source,java]
 ----
@@ -254,27 +248,26 @@ List<Document> documents = List.of(
  new Document("You walk forward facing the past and you turn back toward the future.", Map.of("meta2", "meta2")));
 ----
 
-Add the documents to your vector store:
+将文档添加到您的向量存储：
 
 [source,java]
 ----
 vectorStore.add(documents);
 ----
 
-And finally, retrieve documents similar to a query:
+最后，检索与查询相似的文档：
 
 [source,java]
 ----
 List<Document> results = vectorStore.similaritySearch("Spring");
 ----
 
-If all goes well, you should retrieve the document containing the text "Spring AI rocks!!".
+如果一切顺利，您应该检索到包含文本 "Spring AI rocks!!" 的文档。
 
-
-=== Run Chroma Locally
+=== 在本地运行 Chroma
 
 ```shell
 docker run -it --rm --name chroma -p 8000:8000 ghcr.io/chroma-core/chroma:1.0.0
 ```
 
-Starts a chroma store at <http://localhost:8000/api/v1>
+在 <http://localhost:8000/api/v1> 启动一个 chroma 存储
