@@ -11,6 +11,6 @@ antora src/main/antora/antora-playbook.yml
 
 ## 模版文件
 
-- `src/main/antora/ui-bundle/partials/header-content.hbs`：页头内容
-- `src/main/antora/ui-bundle/partials/footer-content.hbs`：页脚内容
-
+- 侧边栏：`src/main/antora/ui-bundle/partials/toc.hbs`
+- 头内容：`src/main/antora/ui-bundle/partials/header-content.hbs`
+- 脚内容：`src/main/antora/ui-bundle/partials/footer-content.hbs`
